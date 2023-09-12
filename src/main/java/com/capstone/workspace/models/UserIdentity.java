@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 public class UserIdentity {
     private String username;
-    private String tenantId;
+    private String organizationId;
     private String merchantId;
     private UserType userType;
 }

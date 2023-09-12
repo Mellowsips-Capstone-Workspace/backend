@@ -1,0 +1,1 @@
+ALTER TABLE application ALTER COLUMN approved_at DROP NOT NULL;

@@ -43,11 +43,15 @@ public class AuthHelper {
 
         ArrayList<String> groups = tokenPayload.get("cognito:groups", ArrayList.class);
         if (groups != null && !groups.isEmpty()) {
-            userIdentity.setTenantId(groups.get(0));
+            userIdentity.setOrganizationId(groups.get(0));
 
             if (groups.get(0).equals("mellowsips_admin")) {
                 userIdentity.setUserType(UserType.ADMIN);
-            } else if (AppHelper.isVietnamNumberPhone(username)) {
+            }
+        }
+
+        if (userIdentity.getUserType() == null) {
+            if (AppHelper.isVietnamNumberPhone(username)) {
                 userIdentity.setUserType(UserType.CUSTOMER);
             } else {
                 userIdentity.setUserType(UserType.EMPLOYEE);

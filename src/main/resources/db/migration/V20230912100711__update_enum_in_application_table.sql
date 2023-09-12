@@ -1,0 +1,10 @@
+ALTER TABLE application ALTER COLUMN status TYPE VARCHAR(255);
+ALTER TABLE application ADD CONSTRAINT status_chk CHECK (status IN ('DRAFT', 'WAITING_FOR_APPROVAL', 'PROCESSING', 'APPROVED', 'REJECTED'));
+
+ALTER TABLE application ALTER COLUMN type TYPE VARCHAR(255);
+ALTER TABLE application ADD CONSTRAINT type_chk CHECK (type IN ('CREATE_ORGANIZATION'));
+
+DROP CAST (CHARACTER VARYING AS application_type);
+DROP CAST (CHARACTER VARYING AS application_status);
+DROP TYPE application_type;
+DROP TYPE application_status;

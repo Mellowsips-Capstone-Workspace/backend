@@ -4,7 +4,6 @@ import com.capstone.workspace.dtos.CreateReceiverProfileDto;
 import com.capstone.workspace.dtos.RegisterUserDto;
 import com.capstone.workspace.dtos.VerifyUserDto;
 import com.capstone.workspace.entities.User;
-import com.capstone.workspace.enums.AuthErrorCode;
 import com.capstone.workspace.enums.AuthProviderType;
 import com.capstone.workspace.enums.UserType;
 import com.capstone.workspace.exceptions.*;
