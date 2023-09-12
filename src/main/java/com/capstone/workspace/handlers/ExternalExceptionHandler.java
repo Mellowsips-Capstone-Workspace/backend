@@ -3,6 +3,7 @@ package com.capstone.workspace.handlers;
 import com.capstone.workspace.exceptions.AppDefinedException;
 import com.capstone.workspace.exceptions.BaseException;
 import com.capstone.workspace.exceptions.ErrorResponse;
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -62,6 +63,26 @@ public class ExternalExceptionHandler {
                 errorMessage = ((ArrayList) detailMessageArgument).get(0).toString().replaceAll("[:']", "");
                 break;
             }
+        }
+
+        logger.error(ex.getClass().getName() + ": " + ex.getMessage());
+        logger.error(Arrays.toString(ex.getStackTrace()));
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                errorMessage,
+                null
+        );
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleBadIncomingDataExceptions(ConstraintViolationException ex, WebRequest request) {
+        String[] errorMessages = ex.getMessage().split(", ");
+        String errorMessage = errorMessages.length == 0 ? null : errorMessages[0];
+        if (errorMessage != null) {
+            errorMessage = errorMessage.replace(":", "");
         }
 
         logger.error(ex.getClass().getName() + ": " + ex.getMessage());
