@@ -1,12 +1,12 @@
 package com.capstone.workspace.controllers;
 
 import com.capstone.workspace.annotations.AllowedUsers;
-import com.capstone.workspace.dtos.CreateApplicationDto;
-import com.capstone.workspace.entities.Application;
-import com.capstone.workspace.enums.UserType;
-import com.capstone.workspace.models.ApplicationModel;
-import com.capstone.workspace.models.ResponseModel;
-import com.capstone.workspace.services.ApplicationService;
+import com.capstone.workspace.dtos.application.CreateApplicationDto;
+import com.capstone.workspace.entities.application.Application;
+import com.capstone.workspace.enums.user.UserType;
+import com.capstone.workspace.models.application.ApplicationModel;
+import com.capstone.workspace.models.shared.ResponseModel;
+import com.capstone.workspace.services.application.ApplicationService;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

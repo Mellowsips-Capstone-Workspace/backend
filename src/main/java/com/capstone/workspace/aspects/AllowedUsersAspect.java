@@ -1,11 +1,11 @@
 package com.capstone.workspace.aspects;
 
 import com.capstone.workspace.annotations.AllowedUsers;
-import com.capstone.workspace.enums.UserType;
+import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.exceptions.ForbiddenException;
 import com.capstone.workspace.exceptions.UnauthorizedException;
-import com.capstone.workspace.models.UserIdentity;
-import com.capstone.workspace.services.AuthContextService;
+import com.capstone.workspace.models.auth.UserIdentity;
+import com.capstone.workspace.services.auth.AuthContextService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.annotation.Aspect;

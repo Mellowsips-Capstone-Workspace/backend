@@ -1,6 +1,6 @@
 package com.capstone.workspace.annotations;
 
-import com.capstone.workspace.enums.UserType;
+import com.capstone.workspace.enums.user.UserType;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

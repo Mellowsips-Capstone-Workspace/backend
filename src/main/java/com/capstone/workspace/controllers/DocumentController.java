@@ -1,9 +1,9 @@
 package com.capstone.workspace.controllers;
 
-import com.capstone.workspace.entities.Document;
-import com.capstone.workspace.models.DocumentModel;
-import com.capstone.workspace.models.ResponseModel;
-import com.capstone.workspace.services.DocumentService;
+import com.capstone.workspace.entities.document.Document;
+import com.capstone.workspace.models.document.DocumentModel;
+import com.capstone.workspace.models.shared.ResponseModel;
+import com.capstone.workspace.services.document.DocumentService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;

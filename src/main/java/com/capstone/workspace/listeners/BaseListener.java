@@ -1,9 +1,9 @@
 package com.capstone.workspace.listeners;
 
-import com.capstone.workspace.entities.BaseEntity;
-import com.capstone.workspace.helpers.BeanHelper;
-import com.capstone.workspace.models.UserIdentity;
-import com.capstone.workspace.services.AuthContextService;
+import com.capstone.workspace.entities.shared.BaseEntity;
+import com.capstone.workspace.helpers.shared.BeanHelper;
+import com.capstone.workspace.models.auth.UserIdentity;
+import com.capstone.workspace.services.auth.AuthContextService;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import org.springframework.stereotype.Component;

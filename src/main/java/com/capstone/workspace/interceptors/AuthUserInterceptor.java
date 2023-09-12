@@ -1,10 +1,10 @@
 package com.capstone.workspace.interceptors;
 
-import com.capstone.workspace.enums.UserType;
+import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.exceptions.UnauthorizedException;
-import com.capstone.workspace.helpers.AuthHelper;
-import com.capstone.workspace.models.UserIdentity;
-import com.capstone.workspace.services.AuthContextService;
+import com.capstone.workspace.helpers.auth.AuthHelper;
+import com.capstone.workspace.models.auth.UserIdentity;
+import com.capstone.workspace.services.auth.AuthContextService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;

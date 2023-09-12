@@ -1,11 +1,14 @@
 package com.capstone.workspace.controllers;
 
-import com.capstone.workspace.dtos.*;
-import com.capstone.workspace.entities.User;
-import com.capstone.workspace.models.ResponseModel;
-import com.capstone.workspace.models.UserModel;
-import com.capstone.workspace.services.AuthService;
-import com.capstone.workspace.services.UserService;
+import com.capstone.workspace.dtos.auth.PasswordLoginDto;
+import com.capstone.workspace.dtos.auth.ResendConfirmationCodeDto;
+import com.capstone.workspace.dtos.auth.VerifyUserDto;
+import com.capstone.workspace.dtos.user.RegisterUserDto;
+import com.capstone.workspace.entities.user.User;
+import com.capstone.workspace.models.shared.ResponseModel;
+import com.capstone.workspace.models.user.UserModel;
+import com.capstone.workspace.services.auth.AuthService;
+import com.capstone.workspace.services.user.UserService;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
