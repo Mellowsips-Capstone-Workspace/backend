@@ -22,15 +22,15 @@ public class Application extends BaseEntity {
     @Column
     private String approvedBy;
 
-    @Column
+    @Column(nullable = false)
     @JdbcTypeCode(SqlTypes.JSON)
     private Map<String, Object> jsonData;
 
-    @Column
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ApplicationStatus status;
 
-    @Column
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ApplicationType type;
 }

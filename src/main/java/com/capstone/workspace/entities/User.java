@@ -29,11 +29,11 @@ public class User extends BaseEntity {
     @Column
     private String avatar;
 
-    @Column
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private UserType type;
 
-    @Column
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private AuthProviderType provider;
 }

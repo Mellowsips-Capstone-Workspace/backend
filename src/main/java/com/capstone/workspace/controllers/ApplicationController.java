@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class ApplicationController {
     @NonNull
-    private ApplicationService applicationService;
+    private final ApplicationService applicationService;
 
     @NonNull
     private final ModelMapper mapper;

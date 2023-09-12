@@ -18,6 +18,7 @@ public class InterceptorAppConfiguration implements WebMvcConfigurer {
         registry.addInterceptor(authUserInterceptor)
                 .addPathPatterns("/api/auth/logout")
                 .addPathPatterns("/api/auth/me/**")
-                .addPathPatterns("/api/applications/**");
+                .addPathPatterns("/api/applications/**")
+                .addPathPatterns("/api/documents/**");
     }
 }
