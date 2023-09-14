@@ -22,12 +22,13 @@ public class SecurityConfiguration {
         httpSecurity.cors(
                 httpSecurityCorsConfigurer -> {
                     CorsConfiguration configuration = new CorsConfiguration();
-                    configuration.setAllowedOriginPatterns(Collections.singletonList("*"));
+                    configuration.setAllowedOriginPatterns(List.of("*"));
                     configuration.setAllowedMethods(List.of("*"));
                     configuration.setAllowedHeaders(List.of("*"));
-                    configuration.setMaxAge(3600L);
+
                     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
                     source.registerCorsConfiguration("/**", configuration);
+
                     httpSecurityCorsConfigurer.configurationSource(source);
                 }
         );
