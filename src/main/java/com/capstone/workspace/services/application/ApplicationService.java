@@ -3,14 +3,17 @@ package com.capstone.workspace.services.application;
 import com.capstone.workspace.dtos.application.CreateApplicationDto;
 import com.capstone.workspace.entities.application.Application;
 import com.capstone.workspace.enums.application.ApplicationErrorCode;
+import com.capstone.workspace.enums.application.ApplicationEvent;
 import com.capstone.workspace.enums.application.ApplicationStatus;
 import com.capstone.workspace.enums.application.ApplicationType;
 import com.capstone.workspace.exceptions.AppDefinedException;
 import com.capstone.workspace.exceptions.ConflictException;
+import com.capstone.workspace.exceptions.ForbiddenException;
 import com.capstone.workspace.exceptions.NotFoundException;
 import com.capstone.workspace.helpers.application.ApplicationHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.repositories.application.ApplicationRepository;
+import com.capstone.workspace.services.application.application_machine.ApplicationStateMachine;
 import com.capstone.workspace.services.auth.AuthContextService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +37,9 @@ public class ApplicationService {
 
     @NonNull
     private final ApplicationHelper applicationHelper;
+
+    @NonNull
+    private final ApplicationStateMachine applicationStateMachine;
 
     public Application create(CreateApplicationDto dto) {
         Application entity = upsert(null, dto);
@@ -61,7 +67,7 @@ public class ApplicationService {
         }
 
         if (dto.getStatus() == ApplicationStatus.WAITING_FOR_APPROVAL) {
-            applicationHelper.validate(dto);
+            applicationHelper.validate(mapper.map(dto, Application.class));
         }
 
         return repository.save(entity);
@@ -86,4 +92,24 @@ public class ApplicationService {
 
         return entity;
     }
+
+    public Application transition(UUID id, String event) {
+        Application entity = getApplicationById(id);
+        ApplicationEvent applicationEvent = ApplicationEvent.valueOf(event.toUpperCase());
+
+        if (applicationEvent == ApplicationEvent.SUBMIT || applicationEvent == ApplicationEvent.APPROVE) {
+            applicationHelper.validate(entity);
+        }
+
+        applicationStateMachine.init(id);
+
+        ApplicationStatus newStatus = applicationStateMachine.transition(entity.getStatus(), applicationEvent);
+        if (newStatus != ApplicationStatus.APPROVED) {
+            entity.setStatus(newStatus);
+        }
+
+        return repository.save(entity);
+    }
+
+    public void approveApplication() {}
 }

@@ -11,10 +11,9 @@ import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping( "/api/applications")
@@ -30,6 +29,14 @@ public class ApplicationController {
     @PostMapping
     public ResponseModel<ApplicationModel> create(@Valid @RequestBody CreateApplicationDto params) {
         Application entity = applicationService.create(params);
+        ApplicationModel model = mapper.map(entity, ApplicationModel.class);
+        return ResponseModel.<ApplicationModel>builder().data(model).build();
+    }
+
+    @AllowedUsers(userTypes = {UserType.EMPLOYEE, UserType.ADMIN})
+    @PutMapping("/{id}/events/{event}")
+    public ResponseModel<ApplicationModel> transition(@PathVariable UUID id, @PathVariable String event) {
+        Application entity = applicationService.transition(id, event);
         ApplicationModel model = mapper.map(entity, ApplicationModel.class);
         return ResponseModel.<ApplicationModel>builder().data(model).build();
     }

@@ -7,6 +7,6 @@ import lombok.Data;
 public class UserIdentity {
     private String username;
     private String organizationId;
-    private String merchantId;
+    private String storeId;
     private UserType userType;
 }

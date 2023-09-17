@@ -1,6 +1,7 @@
 package com.capstone.workspace.helpers.application;
 
 import com.capstone.workspace.dtos.application.CreateApplicationDto;
+import com.capstone.workspace.entities.application.Application;
 import com.capstone.workspace.enums.organization.BusinessType;
 import com.capstone.workspace.enums.organization.IdentityType;
 import com.capstone.workspace.exceptions.BadRequestException;
@@ -38,13 +39,13 @@ public class ApplicationHelper {
 
     private Logger logger = LoggerFactory.getLogger(ApplicationHelper.class);
 
-    public void validate(CreateApplicationDto dto) {
-        switch (dto.getType()) {
+    public void validate(Application data) {
+        switch (data.getType()) {
             case CREATE_ORGANIZATION:
-                Map jsonData = dto.getJsonData();
+                Map jsonData = data.getJsonData();
 
                 Organization organization = validateOrganization(jsonData.get("organization"));
-                validateMerchant(jsonData.get("merchant"), organization);
+                validateStore(jsonData.get("merchant"), organization);
                 validateController(jsonData.get("controller"));
                 validateBankAccount(jsonData.get("bankAccount"));
 
@@ -84,28 +85,28 @@ public class ApplicationHelper {
         return data;
     }
 
-    private List<Merchant> validateMerchant(Object merchantData, Organization organizationData) {
-        if (merchantData == null) {
-            throw new BadRequestException("Missing merchant information");
+    private List<Store> validateStore(Object storeData, Organization organizationData) {
+        if (storeData == null) {
+            throw new BadRequestException("Missing store information");
         }
 
-        List<Merchant> merchantList = new ArrayList<>();
-        for (Object merchant: (ArrayList) merchantData) {
-            merchantList.add(mapper.map(merchant, Merchant.class));
+        List<Store> storeList = new ArrayList<>();
+        for (Object store: (ArrayList) storeData) {
+            storeList.add(mapper.map(store, Store.class));
         }
 
-        if (merchantList.isEmpty() || (organizationData.getBusinessType() != BusinessType.ENTERPRISE && merchantList.size() > 1)) {
-            throw new BadRequestException("Your business should have one merchant");
+        if (storeList.isEmpty() || (organizationData.getBusinessType() != BusinessType.ENTERPRISE && storeList.size() > 1)) {
+            throw new BadRequestException("Your business should have one store");
         }
 
-        for (Merchant merchant: merchantList) {
-            Set<ConstraintViolation<Merchant>> constraintViolations = validator.validate(merchant);
+        for (Store store: storeList) {
+            Set<ConstraintViolation<Store>> constraintViolations = validator.validate(store);
             if (!constraintViolations.isEmpty()) {
                 throw new ConstraintViolationException(constraintViolations);
             }
         }
 
-        return merchantList;
+        return storeList;
     }
 
     private Controller validateController(Object controllerData) {
@@ -240,7 +241,7 @@ class EnterpriseOrganization extends HouseholdOrganization {
 
 @Data
 @NoArgsConstructor
-class Merchant {
+class Store {
     @NotNull
     @NotBlank
     protected String name;
@@ -257,7 +258,7 @@ class Merchant {
 
     @NotNull
     @NotEmpty
-    protected Set<String> merchantImages;
+    protected Set<String> storeImages;
 
     @NotNull
     @NotEmpty
