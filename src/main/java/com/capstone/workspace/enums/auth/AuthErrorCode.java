@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 @Getter
 public enum AuthErrorCode implements ErrorCode {
-    MISSING_TOKEN("auth/missing-token", HttpStatus.UNAUTHORIZED, "Confirmation code has expired"),
+    MISSING_TOKEN("auth/missing-token", HttpStatus.UNAUTHORIZED, "Unauthorized"),
     INVALID_ACCESS_TOKEN("auth/invalid-access-token", HttpStatus.UNAUTHORIZED, "Access token is invalid or expired"),
     CODE_EXPIRED("auth/code-expired", HttpStatus.GONE, "Confirmation code has expired"),
     CODE_MISMATCH("auth/code-mismatch", HttpStatus.BAD_REQUEST, "Confirmation code does not match"),
