@@ -18,6 +18,8 @@ import com.capstone.workspace.services.auth.AuthContextService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +42,8 @@ public class ApplicationService {
 
     @NonNull
     private final ApplicationStateMachine applicationStateMachine;
+
+    private Logger logger = LoggerFactory.getLogger(ApplicationService.class);
 
     public Application create(CreateApplicationDto dto) {
         Application entity = upsert(null, dto);
@@ -104,12 +108,12 @@ public class ApplicationService {
         applicationStateMachine.init(id);
 
         ApplicationStatus newStatus = applicationStateMachine.transition(entity.getStatus(), applicationEvent);
+        logger.info(String.valueOf(newStatus));
+        logger.info(String.valueOf(applicationEvent));
         if (newStatus != ApplicationStatus.APPROVED) {
             entity.setStatus(newStatus);
         }
 
         return repository.save(entity);
     }
-
-    public void approveApplication() {}
 }

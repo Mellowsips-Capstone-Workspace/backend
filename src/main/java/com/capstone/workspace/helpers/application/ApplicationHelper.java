@@ -258,7 +258,7 @@ class Store {
 
     @NotNull
     @NotEmpty
-    protected Set<String> storeImages;
+    protected Set<String> merchantImages;
 
     @NotNull
     @NotEmpty

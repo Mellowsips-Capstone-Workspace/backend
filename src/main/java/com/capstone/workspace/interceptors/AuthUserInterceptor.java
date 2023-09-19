@@ -1,6 +1,8 @@
 package com.capstone.workspace.interceptors;
 
+import com.capstone.workspace.enums.auth.AuthErrorCode;
 import com.capstone.workspace.enums.user.UserType;
+import com.capstone.workspace.exceptions.AppDefinedException;
 import com.capstone.workspace.exceptions.UnauthorizedException;
 import com.capstone.workspace.helpers.auth.AuthHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
@@ -40,6 +42,6 @@ public class AuthUserInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        throw new UnauthorizedException("Unauthorized");
+        throw AppDefinedException.builder().errorCode(AuthErrorCode.MISSING_TOKEN).build();
     }
 }

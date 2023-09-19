@@ -7,6 +7,8 @@ import com.capstone.workspace.exceptions.ForbiddenException;
 import com.capstone.workspace.repositories.application.ApplicationRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.transition.Transition;
 import org.springframework.stereotype.Component;
@@ -22,6 +24,8 @@ public class ApplicationStateMachine {
 
     @NonNull
     private final ApplicationRepository applicationRepository;
+
+    private Logger logger = LoggerFactory.getLogger(ApplicationStateMachine.class);
 
     public void init(UUID applicationId) {
         Application application = applicationRepository.findById(applicationId).orElse(null);
@@ -39,6 +43,12 @@ public class ApplicationStateMachine {
     private boolean can(ApplicationStatus currentState, ApplicationEvent eventType) {
         Collection<Transition<ApplicationStatus, ApplicationEvent>> transitions = stateMachine.getTransitions();
         return transitions.stream()
+            .map(transition -> {
+                logger.info(String.valueOf(transition.getSource().getId()));
+                logger.info(String.valueOf(transition.getTrigger().getEvent()));
+                logger.info(String.valueOf(transition.getTarget().getId()));
+                return transition;
+            })
             .anyMatch(
                 transition -> transition.getSource().getId() == currentState && transition.getTrigger().getEvent() == eventType
             );

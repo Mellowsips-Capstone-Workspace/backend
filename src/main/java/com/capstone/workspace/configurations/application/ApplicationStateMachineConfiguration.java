@@ -23,8 +23,8 @@ import java.util.UUID;
 @EnableStateMachine
 @RequiredArgsConstructor
 public class ApplicationStateMachineConfiguration extends EnumStateMachineConfigurerAdapter<ApplicationStatus, ApplicationEvent> {
-//    @NonNull
-//    private final JobService jobService;
+    @NonNull
+    private final JobService jobService;
 
     @Override
     public void configure(StateMachineStateConfigurer<ApplicationStatus, ApplicationEvent> states) throws Exception {
@@ -86,7 +86,7 @@ public class ApplicationStateMachineConfiguration extends EnumStateMachineConfig
             payload.put("applicationId", applicationId);
             payload.put("lastState", lastState);
 
-//            jobService.publishApprovedApplicationJob(payload);
+            jobService.publishApprovedApplicationJob(payload);
 //
 //            stateMachine.getExtendedState().getVariables().put("lastState", ApplicationStatus.APPROVED);
 //            stateMachine.stop();
