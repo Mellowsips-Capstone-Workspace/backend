@@ -107,6 +107,13 @@ public class CognitoService {
             throw AppDefinedException.builder().errorCode(AuthErrorCode.CODE_MISMATCH).build();
         } catch (LimitExceededException ex) {
             throw AppDefinedException.builder().errorCode(AuthErrorCode.VERIFICATION_LIMIT_EXCEED).build();
+        } catch (AliasExistsException ex) {
+            AdminConfirmSignUpRequest request = AdminConfirmSignUpRequest.builder()
+                    .username(username)
+                    .userPoolId(POOL_ID)
+                    .build();
+
+            cognitoIdentityProviderClient.adminConfirmSignUp(request);
         }
     }
 
