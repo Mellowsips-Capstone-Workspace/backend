@@ -1,34 +1,26 @@
 package com.capstone.workspace.services.shared;
 
-import com.capstone.workspace.models.shared.JobPayload;
-import com.capstone.workspace.services.application.ApplicationService;
-import com.capstone.workspace.services.application.application_approval.ApproveApplicationJobService;
-import com.capstone.workspace.services.auth.AuthContextService;
+import com.capstone.workspace.jobs.requests.ApproveApplicationJobRequest;
+import com.capstone.workspace.services.auth.IdentityService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.jobrunr.scheduling.JobScheduler;
+import org.jobrunr.scheduling.BackgroundJobRequest;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class JobService {
     @NonNull
-    private final JobScheduler jobScheduler;
+    private final IdentityService identityService;
 
-    @NonNull
-    private final AuthContextService authContextService;
-
-    @NonNull
-    private final ApproveApplicationJobService approveApplicationJobService;
-
-    public void publishApprovedApplicationJob(Map<String, Object> payload) {
-        jobScheduler.enqueue(() -> approveApplicationJobService.execute(preparePayload(payload)));
-    }
-
-    private JobPayload preparePayload(Object data) {
-        return JobPayload.builder().userIdentity(authContextService.getUserIdentity()).data(data).build();
+    public void publishApprovedApplicationJob(UUID applicationId) {
+        BackgroundJobRequest.enqueue(
+            new ApproveApplicationJobRequest(
+                identityService.getUserIdentity(),
+                applicationId
+            )
+        );
     }
 }

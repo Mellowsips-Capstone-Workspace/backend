@@ -8,13 +8,12 @@ import com.capstone.workspace.enums.application.ApplicationStatus;
 import com.capstone.workspace.enums.application.ApplicationType;
 import com.capstone.workspace.exceptions.AppDefinedException;
 import com.capstone.workspace.exceptions.ConflictException;
-import com.capstone.workspace.exceptions.ForbiddenException;
 import com.capstone.workspace.exceptions.NotFoundException;
 import com.capstone.workspace.helpers.application.ApplicationHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.repositories.application.ApplicationRepository;
 import com.capstone.workspace.services.application.application_machine.ApplicationStateMachine;
-import com.capstone.workspace.services.auth.AuthContextService;
+import com.capstone.workspace.services.auth.IdentityService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -32,7 +31,7 @@ public class ApplicationService {
     private final ApplicationRepository repository;
 
     @NonNull
-    private final AuthContextService authContextService;
+    private final IdentityService identityService;
 
     @NonNull
     private final ModelMapper mapper;
@@ -52,7 +51,7 @@ public class ApplicationService {
             throw AppDefinedException.builder().errorCode(ApplicationErrorCode.STATUS_NOT_ALLOWED).build();
         }
 
-        UserIdentity userIdentity = authContextService.getUserIdentity();
+        UserIdentity userIdentity = identityService.getUserIdentity();
         if (dto.getType() == ApplicationType.CREATE_ORGANIZATION) {
             if (userIdentity.getOrganizationId() != null) {
                 throw AppDefinedException.builder().errorCode(ApplicationErrorCode.ORGANIZATION_ALREADY_EXIST).build();
@@ -108,8 +107,6 @@ public class ApplicationService {
         applicationStateMachine.init(id);
 
         ApplicationStatus newStatus = applicationStateMachine.transition(entity.getStatus(), applicationEvent);
-        logger.info(String.valueOf(newStatus));
-        logger.info(String.valueOf(applicationEvent));
         if (newStatus != ApplicationStatus.APPROVED) {
             entity.setStatus(newStatus);
         }

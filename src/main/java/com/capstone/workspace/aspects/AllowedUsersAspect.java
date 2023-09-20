@@ -5,7 +5,7 @@ import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.exceptions.ForbiddenException;
 import com.capstone.workspace.exceptions.UnauthorizedException;
 import com.capstone.workspace.models.auth.UserIdentity;
-import com.capstone.workspace.services.auth.AuthContextService;
+import com.capstone.workspace.services.auth.IdentityService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.annotation.Aspect;
@@ -24,11 +24,11 @@ public class AllowedUsersAspect {
     private Logger logger = LoggerFactory.getLogger(AllowedUsersAspect.class);
 
     @NonNull
-    private AuthContextService authContextService;
+    private IdentityService identityService;
 
     @Before("@annotation(allowedUsers)")
     public void checkUserType(AllowedUsers allowedUsers) {
-        UserIdentity userIdentity = authContextService.getUserIdentity();
+        UserIdentity userIdentity = identityService.getUserIdentity();
         if (userIdentity == null || userIdentity.getUsername() == null) {
             throw new UnauthorizedException("Unauthorized");
         }

@@ -7,8 +7,6 @@ import com.capstone.workspace.exceptions.ForbiddenException;
 import com.capstone.workspace.repositories.application.ApplicationRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.transition.Transition;
 import org.springframework.stereotype.Component;
@@ -25,8 +23,6 @@ public class ApplicationStateMachine {
     @NonNull
     private final ApplicationRepository applicationRepository;
 
-    private Logger logger = LoggerFactory.getLogger(ApplicationStateMachine.class);
-
     public void init(UUID applicationId) {
         Application application = applicationRepository.findById(applicationId).orElse(null);
 
@@ -36,19 +32,13 @@ public class ApplicationStateMachine {
             stateMachine.getExtendedState().getVariables().put("applicationId", applicationId);
             // stateMachine.getExtendedState().getVariables().put("actions", userActions);
             stateMachine.getExtendedState().getVariables().put("application", application);
-            stateMachine.getExtendedState().getVariables().put("lastState", application.getStatus());
+//            stateMachine.getExtendedState().getVariables().put("lastState", application.getStatus());
         }
     }
 
     private boolean can(ApplicationStatus currentState, ApplicationEvent eventType) {
         Collection<Transition<ApplicationStatus, ApplicationEvent>> transitions = stateMachine.getTransitions();
         return transitions.stream()
-            .map(transition -> {
-                logger.info(String.valueOf(transition.getSource().getId()));
-                logger.info(String.valueOf(transition.getTrigger().getEvent()));
-                logger.info(String.valueOf(transition.getTarget().getId()));
-                return transition;
-            })
             .anyMatch(
                 transition -> transition.getSource().getId() == currentState && transition.getTrigger().getEvent() == eventType
             );
@@ -62,10 +52,7 @@ public class ApplicationStateMachine {
         stateMachine.sendEvent(eventType);
 
         ApplicationStatus newState = stateMachine.getState().getId();
-        if (newState != ApplicationStatus.APPROVED) {
-            stateMachine.getExtendedState().getVariables().put("lastState", newState);
-            stateMachine.stop();
-        }
+        stateMachine.stop();
 
         return newState;
     }

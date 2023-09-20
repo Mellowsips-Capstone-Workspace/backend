@@ -7,7 +7,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.action.Action;
 import org.springframework.statemachine.config.EnableStateMachine;
 import org.springframework.statemachine.config.EnumStateMachineConfigurerAdapter;
@@ -15,8 +14,6 @@ import org.springframework.statemachine.config.builders.StateMachineStateConfigu
 import org.springframework.statemachine.config.builders.StateMachineTransitionConfigurer;
 import org.springframework.statemachine.guard.Guard;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 @Configuration
@@ -32,11 +29,12 @@ public class ApplicationStateMachineConfiguration extends EnumStateMachineConfig
             .withStates()
             .initial(ApplicationStatus.DRAFT)
             .initial(ApplicationStatus.WAITING_FOR_APPROVAL)
+            .initial(ApplicationStatus.PROCESSING)
             .state(ApplicationStatus.DRAFT)
             .state(ApplicationStatus.WAITING_FOR_APPROVAL)
             .state(ApplicationStatus.PROCESSING)
-            .end(ApplicationStatus.REJECTED)
-            .end(ApplicationStatus.APPROVED);
+            .state(ApplicationStatus.REJECTED)
+            .state(ApplicationStatus.APPROVED);
     }
 
     @Override
@@ -77,19 +75,8 @@ public class ApplicationStateMachineConfiguration extends EnumStateMachineConfig
     @Bean
     public Action<ApplicationStatus, ApplicationEvent> approve() {
         return context -> {
-//            StateMachine stateMachine = context.getStateMachine();
-
             UUID applicationId = (UUID) context.getExtendedState().getVariables().get("applicationId");
-            ApplicationStatus lastState = (ApplicationStatus) context.getExtendedState().getVariables().get("lastState");
-
-            Map<String, Object> payload = new HashMap<>();
-            payload.put("applicationId", applicationId);
-            payload.put("lastState", lastState);
-
-            jobService.publishApprovedApplicationJob(payload);
-//
-//            stateMachine.getExtendedState().getVariables().put("lastState", ApplicationStatus.APPROVED);
-//            stateMachine.stop();
+            jobService.publishApprovedApplicationJob(applicationId);
         };
     }
 
