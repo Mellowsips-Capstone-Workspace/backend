@@ -24,7 +24,7 @@ public class ApproveApplicationJobRequestHandler implements JobRequestHandler<Ap
 
     @Override
     @Job(name = "Approve application job")
-    public void run(ApproveApplicationJobRequest request) throws Exception {
+    public void run(ApproveApplicationJobRequest request) {
         identityService.setUserIdentity(request.getUserIdentity());
         Application application = applicationService.getApplicationById(request.getApplicationId());
 

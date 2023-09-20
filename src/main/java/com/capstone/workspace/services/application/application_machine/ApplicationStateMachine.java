@@ -7,6 +7,7 @@ import com.capstone.workspace.exceptions.ForbiddenException;
 import com.capstone.workspace.repositories.application.ApplicationRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.LoggerFactory;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.transition.Transition;
 import org.springframework.stereotype.Component;
@@ -29,10 +30,13 @@ public class ApplicationStateMachine {
         if (application != null) {
             stateMachine.start();
 
+            ApplicationStatus initialState = application.getStatus();
+            ApplicationEvent initialEvent = ApplicationEvent.valueOf("TO_" + initialState);
+            stateMachine.sendEvent(initialEvent);
+
             stateMachine.getExtendedState().getVariables().put("applicationId", applicationId);
             // stateMachine.getExtendedState().getVariables().put("actions", userActions);
             stateMachine.getExtendedState().getVariables().put("application", application);
-//            stateMachine.getExtendedState().getVariables().put("lastState", application.getStatus());
         }
     }
 
@@ -50,9 +54,12 @@ public class ApplicationStateMachine {
         }
 
         stateMachine.sendEvent(eventType);
-
         ApplicationStatus newState = stateMachine.getState().getId();
         stateMachine.stop();
+
+        if (newState == currentState) {
+            throw new ForbiddenException("You are not allowed to execute this action");
+        }
 
         return newState;
     }
