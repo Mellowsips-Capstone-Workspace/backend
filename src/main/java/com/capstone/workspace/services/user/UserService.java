@@ -10,7 +10,7 @@ import com.capstone.workspace.exceptions.*;
 import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.repositories.user.UserRepository;
-import com.capstone.workspace.services.auth.AuthContextService;
+import com.capstone.workspace.services.auth.IdentityService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +35,7 @@ public class UserService {
     private final ReceiverProfileService receiverProfileService;
 
     @NonNull
-    private final AuthContextService authContextService;
+    private final IdentityService identityService;
 
     @NonNull
     private final HttpServletRequest httpServletRequest;
@@ -138,7 +138,7 @@ public class UserService {
     }
 
     public User getMyOwnProfile() {
-        UserIdentity userIdentity = authContextService.getUserIdentity();
+        UserIdentity userIdentity = identityService.getUserIdentity();
         if (userIdentity == null || userIdentity.getUsername() == null) {
             throw new UnauthorizedException("Unauthorized");
         }

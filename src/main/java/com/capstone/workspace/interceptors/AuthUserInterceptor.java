@@ -37,7 +37,7 @@ public class AuthUserInterceptor implements HandlerInterceptor {
                 return true;
             }
 
-            //TODO: Implement code to get merchant id of commercial user
+            //TODO: Implement code to get store id of commercial user
             //String token = authHelper.extractTokenFromAuthorization(authorization);
             return true;
         }
