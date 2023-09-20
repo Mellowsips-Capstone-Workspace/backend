@@ -1,6 +1,7 @@
 package com.capstone.workspace.services.application;
 
 import com.capstone.workspace.dtos.application.CreateApplicationDto;
+import com.capstone.workspace.dtos.application.SearchApplicationDto;
 import com.capstone.workspace.entities.application.Application;
 import com.capstone.workspace.enums.application.ApplicationErrorCode;
 import com.capstone.workspace.enums.application.ApplicationEvent;
@@ -10,7 +11,9 @@ import com.capstone.workspace.exceptions.AppDefinedException;
 import com.capstone.workspace.exceptions.ConflictException;
 import com.capstone.workspace.exceptions.NotFoundException;
 import com.capstone.workspace.helpers.application.ApplicationHelper;
+import com.capstone.workspace.models.application.ApplicationModel;
 import com.capstone.workspace.models.auth.UserIdentity;
+import com.capstone.workspace.models.shared.PaginationResponseModel;
 import com.capstone.workspace.repositories.application.ApplicationRepository;
 import com.capstone.workspace.services.application.application_machine.ApplicationStateMachine;
 import com.capstone.workspace.services.auth.IdentityService;
@@ -112,5 +115,9 @@ public class ApplicationService {
         }
 
         return repository.save(entity);
+    }
+
+    public PaginationResponseModel<ApplicationModel> search(SearchApplicationDto dto) {
+        return null;
     }
 }
