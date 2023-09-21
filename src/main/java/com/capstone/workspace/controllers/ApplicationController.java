@@ -44,7 +44,7 @@ public class ApplicationController {
     }
 
     @AllowedUsers(userTypes = {UserType.EMPLOYEE, UserType.ADMIN})
-    @PutMapping("/{id}")
+    @GetMapping("/{id}")
     public ResponseModel<ApplicationModel> getApplicationById(@PathVariable UUID id) {
         Application entity = applicationService.getApplicationById(id);
         ApplicationModel model = mapper.map(entity, ApplicationModel.class);
