@@ -54,7 +54,7 @@ public class ApplicationController {
     @AllowedUsers(userTypes = {UserType.EMPLOYEE, UserType.ADMIN})
     @PostMapping("/search")
     public ResponseModel<PaginationResponseModel<ApplicationModel>> search(@Valid @RequestBody SearchApplicationDto dto) {
-        applicationService.search(dto);
-        return null;
+        PaginationResponseModel<ApplicationModel> data = applicationService.search(dto);
+        return ResponseModel.<PaginationResponseModel<ApplicationModel>>builder().data(data).build();
     }
 }

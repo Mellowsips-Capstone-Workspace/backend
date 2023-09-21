@@ -1,5 +1,7 @@
 package com.capstone.workspace.dtos.application;
 
+import com.capstone.workspace.dtos.shared.PaginationDto;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
@@ -7,9 +9,9 @@ import lombok.Setter;
 @Setter(AccessLevel.NONE)
 @Data
 public class SearchApplicationDto {
-    private int page;
+    @Valid
+    private PaginationDto pagination;
 
-    private int itemsPerPage;
-
+    @Valid
     private SearchApplicationCriteriaDto criteria;
 }

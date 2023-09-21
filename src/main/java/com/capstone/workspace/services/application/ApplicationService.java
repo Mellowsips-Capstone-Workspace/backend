@@ -1,6 +1,7 @@
 package com.capstone.workspace.services.application;
 
 import com.capstone.workspace.dtos.application.CreateApplicationDto;
+import com.capstone.workspace.dtos.application.SearchApplicationCriteriaDto;
 import com.capstone.workspace.dtos.application.SearchApplicationDto;
 import com.capstone.workspace.entities.application.Application;
 import com.capstone.workspace.enums.application.ApplicationErrorCode;
@@ -20,11 +21,16 @@ import com.capstone.workspace.services.auth.IdentityService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -117,7 +123,31 @@ public class ApplicationService {
         return repository.save(entity);
     }
 
-    public PaginationResponseModel<ApplicationModel> search(SearchApplicationDto dto) {
-        return null;
+    public PaginationResponseModel search(SearchApplicationDto dto) {
+        String[] searchableFields = new String[]{};
+        Map<String, String> filterParams = new HashMap<>();
+
+        SearchApplicationCriteriaDto criteria = dto.getCriteria();
+        if (criteria != null) {
+            if (criteria.getFilter() != null) {
+                BeanUtils.copyProperties(criteria.getFilter(), filterParams);
+            }
+        }
+
+        PaginationResponseModel result = repository.searchBy(
+            criteria.getKeyword(),
+            searchableFields,
+            filterParams,
+            criteria.getOrder(),
+            dto.getPagination()
+        );
+
+        List<ApplicationModel> applicationModels = mapper.map(
+            result.getResults(),
+            new TypeToken<List<ApplicationModel>>() {}.getType()
+        );
+        result.setResults(applicationModels);
+
+        return result;
     }
 }

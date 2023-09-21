@@ -7,7 +7,6 @@ import com.capstone.workspace.exceptions.ForbiddenException;
 import com.capstone.workspace.repositories.application.ApplicationRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.LoggerFactory;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.transition.Transition;
 import org.springframework.stereotype.Component;

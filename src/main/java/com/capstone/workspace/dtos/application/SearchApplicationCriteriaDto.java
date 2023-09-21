@@ -1,12 +1,22 @@
 package com.capstone.workspace.dtos.application;
 
-import com.capstone.workspace.enums.application.ApplicationType;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
+import org.springframework.data.domain.Sort;
+
+import java.util.Map;
 
 @Setter(AccessLevel.NONE)
 @Data
 public class SearchApplicationCriteriaDto {
-    private ApplicationType type;
+    @Valid
+    private SearchApplicationFilterDto filter;
+
+    private String keyword;
+
+    @Valid
+    private Map<String, Sort.Direction> order;
 }
+

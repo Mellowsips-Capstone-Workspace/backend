@@ -20,5 +20,5 @@ public class PaginationResponseModel<T> {
     private int itemsPerPage;
 
     @NonNull
-    private int totalItems;
+    private long totalItems;
 }
