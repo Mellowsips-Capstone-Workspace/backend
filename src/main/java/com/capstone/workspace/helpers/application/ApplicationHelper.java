@@ -300,7 +300,7 @@ class Store {
     @NotBlank
     protected String name;
 
-    @Pattern(regexp = "(84[3|5|7|8|9])+(\\d{8})\\b")
+    @Pattern(regexp = "^\\d+$")
     protected String phone;
 
     @Email
