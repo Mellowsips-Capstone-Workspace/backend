@@ -83,4 +83,10 @@ public class AuthService {
         String usernameType = AppHelper.isVietnamNumberPhone(dto.getUsername()) ? "phone" : "username";
         throw new ConflictException("User with this " + usernameType + " already exists");
     }
+
+    @Transactional
+    public void addUserToGroup(String groupName, String username) {
+        userService.addUserToGroup(groupName, username);
+        cognitoService.addUserToGroup(groupName, username);
+    }
 }

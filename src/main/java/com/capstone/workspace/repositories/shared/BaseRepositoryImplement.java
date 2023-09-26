@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 @Transactional
 public class BaseRepositoryImplement<T extends BaseEntity, ID extends Serializable> extends SimpleJpaRepository<T, ID> implements BaseRepository<T, ID> {
@@ -44,7 +43,7 @@ public class BaseRepositoryImplement<T extends BaseEntity, ID extends Serializab
 
         IdentityService identityService = BeanHelper.getBean(IdentityService.class);
         UserIdentity userIdentity = identityService.getUserIdentity();
-        if (userIdentity.getOrganizationId() == null) {
+        if (userIdentity.getPartnerId() == null) {
             if (userIdentity.getUsername() != null) {
                 queryString.append(" AND createdBy = ").append("'").append(userIdentity.getUsername()).append("'");
             }

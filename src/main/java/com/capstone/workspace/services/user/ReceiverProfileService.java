@@ -8,6 +8,7 @@ import com.capstone.workspace.exceptions.BadRequestException;
 import com.capstone.workspace.exceptions.ConflictException;
 import com.capstone.workspace.exceptions.NotAcceptableException;
 import com.capstone.workspace.exceptions.NotFoundException;
+import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.repositories.user.ReceiverProfileRepository;
 import com.capstone.workspace.repositories.user.UserRepository;
 import lombok.NonNull;
@@ -67,7 +68,7 @@ public class ReceiverProfileService {
     private ReceiverProfile upsert(UUID id, Object dto) {
         if (id != null) {
             ReceiverProfile entity = getOneById(id);
-            BeanUtils.copyProperties(dto, entity);
+            BeanUtils.copyProperties(dto, entity, AppHelper.commonProperties);
             return entity;
         }
 

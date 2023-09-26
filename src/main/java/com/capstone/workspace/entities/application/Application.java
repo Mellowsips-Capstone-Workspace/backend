@@ -1,5 +1,6 @@
 package com.capstone.workspace.entities.application;
 
+import com.capstone.workspace.entities.partner.IPartnerEntity;
 import com.capstone.workspace.entities.shared.BaseEntity;
 import com.capstone.workspace.enums.application.ApplicationStatus;
 import com.capstone.workspace.enums.application.ApplicationType;
@@ -16,7 +17,7 @@ import java.util.Map;
 @Entity
 @Table(name = "application", schema = "public")
 @Where(clause = "is_deleted=false")
-public class Application extends BaseEntity {
+public class Application extends BaseEntity implements IPartnerEntity {
     @Column
     private LocalDateTime approvedAt;
 
@@ -34,4 +35,10 @@ public class Application extends BaseEntity {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ApplicationType type;
+
+    @Column
+    private String partnerId;
+
+    @Column
+    private String storeId;
 }

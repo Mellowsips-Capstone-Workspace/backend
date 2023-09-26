@@ -1,5 +1,6 @@
 package com.capstone.workspace.listeners;
 
+import com.capstone.workspace.entities.partner.IPartnerEntity;
 import com.capstone.workspace.entities.shared.BaseEntity;
 import com.capstone.workspace.helpers.shared.BeanHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
@@ -23,6 +24,10 @@ public class BaseListener<E extends BaseEntity> {
         if (userIdentity != null) {
             entity.setCreatedBy(userIdentity.getUsername());
             entity.setUpdatedBy(userIdentity.getUsername());
+
+            if (entity instanceof IPartnerEntity) {
+                ((IPartnerEntity) entity).setPartnerId(userIdentity.getPartnerId());
+            }
         }
     }
 

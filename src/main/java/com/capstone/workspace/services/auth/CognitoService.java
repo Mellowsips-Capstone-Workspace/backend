@@ -4,6 +4,7 @@ import com.capstone.workspace.dtos.user.RegisterUserDto;
 import com.capstone.workspace.enums.auth.AuthErrorCode;
 import com.capstone.workspace.exceptions.AppDefinedException;
 import com.capstone.workspace.exceptions.InternalServerErrorException;
+import com.capstone.workspace.exceptions.NotFoundException;
 import com.capstone.workspace.helpers.shared.AppHelper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.NonNull;
@@ -32,7 +33,7 @@ public class CognitoService {
     @NonNull
     private final HttpServletRequest httpServletRequest;
 
-    public void registerUserByPassword(RegisterUserDto dto) throws UsernameExistsException {
+    void registerUserByPassword(RegisterUserDto dto) throws UsernameExistsException {
         UserContextDataType userContextDataType = UserContextDataType.builder().ipAddress(getClientIp(httpServletRequest)).build();
         String username = dto.getUsername();
 
@@ -54,7 +55,7 @@ public class CognitoService {
         cognitoIdentityProviderClient.signUp(request);
     }
 
-    public Map loginUserByPassword(String username, String password) {
+    Map loginUserByPassword(String username, String password) {
         try {
             Map<String, String> authParameters = new HashMap<String, String>();
             authParameters.put("USERNAME", username);
@@ -89,7 +90,7 @@ public class CognitoService {
         }
     }
 
-    public void verifyUser(String username, String confirmationCode) {
+    void verifyUser(String username, String confirmationCode) {
         UserContextDataType userContextDataType = UserContextDataType.builder().ipAddress(getClientIp(httpServletRequest)).build();
 
         ConfirmSignUpRequest confirmSignUpRequest = ConfirmSignUpRequest.builder()
@@ -117,7 +118,7 @@ public class CognitoService {
         }
     }
 
-    public void logout(String username) {
+    void logout(String username) {
         AdminUserGlobalSignOutRequest signOutRequest = AdminUserGlobalSignOutRequest.builder()
                 .username(username)
                 .userPoolId(POOL_ID)
@@ -126,7 +127,7 @@ public class CognitoService {
         cognitoIdentityProviderClient.adminUserGlobalSignOut(signOutRequest);
     }
 
-    public void resendConfirmationCode(String username) {
+    void resendConfirmationCode(String username) {
         UserContextDataType userContextDataType = UserContextDataType.builder().ipAddress(getClientIp(httpServletRequest)).build();
 
         ResendConfirmationCodeRequest request = ResendConfirmationCodeRequest.builder()
@@ -154,5 +155,42 @@ public class CognitoService {
 
     private boolean isValidClientIp(String clientIp) {
         return !(clientIp == null || clientIp.isEmpty() || "unknown".equalsIgnoreCase(clientIp));
+    }
+
+    void addUserToGroup(String groupName, String username) {
+        try {
+            getGroup(groupName);
+        } catch (ResourceNotFoundException ex) {
+            CreateGroupRequest request = CreateGroupRequest.builder()
+                    .userPoolId(POOL_ID)
+                    .groupName(groupName)
+                    .precedence(1)
+                    .build();
+
+            cognitoIdentityProviderClient.createGroup(request);
+        }
+
+        AdminAddUserToGroupRequest request = AdminAddUserToGroupRequest.builder()
+                .userPoolId(POOL_ID)
+                .groupName(groupName)
+                .username(username)
+                .build();
+
+        cognitoIdentityProviderClient.adminAddUserToGroup(request);
+    }
+
+    private GroupType getGroup(String groupName) {
+        GetGroupRequest request = GetGroupRequest.builder()
+                .userPoolId(POOL_ID)
+                .groupName(groupName)
+                .build();
+        GetGroupResponse response = cognitoIdentityProviderClient.getGroup(request);
+
+        GroupType group = response.group();
+        if (group == null) {
+            throw new NotFoundException("Group not found");
+        }
+
+        return group;
     }
 }
