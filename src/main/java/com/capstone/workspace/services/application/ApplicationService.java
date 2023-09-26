@@ -12,6 +12,7 @@ import com.capstone.workspace.exceptions.AppDefinedException;
 import com.capstone.workspace.exceptions.ConflictException;
 import com.capstone.workspace.exceptions.NotFoundException;
 import com.capstone.workspace.helpers.application.ApplicationHelper;
+import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.models.application.ApplicationModel;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.models.shared.PaginationResponseModel;
@@ -62,8 +63,8 @@ public class ApplicationService {
 
         UserIdentity userIdentity = identityService.getUserIdentity();
         if (dto.getType() == ApplicationType.CREATE_ORGANIZATION) {
-            if (userIdentity.getOrganizationId() != null) {
-                throw AppDefinedException.builder().errorCode(ApplicationErrorCode.ORGANIZATION_ALREADY_EXIST).build();
+            if (userIdentity.getPartnerId() != null) {
+                throw AppDefinedException.builder().errorCode(ApplicationErrorCode.PARTNER_ALREADY_EXIST).build();
             }
 
             Application application = repository.findByCreatedByAndStatusIsNotAndTypeIs(
@@ -74,8 +75,8 @@ public class ApplicationService {
             if (application != null) {
                 throw new ConflictException("Your application for creating organization already exists");
             }
-        } else if (userIdentity.getOrganizationId() == null) {
-            throw AppDefinedException.builder().errorCode(ApplicationErrorCode.ORGANIZATION_NOT_EXIST_YET).build();
+        } else if (userIdentity.getPartnerId() == null) {
+            throw AppDefinedException.builder().errorCode(ApplicationErrorCode.PARTNER_NOT_EXIST_YET).build();
         }
 
         if (dto.getStatus() == ApplicationStatus.WAITING_FOR_APPROVAL) {
@@ -88,7 +89,7 @@ public class ApplicationService {
     private Application upsert(UUID id, Object dto) {
         if (id != null) {
             Application entity = getApplicationById(id);
-            BeanUtils.copyProperties(dto, entity);
+            BeanUtils.copyProperties(dto, entity, AppHelper.commonProperties);
             return entity;
         }
 

@@ -63,7 +63,7 @@ public class UserService {
     private User upsert(UUID id, Object dto) {
         if (id != null) {
             User entity = getUserById(id);
-            BeanUtils.copyProperties(dto, entity);
+            BeanUtils.copyProperties(dto, entity, AppHelper.commonProperties);
             return entity;
         }
 
@@ -144,5 +144,15 @@ public class UserService {
         }
 
         return getUserByUsername(userIdentity.getUsername());
+    }
+
+    public void addUserToGroup(String groupName, String username) {
+        User user = getUserByUsername(username);
+        if (user.getPartnerId() != null) {
+            throw new ConflictException("User already in a group");
+        }
+
+        user.setPartnerId(groupName);
+        repository.save(user);
     }
 }

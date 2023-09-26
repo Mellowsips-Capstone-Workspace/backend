@@ -1,4 +1,4 @@
-package com.capstone.workspace.enums.organization;
+package com.capstone.workspace.enums.partner;
 
 public enum IdentityType {
     CITIZEN_ID_CARD,

@@ -9,8 +9,8 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum ApplicationErrorCode implements ErrorCode {
     STATUS_NOT_ALLOWED("application/status-not-allowed", HttpStatus.NOT_ACCEPTABLE, "Application status is not allowed"),
-    ORGANIZATION_ALREADY_EXIST("application/organization-already-exist", HttpStatus.CONFLICT, "You are already in an organization"),
-    ORGANIZATION_NOT_EXIST_YET("application/organization-not-exist-yet", HttpStatus.NOT_ACCEPTABLE, "You must be in an organization");
+    PARTNER_ALREADY_EXIST("application/partner-already-exist", HttpStatus.CONFLICT, "You are already in an organization"),
+    PARTNER_NOT_EXIST_YET("application/partner-not-exist-yet", HttpStatus.NOT_ACCEPTABLE, "You must be in an organization");
 
     private String value;
     private HttpStatus httpStatus;

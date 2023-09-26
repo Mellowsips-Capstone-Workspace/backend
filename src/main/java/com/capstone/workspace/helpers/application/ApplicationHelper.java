@@ -1,10 +1,12 @@
 package com.capstone.workspace.helpers.application;
 
-import com.capstone.workspace.dtos.application.CreateApplicationDto;
 import com.capstone.workspace.entities.application.Application;
-import com.capstone.workspace.enums.organization.BusinessType;
-import com.capstone.workspace.enums.organization.IdentityType;
+import com.capstone.workspace.enums.partner.BusinessType;
+import com.capstone.workspace.enums.partner.IdentityType;
 import com.capstone.workspace.exceptions.BadRequestException;
+import com.capstone.workspace.models.application.RepresentativeModel;
+import com.capstone.workspace.models.partner.PartnerModel;
+import com.capstone.workspace.models.store.StoreModel;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolation;
@@ -44,8 +46,8 @@ public class ApplicationHelper {
             case CREATE_ORGANIZATION:
                 Map jsonData = data.getJsonData();
 
-                Organization organization = validateOrganization(jsonData.get("organization"));
-                validateStore(jsonData.get("merchant"), organization);
+                Partner partner = validatePartner(jsonData.get("organization"));
+                validateStore(jsonData.get("merchant"), partner);
                 validateController(jsonData.get("controller"));
                 validateBankAccount(jsonData.get("bankAccount"));
 
@@ -53,14 +55,25 @@ public class ApplicationHelper {
         }
     }
 
-    private Organization validateOrganization(Object organizationData) {
-        if (organizationData == null) {
+    private Partner validatePartner(Object partnerData) {
+        Partner partner = getPartner(partnerData);
+
+        Set<ConstraintViolation<Partner>> constraintViolations = validator.validate(partner);
+        if (!constraintViolations.isEmpty()) {
+            throw new ConstraintViolationException(constraintViolations);
+        }
+
+        return partner;
+    }
+
+    private Partner getPartner(Object partnerData) {
+        if (partnerData == null) {
             throw new BadRequestException("Missing organization information");
         }
 
-        LinkedHashMap organization = (LinkedHashMap) organizationData;
+        LinkedHashMap partner = (LinkedHashMap) partnerData;
 
-        String businessType = (String) organization.get("businessType");
+        String businessType = (String) partner.get("businessType");
         if (businessType == null) {
             throw new BadRequestException("Missing business type");
         }
@@ -72,20 +85,14 @@ public class ApplicationHelper {
             throw new BadRequestException("Invalid business type");
         }
 
-        Class organizationClass = businessTypeValue == BusinessType.PERSONAL
-                ? PersonalOrganization.class
-                : (businessTypeValue == BusinessType.HOUSEHOLD ? HouseholdOrganization.class : EnterpriseOrganization.class);
-        Organization data = objectMapper.convertValue(organizationData, (Class<? extends Organization>) organizationClass);
+        Class partnerClass = businessTypeValue == BusinessType.PERSONAL
+                ? PersonalPartner.class
+                : (businessTypeValue == BusinessType.HOUSEHOLD ? HouseholdPartner.class : EnterprisePartner.class);
 
-        Set<ConstraintViolation<Organization>> constraintViolations = validator.validate(data);
-        if (!constraintViolations.isEmpty()) {
-            throw new ConstraintViolationException(constraintViolations);
-        }
-
-        return data;
+        return objectMapper.convertValue(partnerData, (Class<? extends Partner>) partnerClass);
     }
 
-    private List<Store> validateStore(Object storeData, Organization organizationData) {
+    private List<Store> validateStore(Object storeData, Partner partner) {
         if (storeData == null) {
             throw new BadRequestException("Missing store information");
         }
@@ -95,7 +102,7 @@ public class ApplicationHelper {
             storeList.add(mapper.map(store, Store.class));
         }
 
-        if (storeList.isEmpty() || (organizationData.getBusinessType() != BusinessType.ENTERPRISE && storeList.size() > 1)) {
+        if (storeList.isEmpty() || (partner.getBusinessType() != BusinessType.ENTERPRISE && storeList.size() > 1)) {
             throw new BadRequestException("Your business should have one store");
         }
 
@@ -125,11 +132,7 @@ public class ApplicationHelper {
     }
 
     private BankAccount validateBankAccount(Object bankAccountData) {
-        if (bankAccountData == null) {
-            throw new BadRequestException("Missing bank account information");
-        }
-
-        BankAccount bankAccount = mapper.map(bankAccountData, BankAccount.class);
+        BankAccount bankAccount = getBankAccount(bankAccountData);
 
         Set<ConstraintViolation<BankAccount>> constraintViolations = validator.validate(bankAccount);
         if (!constraintViolations.isEmpty()) {
@@ -138,11 +141,62 @@ public class ApplicationHelper {
 
         return bankAccount;
     }
+
+    public PartnerModel getPartnerFromOrg(Object partnerData) {
+        Partner partner = getPartner(partnerData);
+
+        String businessName;
+        try {
+            businessName = ((HouseholdPartner) partner).getBusinessName();
+        } catch (Exception e) {
+            businessName = null;
+        }
+
+        PartnerModel model = objectMapper.convertValue(partner, PartnerModel.class);
+        model.setName(businessName);
+        model.setType(partner.getBusinessType());
+
+        return model;
+    }
+
+    public RepresentativeModel getRepresentativeFromOrg(Object partnerData) {
+        Partner partner = getPartner(partnerData);
+        return mapper.map(partner, RepresentativeModel.class);
+    }
+
+    public BankAccount getBankAccount(Object bankAccountData) {
+        if (bankAccountData == null) {
+            throw new BadRequestException("Missing bank account information");
+        }
+
+        return mapper.map(bankAccountData, BankAccount.class);
+    }
+
+    public Controller getController(Object controllerData) {
+        if (controllerData != null) {
+            return mapper.map(controllerData, Controller.class);
+        }
+
+        return new Controller();
+    }
+
+    public List<StoreModel> getStores(Object storeData) {
+        if (storeData == null) {
+            throw new BadRequestException("Missing store information");
+        }
+
+        List<StoreModel> storeList = new ArrayList<>();
+        for (Object store: (ArrayList) storeData) {
+            storeList.add(mapper.map(store, StoreModel.class));
+        }
+
+        return storeList;
+    }
 }
 
 @Data
 @NoArgsConstructor
-abstract class Organization {
+abstract class Partner {
     @NotNull
     protected BusinessType businessType;
 
@@ -189,7 +243,7 @@ abstract class Organization {
 
 @Data
 @NoArgsConstructor
-class PersonalOrganization extends Organization {
+class PersonalPartner extends Partner {
     @NotNull
     @NotBlank
     private String identityFrontImage;
@@ -201,7 +255,7 @@ class PersonalOrganization extends Organization {
 
 @Data
 @NoArgsConstructor
-class HouseholdOrganization extends Organization {
+class HouseholdPartner extends Partner {
     @NotNull
     @NotBlank
     protected String businessName;
@@ -220,7 +274,7 @@ class HouseholdOrganization extends Organization {
 
     @NotNull
     @NotEmpty
-    protected Set<String> businessIdentityImages;
+    protected List<String> businessIdentityImages;
 
     @AssertTrue(
             message = "businessIdentityIssueDate must be in the past"
@@ -236,7 +290,7 @@ class HouseholdOrganization extends Organization {
 
 @Data
 @NoArgsConstructor
-class EnterpriseOrganization extends HouseholdOrganization {
+class EnterprisePartner extends HouseholdPartner {
 }
 
 @Data
@@ -258,11 +312,11 @@ class Store {
 
     @NotNull
     @NotEmpty
-    protected Set<String> merchantImages;
+    protected List<String> merchantImages;
 
     @NotNull
     @NotEmpty
-    protected Set<String> menuImages;
+    protected List<String> menuImages;
 }
 
 @Data
@@ -298,5 +352,5 @@ class BankAccount {
 
     @NotNull
     @NotEmpty
-    private Set<String> identityImages;
+    private List<String> identityImages;
 }

@@ -11,6 +11,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.jobrunr.jobs.annotations.Job;
 import org.jobrunr.jobs.lambdas.JobRequestHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -22,9 +24,13 @@ public class ApproveApplicationJobRequestHandler implements JobRequestHandler<Ap
     @NonNull
     private final ApplicationService applicationService;
 
+    private Logger logger = LoggerFactory.getLogger(ApproveApplicationJobRequestHandler.class);
+
     @Override
     @Job(name = "Approve application job")
     public void run(ApproveApplicationJobRequest request) {
+        logger.info("Start approve application job");
+
         identityService.setUserIdentity(request.getUserIdentity());
         Application application = applicationService.getApplicationById(request.getApplicationId());
 
@@ -32,6 +38,8 @@ public class ApproveApplicationJobRequestHandler implements JobRequestHandler<Ap
         if (handler != null) {
             handler.execute(application);
         }
+
+        logger.info("Complete approve application job");
     }
 
     private BaseApproveApplication getHandler(Application application) {

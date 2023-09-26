@@ -1,5 +1,6 @@
 package com.capstone.workspace.entities.user;
 
+import com.capstone.workspace.entities.partner.IPartnerEntity;
 import com.capstone.workspace.entities.shared.BaseEntity;
 import com.capstone.workspace.enums.auth.AuthProviderType;
 import com.capstone.workspace.enums.user.UserType;
@@ -11,7 +12,7 @@ import org.hibernate.annotations.Where;
 @Entity
 @Table(name = "user", schema = "public")
 @Where(clause = "is_deleted=false")
-public class User extends BaseEntity {
+public class User extends BaseEntity implements IPartnerEntity {
     @Column(nullable = false, unique = true)
     private String username;
 
@@ -37,4 +38,10 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private AuthProviderType provider;
+
+    @Column
+    private String partnerId;
+
+    @Column
+    private String storeId;
 }

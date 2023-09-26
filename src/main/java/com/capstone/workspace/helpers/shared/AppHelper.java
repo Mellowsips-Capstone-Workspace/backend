@@ -3,6 +3,8 @@ package com.capstone.workspace.helpers.shared;
 import java.util.regex.Pattern;
 
 public class AppHelper {
+    public static String[] commonProperties = new String[]{"id", "createdAt", "createdBy", "updatedAt", "updatedBy", "isDeleted"};
+
     public static boolean isEmail(String s) {
         return Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$").matcher(s).matches();
     }
