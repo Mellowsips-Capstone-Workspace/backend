@@ -10,7 +10,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Where;
 import org.hibernate.type.SqlTypes;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Map;
 
 @Data
@@ -19,7 +19,7 @@ import java.util.Map;
 @Where(clause = "is_deleted=false")
 public class Application extends BaseEntity implements IPartnerEntity {
     @Column
-    private LocalDateTime approvedAt;
+    private Instant approvedAt;
 
     @Column
     private String approvedBy;
@@ -38,7 +38,4 @@ public class Application extends BaseEntity implements IPartnerEntity {
 
     @Column
     private String partnerId;
-
-    @Column
-    private String storeId;
 }

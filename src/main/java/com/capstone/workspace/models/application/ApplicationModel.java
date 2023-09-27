@@ -19,4 +19,6 @@ public class ApplicationModel extends BaseModel {
     private ApplicationStatus status;
 
     private ApplicationType type;
+
+    private String partnerId;
 }

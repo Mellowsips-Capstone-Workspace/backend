@@ -3,7 +3,7 @@ package com.capstone.workspace.models.shared;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Getter
@@ -11,9 +11,9 @@ import java.util.UUID;
 public class BaseModel {
     protected UUID id;
 
-    protected LocalDateTime createdAt;
+    protected Instant createdAt;
 
-    protected LocalDateTime updatedAt;
+    protected Instant updatedAt;
 
     protected String createdBy;
 

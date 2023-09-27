@@ -9,13 +9,13 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Component
 public class BaseListener<E extends BaseEntity> {
     @PrePersist
     public void prePersist(E entity) {
-        LocalDateTime now = LocalDateTime.now();
+        Instant now = Instant.now();
         entity.setCreatedAt(now);
         entity.setUpdatedAt(now);
 
@@ -33,7 +33,7 @@ public class BaseListener<E extends BaseEntity> {
 
     @PreUpdate
     public void preUpdate(E entity) {
-        entity.setUpdatedAt(LocalDateTime.now());
+        entity.setUpdatedAt(Instant.now());
 
         IdentityService identityService = BeanHelper.getBean(IdentityService.class);
         UserIdentity userIdentity = identityService.getUserIdentity();

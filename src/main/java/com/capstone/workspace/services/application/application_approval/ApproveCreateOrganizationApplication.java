@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -78,11 +78,24 @@ public class ApproveCreateOrganizationApplication extends BaseApproveApplication
     @Override
     @Transactional
     public void execute(Application application) {
+        UserIdentity userIdentity = identityService.getUserIdentity();
+        String approver = userIdentity.getUsername();
+
+        String creator = application.getCreatedBy();
+        userIdentity.setUsername(creator);
+
         Map jsonData = application.getJsonData();
         Partner partner = createPartner(jsonData.get("organization"));
 
-        UserIdentity userIdentity = identityService.getUserIdentity();
         userIdentity.setPartnerId(String.valueOf(partner.getId()));
+
+        // Create bank account, representative, invoice controller, stores
+        createBankAccount(jsonData.get("bankAccount"));
+        createRepresentative(jsonData.get("organization"));
+        createInvoiceController(jsonData.get("controller"));
+        createStores(jsonData.get("merchant"));
+
+        userIdentity.setUsername(approver);
 
         // Create "owner" role
         List<Permission> permissions = permissionService.getAll();
@@ -95,27 +108,20 @@ public class ApproveCreateOrganizationApplication extends BaseApproveApplication
         Role ownerRole = roleService.create(createRoleDto);
 
         // Assign application creator to owner role
-        String username = application.getCreatedBy();
-        if (username == null) {
+        if (creator == null) {
             throw new BadRequestException("Application missing creator");
         }
-        roleService.assignUserToRole(ownerRole.getId(), username);
-
-        // Create bank account, representative, invoice controller, stores
-        createBankAccount(jsonData.get("bankAccount"));
-        createRepresentative(jsonData.get("organization"));
-        createInvoiceController(jsonData.get("controller"));
-        createStores(jsonData.get("merchant"));
+        roleService.assignUserToRole(ownerRole.getId(), creator);
 
         // Application
         application.setStatus(ApplicationStatus.APPROVED);
         application.setPartnerId(String.valueOf(partner.getId()));
-        application.setApprovedBy(userIdentity.getUsername());
-        application.setApprovedAt(LocalDateTime.now());
+        application.setApprovedBy(approver);
+        application.setApprovedAt(Instant.now());
         applicationRepository.save(application);
 
         // Add user to group
-        authService.addUserToGroup(String.valueOf(partner.getId()), username);
+        authService.addUserToGroup(String.valueOf(partner.getId()), creator);
     }
 
     private Partner createPartner(Object data) {
