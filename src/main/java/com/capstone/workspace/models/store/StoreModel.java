@@ -21,9 +21,9 @@ public class StoreModel extends BaseModel {
 
     private List<String> categories;
 
-    private boolean isActive;
+    private Boolean isActive;
 
-    private boolean isOpen;
+    private Boolean isOpen;
 
     private String partnerId;
 }

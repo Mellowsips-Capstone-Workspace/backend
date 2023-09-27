@@ -126,20 +126,25 @@ public class ApplicationService {
 
     public PaginationResponseModel search(SearchApplicationDto dto) {
         String[] searchableFields = new String[]{};
-        Map<String, String> filterParams = new HashMap<>();
+        Map<String, Object> filterParams = new HashMap<>();
 
         SearchApplicationCriteriaDto criteria = dto.getCriteria();
+        String keyword = null;
+        Map orderCriteria = null;
+
         if (criteria != null) {
             if (criteria.getFilter() != null) {
                 BeanUtils.copyProperties(criteria.getFilter(), filterParams);
             }
+            keyword = criteria.getKeyword();
+            orderCriteria = criteria.getOrder();
         }
 
         PaginationResponseModel result = repository.searchBy(
-            criteria.getKeyword(),
+            keyword,
             searchableFields,
             filterParams,
-            criteria.getOrder(),
+            orderCriteria,
             dto.getPagination()
         );
 

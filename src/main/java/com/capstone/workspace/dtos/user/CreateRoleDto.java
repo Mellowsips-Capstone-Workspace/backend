@@ -22,5 +22,5 @@ public class CreateRoleDto {
     private List<String> permissions;
 
     @Builder.Default
-    private boolean isAllowedEdit = true;
+    private Boolean isAllowedEdit = true;
 }
