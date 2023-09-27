@@ -135,11 +135,14 @@ public class ApplicationService {
             }
         }
 
+        String keyword = criteria != null ? criteria.getKeyword() : null;
+        Map orderCriteria = criteria != null ? criteria.getOrder() : null;
+
         PaginationResponseModel result = repository.searchBy(
-            criteria.getKeyword(),
+            keyword,
             searchableFields,
             filterParams,
-            criteria.getOrder(),
+            orderCriteria,
             dto.getPagination()
         );
 

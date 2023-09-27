@@ -43,12 +43,15 @@ public class BaseRepositoryImplement<T extends BaseEntity, ID extends Serializab
 
         IdentityService identityService = BeanHelper.getBean(IdentityService.class);
         UserIdentity userIdentity = identityService.getUserIdentity();
-        if (userIdentity.getPartnerId() == null) {
-            if (userIdentity.getUsername() != null) {
-                queryString.append(" AND createdBy = ").append("'").append(userIdentity.getUsername()).append("'");
+
+        if (userIdentity != null) {
+            if (userIdentity.getPartnerId() == null) {
+                if (userIdentity.getUsername() != null) {
+                    queryString.append(" AND createdBy = ").append("'").append(userIdentity.getUsername()).append("'");
+                }
+            } else {
+                // TODO: Implement ringfence for user in organization
             }
-        } else {
-            // TODO: Implement ringfence for user in organization
         }
 
         if (filterParams != null && !filterParams.isEmpty()) {
