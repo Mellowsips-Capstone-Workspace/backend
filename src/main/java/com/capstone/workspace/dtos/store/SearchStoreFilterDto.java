@@ -7,4 +7,5 @@ import lombok.Setter;
 @Setter(AccessLevel.NONE)
 @Data
 public class SearchStoreFilterDto {
+    private Boolean isActive;
 }

@@ -20,12 +20,12 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -74,17 +74,25 @@ public class StoreService {
 
     public PaginationResponseModel<StoreModel> search(SearchStoreDto dto) {
         String[] searchableFields = new String[]{};
-        Map<String, String> filterParams = new HashMap<>();
+        Map<String, Object> filterParams = new HashMap<>();
 
         SearchStoreCriteriaDto criteria = dto.getCriteria();
+        String keyword = null;
+        Map orderCriteria = null;
+
         if (criteria != null) {
             if (criteria.getFilter() != null) {
-                BeanUtils.copyProperties(criteria.getFilter(), filterParams);
+                BeanWrapper wrapper = new BeanWrapperImpl(criteria.getFilter());
+                Stream.of(wrapper.getPropertyDescriptors())
+                    .forEach(pd -> {
+                        if (!pd.getName().equalsIgnoreCase("class")) {
+                            filterParams.put(pd.getName(), wrapper.getPropertyValue(pd.getName()));
+                        }
+                    });
             }
+            keyword = criteria.getKeyword();
+            orderCriteria = criteria.getOrder();
         }
-
-        String keyword = criteria != null ? criteria.getKeyword() : null;
-        Map orderCriteria = criteria != null ? criteria.getOrder() : null;
 
         PaginationResponseModel result = repository.searchBy(
             keyword,

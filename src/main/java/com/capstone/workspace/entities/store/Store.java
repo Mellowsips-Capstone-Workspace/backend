@@ -39,10 +39,10 @@ public class Store extends BaseEntity implements IPartnerEntity {
     private List<String> categories;
 
     @Column
-    private boolean isActive;
+    private Boolean isActive;
 
     @Column
-    private boolean isOpen;
+    private Boolean isOpen;
 
     @Column
     private String partnerId;

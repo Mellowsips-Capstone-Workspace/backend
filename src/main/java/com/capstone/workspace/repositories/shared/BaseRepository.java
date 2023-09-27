@@ -15,7 +15,7 @@ public interface BaseRepository<T extends BaseEntity, ID extends Serializable> e
     PaginationResponseModel<T> searchBy(
         String keyword,
         String[] searchFields,
-        Map<String, String> filterParams,
+        Map<String, Object> filterParams,
         Map<String, Sort.Direction> orderParams,
         PaginationDto pagination
     );

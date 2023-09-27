@@ -1,7 +1,9 @@
 package com.capstone.workspace.repositories.shared;
 
 import com.capstone.workspace.dtos.shared.PaginationDto;
+import com.capstone.workspace.entities.partner.IPartnerEntity;
 import com.capstone.workspace.entities.shared.BaseEntity;
+import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.helpers.shared.BeanHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.models.shared.PaginationResponseModel;
@@ -35,7 +37,7 @@ public class BaseRepositoryImplement<T extends BaseEntity, ID extends Serializab
     public PaginationResponseModel<T> searchBy(
         String keyword,
         String[] searchFields,
-        Map<String, String> filterParams,
+        Map<String, Object> filterParams,
         Map<String, Sort.Direction> orderParams,
         PaginationDto pagination
     ) {
@@ -46,17 +48,20 @@ public class BaseRepositoryImplement<T extends BaseEntity, ID extends Serializab
 
         if (userIdentity != null) {
             if (userIdentity.getPartnerId() == null) {
-                if (userIdentity.getUsername() != null) {
+                if (userIdentity.getUsername() != null && userIdentity.getUserType() != UserType.ADMIN) {
                     queryString.append(" AND createdBy = ").append("'").append(userIdentity.getUsername()).append("'");
                 }
             } else {
-                // TODO: Implement ringfence for user in organization
+                if (IPartnerEntity.class.isAssignableFrom(getDomainClass())) {
+                    queryString.append(" AND partnerId = ").append("'").append(userIdentity.getPartnerId()).append("'");
+                }
+                // TODO: Implement if have store id
             }
         }
 
         if (filterParams != null && !filterParams.isEmpty()) {
-            for (Map.Entry<String, String> entry: filterParams.entrySet()) {
-                queryString.append(" AND ").append(entry.getKey()).append(" = ").append(entry.getValue());
+            for (Map.Entry<String, Object> entry: filterParams.entrySet()) {
+                queryString.append(" AND ").append(entry.getKey()).append(" = ").append(String.valueOf(entry.getValue()));
             }
         }
 

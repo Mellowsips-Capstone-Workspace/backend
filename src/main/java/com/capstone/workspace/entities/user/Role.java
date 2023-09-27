@@ -36,7 +36,7 @@ public class Role extends BaseEntity implements IPartnerEntity {
     private List<User> users;
 
     @Column(columnDefinition = "BOOLEAN DEFAULT true")
-    protected boolean isAllowedEdit = true;
+    protected Boolean isAllowedEdit = true;
 
     @Column
     private String partnerId;
