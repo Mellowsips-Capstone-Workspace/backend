@@ -22,4 +22,8 @@ public class UserModel extends BaseModel {
     private UserType type;
 
     private AuthProviderType provider;
+
+    private String partnerId;
+
+    private String storeId;
 }

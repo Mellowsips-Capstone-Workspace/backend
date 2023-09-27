@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @EntityListeners(BaseListener.class)
@@ -20,10 +20,10 @@ public class BaseEntity implements Serializable {
     protected UUID id;
 
     @Column(nullable = false)
-    protected LocalDateTime createdAt;
+    protected Instant createdAt;
 
     @Column(nullable = false)
-    protected LocalDateTime updatedAt;
+    protected Instant updatedAt;
 
     @Column
     protected String createdBy;
