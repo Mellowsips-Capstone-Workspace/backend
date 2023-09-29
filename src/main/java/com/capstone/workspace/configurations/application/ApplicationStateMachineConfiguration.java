@@ -116,9 +116,8 @@ public class ApplicationStateMachineConfiguration extends EnumStateMachineConfig
     @Bean
     public Guard<ApplicationStatus, ApplicationEvent> isAdmin() {
         return context -> {
-            return true;
-//            UserIdentity userIdentity = identityService.getUserIdentity();
-//            return userIdentity != null && userIdentity.getUserType() == UserType.ADMIN;
+            UserIdentity userIdentity = identityService.getUserIdentity();
+            return userIdentity != null && userIdentity.getUserType() == UserType.ADMIN;
         };
     }
 }
