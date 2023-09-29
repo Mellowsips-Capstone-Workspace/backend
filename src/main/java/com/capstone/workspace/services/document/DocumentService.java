@@ -1,11 +1,15 @@
 package com.capstone.workspace.services.document;
 
+import com.capstone.workspace.dtos.document.UpdateDocumentDto;
 import com.capstone.workspace.entities.document.Document;
 import com.capstone.workspace.exceptions.BadRequestException;
 import com.capstone.workspace.exceptions.NotFoundException;
+import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.repositories.document.DocumentRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,5 +52,11 @@ public class DocumentService {
         }
 
         return entity;
+    }
+
+    public Document updateDocument(UUID id, UpdateDocumentDto dto) {
+        Document entity = getDocumentById(id);
+        BeanUtils.copyProperties(dto, entity, AppHelper.commonProperties);
+        return repository.save(entity);
     }
 }
