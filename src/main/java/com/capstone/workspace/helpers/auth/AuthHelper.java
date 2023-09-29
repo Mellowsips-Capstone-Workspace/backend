@@ -44,10 +44,10 @@ public class AuthHelper {
 
         ArrayList<String> groups = tokenPayload.get("cognito:groups", ArrayList.class);
         if (groups != null && !groups.isEmpty()) {
-            userIdentity.setPartnerId(groups.get(0));
-
             if (groups.get(0).equals("mellowsips_admin")) {
                 userIdentity.setUserType(UserType.ADMIN);
+            } else {
+                userIdentity.setPartnerId(groups.get(0));
             }
         }
 

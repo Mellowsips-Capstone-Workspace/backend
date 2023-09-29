@@ -3,8 +3,8 @@ package com.capstone.workspace.services.auth;
 import com.capstone.workspace.dtos.user.RegisterUserDto;
 import com.capstone.workspace.enums.auth.AuthErrorCode;
 import com.capstone.workspace.exceptions.AppDefinedException;
-import com.capstone.workspace.exceptions.InternalServerErrorException;
 import com.capstone.workspace.exceptions.NotFoundException;
+import com.capstone.workspace.exceptions.UnauthorizedException;
 import com.capstone.workspace.helpers.shared.AppHelper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.NonNull;
@@ -80,7 +80,7 @@ public class CognitoService {
                 );
             }
 
-            throw new InternalServerErrorException("Authentication failed");
+            throw new UnauthorizedException("Authentication failed");
         } catch (NotAuthorizedException ex) {
             throw AppDefinedException.builder().errorCode(AuthErrorCode.INVALID_CREDENTIALS).build();
         } catch (UserNotConfirmedException ex) {
@@ -192,5 +192,16 @@ public class CognitoService {
         }
 
         return group;
+    }
+
+    public void resetPassword(String username, String newPassword) {
+        AdminSetUserPasswordRequest request = AdminSetUserPasswordRequest.builder()
+            .userPoolId(POOL_ID)
+            .username(username)
+            .password(newPassword)
+            .permanent(true)
+            .build();
+
+        cognitoIdentityProviderClient.adminSetUserPassword(request);
     }
 }

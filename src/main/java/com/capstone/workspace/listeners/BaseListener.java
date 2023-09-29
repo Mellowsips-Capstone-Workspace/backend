@@ -2,6 +2,7 @@ package com.capstone.workspace.listeners;
 
 import com.capstone.workspace.entities.partner.IPartnerEntity;
 import com.capstone.workspace.entities.shared.BaseEntity;
+import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.helpers.shared.BeanHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.services.auth.IdentityService;
@@ -25,7 +26,7 @@ public class BaseListener<E extends BaseEntity> {
             entity.setCreatedBy(userIdentity.getUsername());
             entity.setUpdatedBy(userIdentity.getUsername());
 
-            if (entity instanceof IPartnerEntity) {
+            if (entity instanceof IPartnerEntity && userIdentity.getUserType() == UserType.EMPLOYEE) {
                 ((IPartnerEntity) entity).setPartnerId(userIdentity.getPartnerId());
             }
         }

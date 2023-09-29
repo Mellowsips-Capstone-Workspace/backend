@@ -10,6 +10,7 @@ import com.capstone.workspace.entities.store.Store;
 import com.capstone.workspace.entities.user.Permission;
 import com.capstone.workspace.entities.user.Role;
 import com.capstone.workspace.enums.application.ApplicationStatus;
+import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.exceptions.BadRequestException;
 import com.capstone.workspace.helpers.application.ApplicationHelper;
 import com.capstone.workspace.models.application.RepresentativeModel;
@@ -83,6 +84,7 @@ public class ApproveCreateOrganizationApplication extends BaseApproveApplication
 
         String creator = application.getCreatedBy();
         userIdentity.setUsername(creator);
+        userIdentity.setUserType(UserType.EMPLOYEE);
 
         Map jsonData = application.getJsonData();
         Partner partner = createPartner(jsonData.get("organization"));
@@ -95,8 +97,6 @@ public class ApproveCreateOrganizationApplication extends BaseApproveApplication
         createInvoiceController(jsonData.get("controller"));
         createStores(jsonData.get("merchant"));
 
-        userIdentity.setUsername(approver);
-
         // Create "owner" role
         List<Permission> permissions = permissionService.getAll();
         CreateRoleDto createRoleDto = CreateRoleDto.builder()
@@ -106,6 +106,9 @@ public class ApproveCreateOrganizationApplication extends BaseApproveApplication
                 .permissions(permissions.stream().map(p -> p.getId()).toList())
                 .build();
         Role ownerRole = roleService.create(createRoleDto);
+
+        userIdentity.setUsername(approver);
+        userIdentity.setUserType(UserType.ADMIN);
 
         // Assign application creator to owner role
         if (creator == null) {
