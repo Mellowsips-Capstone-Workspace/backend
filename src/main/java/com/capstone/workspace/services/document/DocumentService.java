@@ -8,7 +8,6 @@ import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.repositories.document.DocumentRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;

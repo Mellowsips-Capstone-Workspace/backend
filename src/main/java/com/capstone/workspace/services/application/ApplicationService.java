@@ -94,7 +94,9 @@ public class ApplicationService {
         }
 
         Application saved = repository.save(entity);
+
         updateApplicationDocument(saved);
+
         return saved;
     }
 
@@ -192,15 +194,13 @@ public class ApplicationService {
             }
 
             UpdateDocumentDto dto = UpdateDocumentDto.builder()
-                    .reference(String.valueOf(application.getId()))
+                    .reference(application.getId())
                     .referenceType("application")
                     .build();
-            logger.info(String.valueOf(application.getId()));
 
             documentIds.forEach(item -> {
                 int lastIndex = item.lastIndexOf("|");
                 String documentId = item.substring(lastIndex + 1);
-                logger.info(documentId);
                 documentService.updateDocument(UUID.fromString(documentId), dto);
             });
         } catch (JsonProcessingException ex) {
