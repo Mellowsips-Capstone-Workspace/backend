@@ -95,6 +95,10 @@ public class AuthService {
     public void resetPassword(ResetPasswordDto dto) {
         userService.getUserByUsername(dto.getUsername());
 
+        if (dto.getNewPassword().equals(dto.getPassword())) {
+            throw new BadRequestException("New password must be different from current one");
+        }
+
         try {
             cognitoService.loginUserByPassword(dto.getUsername(), dto.getPassword());
         } catch (UnauthorizedException ex) {
