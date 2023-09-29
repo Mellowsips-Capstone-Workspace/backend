@@ -2,12 +2,14 @@ package com.capstone.workspace.services.auth;
 
 import com.capstone.workspace.dtos.auth.PasswordLoginDto;
 import com.capstone.workspace.dtos.auth.ResendConfirmationCodeDto;
+import com.capstone.workspace.dtos.auth.ResetPasswordDto;
 import com.capstone.workspace.dtos.auth.VerifyUserDto;
 import com.capstone.workspace.dtos.user.RegisterUserDto;
 import com.capstone.workspace.entities.user.User;
 import com.capstone.workspace.exceptions.BadRequestException;
 import com.capstone.workspace.exceptions.ConflictException;
 import com.capstone.workspace.exceptions.NotFoundException;
+import com.capstone.workspace.exceptions.UnauthorizedException;
 import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.services.user.UserService;
@@ -88,5 +90,15 @@ public class AuthService {
     public void addUserToGroup(String groupName, String username) {
         userService.addUserToGroup(groupName, username);
         cognitoService.addUserToGroup(groupName, username);
+    }
+
+    public void resetPassword(ResetPasswordDto dto) {
+        userService.getUserByUsername(dto.getUsername());
+
+        try {
+            cognitoService.loginUserByPassword(dto.getUsername(), dto.getPassword());
+        } catch (UnauthorizedException ex) {
+            cognitoService.resetPassword(dto.getUsername(), dto.getNewPassword());
+        }
     }
 }

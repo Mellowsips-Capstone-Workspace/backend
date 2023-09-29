@@ -2,6 +2,7 @@ package com.capstone.workspace.controllers;
 
 import com.capstone.workspace.dtos.auth.PasswordLoginDto;
 import com.capstone.workspace.dtos.auth.ResendConfirmationCodeDto;
+import com.capstone.workspace.dtos.auth.ResetPasswordDto;
 import com.capstone.workspace.dtos.auth.VerifyUserDto;
 import com.capstone.workspace.dtos.user.RegisterUserDto;
 import com.capstone.workspace.entities.user.User;
@@ -65,5 +66,11 @@ public class AuthController {
         User user = userService.getMyOwnProfile();
         UserModel userModel = mapper.map(user, UserModel.class);
         return ResponseModel.<UserModel>builder().data(userModel).build();
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseModel resetPassword(@Valid @RequestBody ResetPasswordDto params) {
+        authService.resetPassword(params);
+        return ResponseModel.builder().message("Reset password successfully").build();
     }
 }
