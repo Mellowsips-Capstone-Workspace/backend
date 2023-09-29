@@ -3,6 +3,7 @@ package com.capstone.workspace.services.application;
 import com.capstone.workspace.dtos.application.CreateApplicationDto;
 import com.capstone.workspace.dtos.application.SearchApplicationCriteriaDto;
 import com.capstone.workspace.dtos.application.SearchApplicationDto;
+import com.capstone.workspace.dtos.document.UpdateDocumentDto;
 import com.capstone.workspace.entities.application.Application;
 import com.capstone.workspace.enums.application.ApplicationErrorCode;
 import com.capstone.workspace.enums.application.ApplicationEvent;
@@ -10,6 +11,7 @@ import com.capstone.workspace.enums.application.ApplicationStatus;
 import com.capstone.workspace.enums.application.ApplicationType;
 import com.capstone.workspace.exceptions.AppDefinedException;
 import com.capstone.workspace.exceptions.ConflictException;
+import com.capstone.workspace.exceptions.InternalServerErrorException;
 import com.capstone.workspace.exceptions.NotFoundException;
 import com.capstone.workspace.helpers.application.ApplicationHelper;
 import com.capstone.workspace.helpers.shared.AppHelper;
@@ -19,6 +21,10 @@ import com.capstone.workspace.models.shared.PaginationResponseModel;
 import com.capstone.workspace.repositories.application.ApplicationRepository;
 import com.capstone.workspace.services.application.application_machine.ApplicationStateMachine;
 import com.capstone.workspace.services.auth.IdentityService;
+import com.capstone.workspace.services.document.DocumentService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -26,13 +32,10 @@ import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -47,13 +50,20 @@ public class ApplicationService {
     private final ModelMapper mapper;
 
     @NonNull
+    private final ObjectMapper objectMapper;
+
+    @NonNull
     private final ApplicationHelper applicationHelper;
 
     @NonNull
     private final ApplicationStateMachine applicationStateMachine;
 
+    @NonNull
+    private final DocumentService documentService;
+
     private Logger logger = LoggerFactory.getLogger(ApplicationService.class);
 
+    @Transactional
     public Application create(CreateApplicationDto dto) {
         Application entity = upsert(null, dto);
 
@@ -83,7 +93,9 @@ public class ApplicationService {
             applicationHelper.validate(mapper.map(dto, Application.class));
         }
 
-        return repository.save(entity);
+        Application saved = repository.save(entity);
+        updateApplicationDocument(saved);
+        return saved;
     }
 
     private Application upsert(UUID id, Object dto) {
@@ -155,5 +167,71 @@ public class ApplicationService {
         result.setResults(applicationModels);
 
         return result;
+    }
+
+    private void updateApplicationDocument(Application application) {
+        try {
+            List<String> documentIds = new ArrayList<>();
+            Map<String, List<String>> documentFields = getApplicationDocumentFields();
+
+            Map<String, Object> data = application.getJsonData();
+            JsonNode jsonData = objectMapper.readTree(objectMapper.writeValueAsString(data));
+
+            List<String> nodeKeys = List.of("organization", "bankAccount", "merchant");
+            for (String key: nodeKeys) {
+                JsonNode node = jsonData.get(key);
+                List<String> fields = documentFields.get(key);
+
+                if (node.isArray()) {
+                    for (JsonNode n: node) {
+                        findDocumentIds(documentIds, fields, n);
+                    }
+                } else {
+                    findDocumentIds(documentIds, fields, node);
+                }
+            }
+
+            UpdateDocumentDto dto = UpdateDocumentDto.builder()
+                    .reference(String.valueOf(application.getId()))
+                    .referenceType("application")
+                    .build();
+            logger.info(String.valueOf(application.getId()));
+
+            documentIds.forEach(item -> {
+                int lastIndex = item.lastIndexOf("|");
+                String documentId = item.substring(lastIndex + 1);
+                logger.info(documentId);
+                documentService.updateDocument(UUID.fromString(documentId), dto);
+            });
+        } catch (JsonProcessingException ex) {
+            throw new InternalServerErrorException();
+        }
+    }
+
+    private Map<String, List<String>> getApplicationDocumentFields() {
+        Map<String, List<String>> documentFields = new HashMap<>();
+
+        documentFields.put("organization", List.of("identityFrontImage", "identityBackImage", "businessIdentityImages"));
+        documentFields.put("bankAccount", List.of("identityImages"));
+        documentFields.put("merchant", List.of("menuImages", "merchantImages"));
+
+        return documentFields;
+    }
+
+    private List<String> findDocumentIds(List<String> documentIds, List<String> fields, JsonNode node) {
+        fields.forEach(field -> {
+            JsonNode value = node.get(field);
+
+            if (value != null && !value.isEmpty()) {
+                if (value.isTextual()) documentIds.add(value.asText());
+                else if (value.isArray()) {
+                    for (JsonNode item: value) {
+                        documentIds.add(item.asText());
+                    }
+                }
+            }
+        });
+
+        return documentIds;
     }
 }
