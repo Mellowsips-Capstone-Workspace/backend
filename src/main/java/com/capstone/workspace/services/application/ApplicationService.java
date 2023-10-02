@@ -3,16 +3,14 @@ package com.capstone.workspace.services.application;
 import com.capstone.workspace.dtos.application.CreateApplicationDto;
 import com.capstone.workspace.dtos.application.SearchApplicationCriteriaDto;
 import com.capstone.workspace.dtos.application.SearchApplicationDto;
+import com.capstone.workspace.dtos.application.UpdateApplicationDto;
 import com.capstone.workspace.dtos.document.UpdateDocumentDto;
 import com.capstone.workspace.entities.application.Application;
 import com.capstone.workspace.enums.application.ApplicationErrorCode;
 import com.capstone.workspace.enums.application.ApplicationEvent;
 import com.capstone.workspace.enums.application.ApplicationStatus;
 import com.capstone.workspace.enums.application.ApplicationType;
-import com.capstone.workspace.exceptions.AppDefinedException;
-import com.capstone.workspace.exceptions.ConflictException;
-import com.capstone.workspace.exceptions.InternalServerErrorException;
-import com.capstone.workspace.exceptions.NotFoundException;
+import com.capstone.workspace.exceptions.*;
 import com.capstone.workspace.helpers.application.ApplicationHelper;
 import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.models.application.ApplicationModel;
@@ -233,5 +231,15 @@ public class ApplicationService {
         });
 
         return documentIds;
+    }
+
+    public Application update(UUID id, UpdateApplicationDto params) {
+        Application entity = upsert(id, params);
+
+        if (entity.getStatus() == ApplicationStatus.APPROVED || entity.getStatus() == ApplicationStatus.REJECTED) {
+            throw new ForbiddenException("Not allow to update application after close");
+        }
+
+        return repository.save(entity);
     }
 }

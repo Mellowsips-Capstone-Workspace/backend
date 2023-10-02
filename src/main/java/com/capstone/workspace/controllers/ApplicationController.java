@@ -3,6 +3,7 @@ package com.capstone.workspace.controllers;
 import com.capstone.workspace.annotations.AllowedUsers;
 import com.capstone.workspace.dtos.application.CreateApplicationDto;
 import com.capstone.workspace.dtos.application.SearchApplicationDto;
+import com.capstone.workspace.dtos.application.UpdateApplicationDto;
 import com.capstone.workspace.entities.application.Application;
 import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.models.application.ApplicationModel;
@@ -56,5 +57,13 @@ public class ApplicationController {
     public ResponseModel<PaginationResponseModel<ApplicationModel>> search(@Valid @RequestBody SearchApplicationDto dto) {
         PaginationResponseModel<ApplicationModel> data = applicationService.search(dto);
         return ResponseModel.<PaginationResponseModel<ApplicationModel>>builder().data(data).build();
+    }
+
+    @AllowedUsers(userTypes = {UserType.EMPLOYEE})
+    @PutMapping("/{id}")
+    public ResponseModel<ApplicationModel> update(@PathVariable UUID id, @Valid @RequestBody UpdateApplicationDto params) {
+        Application entity = applicationService.update(id, params);
+        ApplicationModel model = mapper.map(entity, ApplicationModel.class);
+        return ResponseModel.<ApplicationModel>builder().data(model).build();
     }
 }
