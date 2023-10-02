@@ -71,7 +71,7 @@ public class BaseRepositoryImplement<T extends BaseEntity, ID extends Serializab
                 if (i != 0) {
                     queryString.append(" OR ");
                 }
-                queryString.append(searchFields[i]).append(" LIKE ").append("'%").append(keyword).append("%'");
+                queryString.append(searchFields[i]).append(" ILIKE ").append("'%").append(keyword).append("%'");
             }
             queryString.append(")");
         }

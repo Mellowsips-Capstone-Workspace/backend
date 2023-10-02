@@ -74,7 +74,7 @@ public class StoreService {
     }
 
     public PaginationResponseModel<StoreModel> search(SearchStoreDto dto) {
-        String[] searchableFields = new String[]{};
+        String[] searchableFields = new String[]{"name"};
         Map<String, Object> filterParams = new HashMap<>();
 
         SearchStoreCriteriaDto criteria = dto.getCriteria();
