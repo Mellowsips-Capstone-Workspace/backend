@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -112,6 +113,24 @@ public class ExternalExceptionHandler {
         );
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(TransactionSystemException.class)
+    public ResponseEntity<ErrorResponse> handleTransactionSystemException(TransactionSystemException ex, WebRequest request) {
+        Throwable exception = ex.getCause().getCause() == null ? ex : ex.getCause().getCause();
+
+        logger.error(exception.getClass().getName() + ": " + exception.getMessage());
+        logger.error(Arrays.toString(exception.getStackTrace()));
+
+        HttpStatus httpStatus = exception instanceof BaseException ? ((BaseException) exception).getHttpStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                httpStatus.value(),
+                exception.getMessage(),
+                null
+        );
+
+        return new ResponseEntity<>(errorResponse, httpStatus);
     }
 
     @ExceptionHandler(Exception.class)
