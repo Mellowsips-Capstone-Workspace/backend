@@ -7,6 +7,7 @@ import com.capstone.workspace.entities.store.Store;
 import com.capstone.workspace.enums.partner.BusinessType;
 import com.capstone.workspace.exceptions.BadRequestException;
 import com.capstone.workspace.exceptions.ConflictException;
+import com.capstone.workspace.exceptions.NotFoundException;
 import com.capstone.workspace.exceptions.UnauthorizedException;
 import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
@@ -109,5 +110,15 @@ public class StoreService {
         result.setResults(storeModels);
 
         return result;
+    }
+
+    public Store getStoreById(UUID id) {
+        Store entity = repository.findById(id).orElse(null);
+
+        if (entity == null) {
+            throw new NotFoundException("Store not found");
+        }
+
+        return entity;
     }
 }
