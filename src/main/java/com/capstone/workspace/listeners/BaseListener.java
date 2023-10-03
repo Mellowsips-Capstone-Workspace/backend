@@ -3,9 +3,9 @@ package com.capstone.workspace.listeners;
 import com.capstone.workspace.entities.partner.IPartnerEntity;
 import com.capstone.workspace.entities.shared.BaseEntity;
 import com.capstone.workspace.entities.store.IStoreEntity;
+import com.capstone.workspace.entities.user.User;
 import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.exceptions.ForbiddenException;
-import com.capstone.workspace.exceptions.UnauthorizedException;
 import com.capstone.workspace.helpers.shared.BeanHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.services.auth.IdentityService;
@@ -47,23 +47,22 @@ public class BaseListener<E extends BaseEntity> {
 
         IdentityService identityService = BeanHelper.getBean(IdentityService.class);
         UserIdentity userIdentity = identityService.getUserIdentity();
-//        verifyUser(userIdentity, entity);
         if (userIdentity != null) {
+            verifyUser(userIdentity, entity);
             entity.setUpdatedBy(userIdentity.getUsername());
         }
     }
 
     private void verifyUser(UserIdentity userIdentity, E entity) {
-        if (userIdentity == null) {
-            throw new UnauthorizedException("Unauthorized");
-        }
-
         if (userIdentity.getUserType() != UserType.EMPLOYEE) {
             return;
         }
 
         if (userIdentity.getPartnerId() == null) {
-            if (!entity.getCreatedBy().equals(userIdentity.getUsername())) {
+            if (
+                !entity.getCreatedBy().equals(userIdentity.getUsername())
+                || (entity instanceof User && !((User) entity).getUsername().equals(userIdentity.getUsername()))
+            ) {
                 throw new ForbiddenException("Not allow to modify this data");
             }
         } else {
