@@ -11,7 +11,6 @@ import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.services.auth.IdentityService;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
