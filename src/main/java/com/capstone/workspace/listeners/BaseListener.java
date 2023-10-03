@@ -48,8 +48,10 @@ public class BaseListener<E extends BaseEntity> {
 
         IdentityService identityService = BeanHelper.getBean(IdentityService.class);
         UserIdentity userIdentity = identityService.getUserIdentity();
-        verifyUser(userIdentity, entity);
-        entity.setUpdatedBy(userIdentity.getUsername());
+//        verifyUser(userIdentity, entity);
+        if (userIdentity != null) {
+            entity.setUpdatedBy(userIdentity.getUsername());
+        }
     }
 
     private void verifyUser(UserIdentity userIdentity, E entity) {
