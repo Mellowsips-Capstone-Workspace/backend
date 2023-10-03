@@ -3,17 +3,20 @@ package com.capstone.workspace.listeners;
 import com.capstone.workspace.entities.partner.IPartnerEntity;
 import com.capstone.workspace.entities.shared.BaseEntity;
 import com.capstone.workspace.entities.store.IStoreEntity;
+import com.capstone.workspace.entities.store.Store;
 import com.capstone.workspace.entities.user.User;
 import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.exceptions.ForbiddenException;
 import com.capstone.workspace.helpers.shared.BeanHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.services.auth.IdentityService;
+import com.capstone.workspace.services.store.StoreService;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Component
 public class BaseListener<E extends BaseEntity> {
@@ -34,8 +37,17 @@ public class BaseListener<E extends BaseEntity> {
                     ((IPartnerEntity) entity).setPartnerId(userIdentity.getPartnerId());
                 }
 
-                if (entity instanceof IStoreEntity && userIdentity.getStoreId() != null) {
-                    ((IStoreEntity) entity).setStoreId(userIdentity.getStoreId());
+                if (entity instanceof IStoreEntity) {
+                    if (userIdentity.getStoreId() != null) {
+                        ((IStoreEntity) entity).setStoreId(userIdentity.getStoreId());
+                    }
+
+                    String storeId = ((IStoreEntity) entity).getStoreId();
+                    StoreService storeService = BeanHelper.getBean(StoreService.class);
+                    Store store = storeService.getStoreById(UUID.fromString(storeId));
+                    if (!store.getPartnerId().equals(userIdentity.getPartnerId())) {
+                        throw new ForbiddenException("Not allow to create this data");
+                    }
                 }
             }
         }
