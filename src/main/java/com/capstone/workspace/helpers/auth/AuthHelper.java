@@ -1,11 +1,13 @@
 package com.capstone.workspace.helpers.auth;
 
+import com.capstone.workspace.entities.user.User;
 import com.capstone.workspace.enums.auth.AuthErrorCode;
 import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.exceptions.AppDefinedException;
 import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.services.auth.JwtService;
+import com.capstone.workspace.services.user.UserService;
 import io.jsonwebtoken.Claims;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +23,10 @@ public class AuthHelper {
     private static final Logger logger = LoggerFactory.getLogger(AuthHelper.class);
 
     @NonNull
-    private JwtService jwtService;
+    private final JwtService jwtService;
+
+    @NonNull
+    private final UserService userService;
 
     public UserIdentity parseUserIdentity(String authorization) {
         if (authorization != null) {
@@ -57,6 +62,11 @@ public class AuthHelper {
             } else {
                 userIdentity.setUserType(UserType.EMPLOYEE);
             }
+        }
+
+        if (userIdentity.getUserType() == UserType.EMPLOYEE) {
+            User user = userService.getUserByUsername(username);
+            userIdentity.setStoreId(user.getStoreId());
         }
 
         return userIdentity;

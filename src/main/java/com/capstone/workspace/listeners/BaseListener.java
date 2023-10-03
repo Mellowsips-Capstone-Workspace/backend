@@ -3,18 +3,20 @@ package com.capstone.workspace.listeners;
 import com.capstone.workspace.entities.partner.IPartnerEntity;
 import com.capstone.workspace.entities.shared.BaseEntity;
 import com.capstone.workspace.entities.store.IStoreEntity;
+import com.capstone.workspace.entities.store.Store;
+import com.capstone.workspace.entities.user.User;
 import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.exceptions.ForbiddenException;
-import com.capstone.workspace.exceptions.UnauthorizedException;
 import com.capstone.workspace.helpers.shared.BeanHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.services.auth.IdentityService;
+import com.capstone.workspace.services.store.StoreService;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Component
 public class BaseListener<E extends BaseEntity> {
@@ -35,8 +37,17 @@ public class BaseListener<E extends BaseEntity> {
                     ((IPartnerEntity) entity).setPartnerId(userIdentity.getPartnerId());
                 }
 
-                if (entity instanceof IStoreEntity && userIdentity.getStoreId() != null) {
-                    ((IStoreEntity) entity).setStoreId(userIdentity.getStoreId());
+                if (entity instanceof IStoreEntity) {
+                    if (userIdentity.getStoreId() != null) {
+                        ((IStoreEntity) entity).setStoreId(userIdentity.getStoreId());
+                    }
+
+                    String storeId = ((IStoreEntity) entity).getStoreId();
+                    StoreService storeService = BeanHelper.getBean(StoreService.class);
+                    Store store = storeService.getStoreById(UUID.fromString(storeId));
+                    if (!store.getPartnerId().equals(userIdentity.getPartnerId())) {
+                        throw new ForbiddenException("Not allow to create this data");
+                    }
                 }
             }
         }
@@ -48,23 +59,22 @@ public class BaseListener<E extends BaseEntity> {
 
         IdentityService identityService = BeanHelper.getBean(IdentityService.class);
         UserIdentity userIdentity = identityService.getUserIdentity();
-//        verifyUser(userIdentity, entity);
         if (userIdentity != null) {
+            verifyUser(userIdentity, entity);
             entity.setUpdatedBy(userIdentity.getUsername());
         }
     }
 
     private void verifyUser(UserIdentity userIdentity, E entity) {
-        if (userIdentity == null) {
-            throw new UnauthorizedException("Unauthorized");
-        }
-
         if (userIdentity.getUserType() != UserType.EMPLOYEE) {
             return;
         }
 
         if (userIdentity.getPartnerId() == null) {
-            if (!entity.getCreatedBy().equals(userIdentity.getUsername())) {
+            if (
+                !entity.getCreatedBy().equals(userIdentity.getUsername())
+                || (entity instanceof User && !((User) entity).getUsername().equals(userIdentity.getUsername()))
+            ) {
                 throw new ForbiddenException("Not allow to modify this data");
             }
         } else {

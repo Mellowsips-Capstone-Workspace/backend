@@ -1,9 +1,9 @@
 package com.capstone.workspace.interceptors;
 
+import com.capstone.workspace.entities.user.User;
 import com.capstone.workspace.enums.auth.AuthErrorCode;
 import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.exceptions.AppDefinedException;
-import com.capstone.workspace.exceptions.UnauthorizedException;
 import com.capstone.workspace.helpers.auth.AuthHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.services.auth.AuthContextService;
@@ -37,8 +37,6 @@ public class AuthUserInterceptor implements HandlerInterceptor {
                 return true;
             }
 
-            //TODO: Implement code to get store id of commercial user
-            //String token = authHelper.extractTokenFromAuthorization(authorization);
             return true;
         }
 
