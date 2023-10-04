@@ -5,6 +5,7 @@ import com.capstone.workspace.dtos.store.QrCodeDto;
 import com.capstone.workspace.dtos.store.SearchStoreDto;
 import com.capstone.workspace.entities.store.Menu;
 import com.capstone.workspace.entities.store.QrCode;
+import com.capstone.workspace.entities.store.Store;
 import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.models.shared.PaginationResponseModel;
 import com.capstone.workspace.models.shared.ResponseModel;
@@ -21,6 +22,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping( "/api/stores")
@@ -71,5 +73,12 @@ public class StoreController {
     public ResponseModel<List<QrCodeModel>> getStoreQrCodes(@PathVariable(name = "id") String storeId) {
         List<QrCodeModel> data = qrCodeService.getStoreQrCodes(storeId);
         return ResponseModel.<List<QrCodeModel>>builder().data(data).build();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseModel<StoreModel> getStoreById(@PathVariable(name = "id") UUID storeId) {
+        Store entity = storeService.getStoreById(storeId);
+        StoreModel model = mapper.map(entity, StoreModel.class);
+        return ResponseModel.<StoreModel>builder().data(model).build();
     }
 }

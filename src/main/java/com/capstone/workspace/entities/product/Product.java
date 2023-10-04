@@ -23,6 +23,9 @@ public class Product extends BaseEntity implements IPartnerEntity, IStoreEntity 
     @Column
     private String coverImage;
 
+    @Column
+    private String description;
+
     @Convert(attributeName = "categories")
     @Column
     private List<String> categories;
