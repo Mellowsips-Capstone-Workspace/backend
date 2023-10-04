@@ -2,13 +2,17 @@ package com.capstone.workspace.entities.store;
 
 import com.capstone.workspace.entities.partner.IPartnerEntity;
 import com.capstone.workspace.entities.shared.BaseEntity;
+import com.capstone.workspace.models.shared.Period;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Data;
+import org.hibernate.annotations.JdbcType;
 import org.hibernate.annotations.Where;
+import org.hibernate.dialect.PostgreSQLJsonPGObjectJsonbType;
 
+import java.sql.Time;
 import java.util.List;
 
 @Data
@@ -43,6 +47,11 @@ public class Store extends BaseEntity implements IPartnerEntity {
 
     @Column
     private Boolean isOpen;
+
+    @Convert(attributeName = "operationalHours")
+    @Column
+    @JdbcType(PostgreSQLJsonPGObjectJsonbType.class)
+    private List<Period<Time>> operationalHours;
 
     @Column
     private String partnerId;
