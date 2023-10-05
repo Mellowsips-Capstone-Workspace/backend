@@ -1,8 +1,11 @@
 package com.capstone.workspace.entities.store;
 
+import com.capstone.workspace.converters.PeriodListConverter;
 import com.capstone.workspace.entities.partner.IPartnerEntity;
 import com.capstone.workspace.entities.shared.BaseEntity;
 import com.capstone.workspace.models.shared.Period;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -48,7 +51,7 @@ public class Store extends BaseEntity implements IPartnerEntity {
     @Column
     private Boolean isOpen;
 
-    @Convert(attributeName = "operationalHours")
+    @Convert(converter = PeriodListConverter.class)
     @Column
     @JdbcType(PostgreSQLJsonPGObjectJsonbType.class)
     private List<Period<Time>> operationalHours;

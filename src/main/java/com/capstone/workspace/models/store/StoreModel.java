@@ -1,8 +1,10 @@
 package com.capstone.workspace.models.store;
 
 import com.capstone.workspace.models.shared.BaseModel;
+import com.capstone.workspace.models.shared.Period;
 import lombok.Data;
 
+import java.sql.Time;
 import java.util.List;
 
 @Data
@@ -24,6 +26,8 @@ public class StoreModel extends BaseModel {
     private Boolean isActive;
 
     private Boolean isOpen;
+
+    private List<Period<Time>> operationalHours;
 
     private String partnerId;
 }
