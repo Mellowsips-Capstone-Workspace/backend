@@ -22,6 +22,7 @@ public class InterceptorAppConfiguration implements WebMvcConfigurer {
                 .addPathPatterns("/api/documents/**")
                 .addPathPatterns("/api/stores/**/qrcodes")
                 .addPathPatterns("/api/stores/search")
-                .addPathPatterns("/api/qrcodes/**");
+                .addPathPatterns("/api/qrcodes/**")
+                .addPathPatterns("/api/carts/**");
     }
 }

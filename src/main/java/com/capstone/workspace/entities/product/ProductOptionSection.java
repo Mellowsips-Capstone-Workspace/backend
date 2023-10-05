@@ -19,7 +19,7 @@ public class ProductOptionSection extends BaseEntity {
     private int order;
 
     @Column
-    protected Boolean isRequired;
+    private Boolean isRequired;
 
     @Column
     private Integer maxAllowedChoices;
