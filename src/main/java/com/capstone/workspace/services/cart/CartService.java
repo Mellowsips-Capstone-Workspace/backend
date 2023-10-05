@@ -1,6 +1,7 @@
 package com.capstone.workspace.services.cart;
 
 import com.capstone.workspace.dtos.cart.AddProductToCartDto;
+import com.capstone.workspace.dtos.cart.UpdateCartItemDto;
 import com.capstone.workspace.entities.cart.Cart;
 import com.capstone.workspace.entities.cart.CartItem;
 import com.capstone.workspace.entities.product.Product;
@@ -9,6 +10,7 @@ import com.capstone.workspace.entities.product.ProductOptionSection;
 import com.capstone.workspace.entities.store.Store;
 import com.capstone.workspace.exceptions.BadRequestException;
 import com.capstone.workspace.exceptions.NotFoundException;
+import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.models.cart.CartDetailsModel;
 import com.capstone.workspace.models.cart.CartItemModel;
@@ -25,11 +27,13 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -62,32 +66,7 @@ public class CartService {
         String username = userIdentity.getUsername();
 
         Product product = productService.getProductById(dto.getProductId());
-
-        List<ProductAddon> productAddons = Collections.emptyList();
-        if (dto.getAddons() != null && !dto.getAddons().isEmpty()) {
-            productAddons = dto.getAddons().stream().map(id -> productAddonService.checkIfAddonBelongToProduct(id, product.getId())).toList();
-        }
-
-        List<ProductOptionSection> productOptionSections = product.getProductOptionSections();
-        for (ProductOptionSection section : productOptionSections) {
-            if (section.getIsRequired() != null && section.getIsRequired()) {
-                int addonLength = (int) productAddons.stream().filter(addon -> section.getId().equals(addon.getProductOptionSection().getId())).count();
-
-                if (addonLength != 1) {
-                    throw new BadRequestException("Missing required addon or exceeded max allowed addon items in section");
-                }
-
-                continue;
-            }
-
-            if (!productAddons.isEmpty()) {
-                int maxAllowedChoices = section.getMaxAllowedChoices();
-                long numberOfChoices = productAddons.stream().filter(addon -> section.getId().equals(addon.getProductOptionSection().getId())).count();
-                if (numberOfChoices > maxAllowedChoices) {
-                    throw new BadRequestException("Exceeded max allowed addon items in section");
-                }
-            }
-        }
+        List<ProductAddon> productAddons = getAddonList(product, dto.getAddons());
 
         CartItem cartItem = cartItemRepository.findByCreatedByAndProduct_IdAndAddonsAndNote(
                 username,
@@ -117,15 +96,7 @@ public class CartService {
         }
 
         cartItem = cartItemRepository.save(cartItem);
-        CartItemModel model = mapper.map(cartItem, CartItemModel.class);
-        model.setAddons(mapper.map(productAddons, new TypeToken<List<ProductAddonModel>>() {}.getType()));
-
-        long addonsPrice = productAddons.stream().reduce(0L, (res, item) -> res + item.getPrice(), Long::sum);
-        long tempPrice = model.getQuantity() * (model.getProduct().getPrice() + addonsPrice);
-        model.setTempPrice(tempPrice);
-        model.setFinalPrice(tempPrice);
-
-        return model;
+        return getCartItemModel(cartItem, productAddons);
     }
 
     public List<CartModel> getAllCartsByUser() {
@@ -147,27 +118,12 @@ public class CartService {
         }).toList();
     }
 
-    public CartDetailsModel getCartById(UUID id) {
-        UserIdentity userIdentity = identityService.getUserIdentity();
-        String username = userIdentity.getUsername();
-
-        Cart entity = repository.findById(id).orElse(null);
-
-        if (entity == null || !username.equals(entity.getCreatedBy())) {
-            throw new NotFoundException("Cart not found");
-        }
+    public CartDetailsModel getCartDetails(UUID id) {
+        Cart entity = getCartById(id);
 
         List<CartItemModel> cartItems = entity.getCartItems().stream().map(item -> {
-            CartItemModel model = mapper.map(item, CartItemModel.class);
             List<ProductAddon> addons = productAddonService.getBulk(item.getAddons());
-            model.setAddons(mapper.map(addons, new TypeToken<List<ProductAddonModel>>() {}.getType()));
-
-            long addonsPrice = addons.stream().reduce(0L, (res, el) -> res + el.getPrice(), Long::sum);
-            long tempPrice = model.getQuantity() * (model.getProduct().getPrice() + addonsPrice);
-            model.setTempPrice(tempPrice);
-            model.setFinalPrice(tempPrice);
-
-            return model;
+            return getCartItemModel(item, addons);
         }).toList();
 
         Store store = storeService.getStoreById(UUID.fromString(entity.getStoreId()));
@@ -182,5 +138,104 @@ public class CartService {
         model.setFinalPrice(tempPrice);
 
         return model;
+    }
+
+    public CartItemModel updateCartItem(UUID id, UpdateCartItemDto dto) {
+        CartItem cartItem = getCartItemById(id);
+
+        Product product = cartItem.getProduct();
+        List<ProductAddon> productAddons = getAddonList(product, dto.getAddons());
+
+        BeanUtils.copyProperties(dto, cartItem, AppHelper.commonProperties);
+        cartItem = cartItemRepository.save(cartItem);
+
+        return getCartItemModel(cartItem, productAddons);
+    }
+
+    public CartItem getCartItemById(UUID id) {
+        CartItem entity = cartItemRepository.findById(id).orElse(null);
+
+        UserIdentity userIdentity = identityService.getUserIdentity();
+        String username = userIdentity.getUsername();
+
+        if (entity == null || !entity.getCreatedBy().equals(username)) {
+            throw new NotFoundException("Cart item not found");
+        }
+
+        return entity;
+    }
+
+    private List<ProductAddon> getAddonList(Product product, Set<UUID> addonIds) {
+        List<ProductAddon> productAddons = Collections.emptyList();
+        if (addonIds != null && !addonIds.isEmpty()) {
+            productAddons = addonIds.stream().map(addonId -> productAddonService.checkIfAddonBelongToProduct(addonId, product.getId())).toList();
+        }
+
+        List<ProductOptionSection> productOptionSections = product.getProductOptionSections();
+        for (ProductOptionSection section : productOptionSections) {
+            if (section.getIsRequired() != null && section.getIsRequired()) {
+                int addonLength = (int) productAddons.stream().filter(addon -> section.getId().equals(addon.getProductOptionSection().getId())).count();
+
+                if (addonLength != 1) {
+                    throw new BadRequestException("Missing required addon or exceeded max allowed addon items in section");
+                }
+
+                continue;
+            }
+
+            if (!productAddons.isEmpty()) {
+                int maxAllowedChoices = section.getMaxAllowedChoices();
+                long numberOfChoices = productAddons.stream().filter(addon -> section.getId().equals(addon.getProductOptionSection().getId())).count();
+                if (numberOfChoices > maxAllowedChoices) {
+                    throw new BadRequestException("Exceeded max allowed addon items in section");
+                }
+            }
+        }
+
+        return productAddons;
+    }
+
+    private CartItemModel getCartItemModel(CartItem entity, List<ProductAddon> productAddons) {
+        CartItemModel model = mapper.map(entity, CartItemModel.class);
+        model.setAddons(mapper.map(productAddons, new TypeToken<List<ProductAddonModel>>() {}.getType()));
+
+        long addonsPrice = productAddons.stream().reduce(0L, (res, item) -> res + item.getPrice(), Long::sum);
+        long tempPrice = model.getQuantity() * (model.getProduct().getPrice() + addonsPrice);
+        model.setTempPrice(tempPrice);
+        model.setFinalPrice(tempPrice);
+
+        return model;
+    }
+
+    @Transactional
+    public void deleteCartItem(UUID id) {
+        CartItem cartItem = getCartItemById(id);
+
+        Cart cart = cartItem.getCart();
+        if (cart.getCartItems().size() == 1) {
+            repository.delete(cart);
+            return;
+        }
+
+        cartItemRepository.delete(cartItem);
+    }
+
+    @Transactional
+    public void deleteCart(UUID id) {
+        Cart entity = getCartById(id);
+        repository.delete(entity);
+    }
+
+    private Cart getCartById(UUID id) {
+        UserIdentity userIdentity = identityService.getUserIdentity();
+        String username = userIdentity.getUsername();
+
+        Cart entity = repository.findById(id).orElse(null);
+
+        if (entity == null || !username.equals(entity.getCreatedBy())) {
+            throw new NotFoundException("Cart not found");
+        }
+
+        return entity;
     }
 }
