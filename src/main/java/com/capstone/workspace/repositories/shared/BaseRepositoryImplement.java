@@ -64,6 +64,8 @@ public class BaseRepositoryImplement<T extends BaseEntity, ID extends Serializab
 
         if (filterParams != null && !filterParams.isEmpty()) {
             for (Map.Entry<String, Object> entry: filterParams.entrySet()) {
+                if (entry.getValue() == null) continue;
+
                 try {
                     ArrayList convertedValue = (ArrayList) entry.getValue();
 
