@@ -1,5 +1,6 @@
 package com.capstone.workspace.dtos.application;
 
+import com.capstone.workspace.enums.application.ApplicationStatus;
 import com.capstone.workspace.enums.application.ApplicationType;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -9,4 +10,5 @@ import lombok.Setter;
 @Data
 public class SearchApplicationFilterDto {
     private ApplicationType type;
+    private Object status;
 }

@@ -138,7 +138,7 @@ public class ApplicationService {
 
     public PaginationResponseModel search(SearchApplicationDto dto) {
         String[] searchableFields = new String[]{};
-        Map<String, Object> filterParams = new HashMap<>();
+        Map<String, Object> filterParams = Collections.emptyMap();
 
         SearchApplicationCriteriaDto criteria = dto.getCriteria();
         String keyword = null;
@@ -146,7 +146,7 @@ public class ApplicationService {
 
         if (criteria != null) {
             if (criteria.getFilter() != null) {
-                BeanUtils.copyProperties(criteria.getFilter(), filterParams);
+                filterParams = AppHelper.copyPropertiesToMap(criteria.getFilter());
             }
             keyword = criteria.getKeyword();
             orderCriteria = criteria.getOrder();
