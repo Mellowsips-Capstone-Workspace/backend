@@ -21,8 +21,6 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -75,7 +73,7 @@ public class StoreService {
 
     public PaginationResponseModel<StoreModel> search(SearchStoreDto dto) {
         String[] searchableFields = new String[]{"name"};
-        Map<String, Object> filterParams = new HashMap<>();
+        Map<String, Object> filterParams = Collections.emptyMap();
 
         SearchStoreCriteriaDto criteria = dto.getCriteria();
         String keyword = null;
@@ -83,13 +81,7 @@ public class StoreService {
 
         if (criteria != null) {
             if (criteria.getFilter() != null) {
-                BeanWrapper wrapper = new BeanWrapperImpl(criteria.getFilter());
-                Stream.of(wrapper.getPropertyDescriptors())
-                    .forEach(pd -> {
-                        if (!pd.getName().equalsIgnoreCase("class")) {
-                            filterParams.put(pd.getName(), wrapper.getPropertyValue(pd.getName()));
-                        }
-                    });
+                filterParams = AppHelper.copyPropertiesToMap(criteria.getFilter());
             }
             keyword = criteria.getKeyword();
             orderCriteria = criteria.getOrder();
