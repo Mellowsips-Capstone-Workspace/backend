@@ -1,8 +1,8 @@
 package com.capstone.workspace.services.user;
 
+import com.capstone.workspace.dtos.auth.VerifyUserDto;
 import com.capstone.workspace.dtos.user.CreateReceiverProfileDto;
 import com.capstone.workspace.dtos.user.RegisterUserDto;
-import com.capstone.workspace.dtos.auth.VerifyUserDto;
 import com.capstone.workspace.entities.user.User;
 import com.capstone.workspace.enums.auth.AuthProviderType;
 import com.capstone.workspace.enums.user.UserType;

@@ -4,8 +4,6 @@ import com.capstone.workspace.converters.PeriodListConverter;
 import com.capstone.workspace.entities.partner.IPartnerEntity;
 import com.capstone.workspace.entities.shared.BaseEntity;
 import com.capstone.workspace.models.shared.Period;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;

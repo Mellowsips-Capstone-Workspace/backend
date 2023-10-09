@@ -1,6 +1,5 @@
 package com.capstone.workspace.dtos.application;
 
-import com.capstone.workspace.enums.application.ApplicationStatus;
 import com.capstone.workspace.enums.application.ApplicationType;
 import lombok.AccessLevel;
 import lombok.Data;

@@ -1,6 +1,5 @@
 package com.capstone.workspace.interceptors;
 
-import com.capstone.workspace.entities.user.User;
 import com.capstone.workspace.enums.auth.AuthErrorCode;
 import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.exceptions.AppDefinedException;
