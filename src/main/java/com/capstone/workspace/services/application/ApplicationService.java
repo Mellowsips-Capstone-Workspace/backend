@@ -233,6 +233,7 @@ public class ApplicationService {
         return documentIds;
     }
 
+    @Transactional
     public Application update(UUID id, UpdateApplicationDto params) {
         Application entity = upsert(id, params);
 
@@ -240,6 +241,8 @@ public class ApplicationService {
             throw new ForbiddenException("Not allow to update application after close");
         }
 
-        return repository.save(entity);
+        Application saved = repository.save(entity);
+        updateApplicationDocument(saved);
+        return saved;
     }
 }
