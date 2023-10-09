@@ -10,12 +10,15 @@ import com.capstone.workspace.models.shared.PaginationResponseModel;
 import com.capstone.workspace.services.auth.IdentityService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -61,7 +64,24 @@ public class BaseRepositoryImplement<T extends BaseEntity, ID extends Serializab
 
         if (filterParams != null && !filterParams.isEmpty()) {
             for (Map.Entry<String, Object> entry: filterParams.entrySet()) {
-                queryString.append(" AND ").append(entry.getKey()).append(" = ").append(String.valueOf(entry.getValue()));
+                if (entry.getValue() == null) continue;
+
+                try {
+                    ArrayList convertedValue = (ArrayList) entry.getValue();
+
+                    if (convertedValue.isEmpty()) {
+                        continue;
+                    }
+
+                    queryString.append(" AND ").append(entry.getKey()).append(" IN (");
+                    for (Object item: convertedValue) {
+                        queryString.append("'").append(String.valueOf(item)).append("',");
+                    }
+                    queryString.deleteCharAt(queryString.length() - 1);
+                    queryString.append(")");
+                } catch (Exception e) {
+                    queryString.append(" AND ").append(entry.getKey()).append(" = ").append(String.valueOf(entry.getValue()));
+                }
             }
         }
 
