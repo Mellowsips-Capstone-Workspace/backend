@@ -10,7 +10,6 @@ import com.capstone.workspace.models.shared.PaginationResponseModel;
 import com.capstone.workspace.services.auth.IdentityService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
@@ -18,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 

@@ -4,6 +4,7 @@ import com.capstone.workspace.entities.application.Application;
 import com.capstone.workspace.enums.partner.BusinessType;
 import com.capstone.workspace.enums.partner.IdentityType;
 import com.capstone.workspace.exceptions.BadRequestException;
+import com.capstone.workspace.helpers.shared.BeanHelper;
 import com.capstone.workspace.models.application.RepresentativeModel;
 import com.capstone.workspace.models.partner.PartnerModel;
 import com.capstone.workspace.models.store.StoreModel;
@@ -234,7 +235,7 @@ abstract class Partner {
     )
     public boolean isValidIdentityIssueDate() {
         try {
-            return !identityIssueDate.isAfter(LocalDate.now());
+            return !identityIssueDate.isAfter(BeanHelper.getBean(LocalDateHelper.class).getLocalDateAtZoneRequest());
         }catch (NullPointerException nullPointerException){
             return false;
         }
@@ -281,7 +282,7 @@ class HouseholdPartner extends Partner {
     )
     public boolean isValidBusinessIdentityIssueDate() {
         try {
-            return !businessIdentityIssueDate.isAfter(LocalDate.now());
+            return !businessIdentityIssueDate.isAfter(BeanHelper.getBean(LocalDateHelper.class).getLocalDateAtZoneRequest());
         }catch (NullPointerException nullPointerException){
             return false;
         }
