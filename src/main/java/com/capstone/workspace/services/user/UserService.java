@@ -1,6 +1,5 @@
 package com.capstone.workspace.services.user;
 
-import com.capstone.workspace.dtos.user.CreateReceiverProfileDto;
 import com.capstone.workspace.dtos.user.RegisterUserDto;
 import com.capstone.workspace.dtos.auth.VerifyUserDto;
 import com.capstone.workspace.entities.user.User;
@@ -30,9 +29,6 @@ public class UserService {
 
     @NonNull
     private final ModelMapper mapper;
-
-    @NonNull
-    private final ReceiverProfileService receiverProfileService;
 
     @NonNull
     private final IdentityService identityService;
@@ -72,9 +68,7 @@ public class UserService {
 
     @Transactional
     public User create(RegisterUserDto dto) {
-        User user = save(dto);
-        createDefaultReceiverProfile(user);
-        return user;
+        return save(dto);
     }
 
     private User save(RegisterUserDto dto) {
@@ -100,20 +94,6 @@ public class UserService {
         }
 
         return repository.save(entity);
-    }
-
-    private void createDefaultReceiverProfile(User user) {
-        if (!AppHelper.isVietnamNumberPhone(user.getUsername()) || user.getPhone() == null || user.getPhone().isBlank()) {
-            return;
-        }
-
-        CreateReceiverProfileDto receiverProfileDto = CreateReceiverProfileDto.builder()
-                .name(user.getDisplayName())
-                .phone(user.getPhone())
-                .isDefault(true)
-                .build();
-
-        receiverProfileService.create(receiverProfileDto, user.getUsername());
     }
 
     public void validateUsername(String username) {
