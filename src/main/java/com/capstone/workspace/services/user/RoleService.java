@@ -4,7 +4,6 @@ import com.capstone.workspace.dtos.user.CreateRoleDto;
 import com.capstone.workspace.entities.user.Permission;
 import com.capstone.workspace.entities.user.Role;
 import com.capstone.workspace.entities.user.User;
-import com.capstone.workspace.exceptions.ConflictException;
 import com.capstone.workspace.exceptions.NotFoundException;
 import com.capstone.workspace.repositories.user.RoleRepository;
 import lombok.NonNull;
