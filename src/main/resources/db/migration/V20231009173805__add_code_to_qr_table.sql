@@ -1,0 +1,4 @@
+DELETE FROM qr_code;
+
+ALTER TABLE qr_code
+    ADD COLUMN code VARCHAR(6) UNIQUE NOT NULL;

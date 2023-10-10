@@ -27,7 +27,7 @@ public class StoreModel extends BaseModel {
 
     private Boolean isOpen;
 
-    private List<Period<Time>> operationalHours;
+    private List<Period> operationalHours;
 
     private String partnerId;
 }

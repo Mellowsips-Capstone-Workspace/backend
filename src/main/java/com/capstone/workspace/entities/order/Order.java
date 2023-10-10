@@ -1,11 +1,13 @@
 package com.capstone.workspace.entities.order;
 
 import com.capstone.workspace.converters.CartDetailsConverter;
+import com.capstone.workspace.converters.QrCodeConverter;
 import com.capstone.workspace.entities.partner.IPartnerEntity;
 import com.capstone.workspace.entities.shared.BaseEntity;
 import com.capstone.workspace.entities.store.IStoreEntity;
 import com.capstone.workspace.enums.order.OrderStatus;
 import com.capstone.workspace.models.cart.CartDetailsModel;
+import com.capstone.workspace.models.store.QrCodeModel;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.JdbcType;
@@ -28,6 +30,11 @@ public class Order extends BaseEntity implements IPartnerEntity, IStoreEntity {
     @Column(nullable = false)
     @JdbcType(PostgreSQLJsonPGObjectJsonbType.class)
     private CartDetailsModel details;
+
+    @Convert(converter = QrCodeConverter.class)
+    @Column(nullable = false)
+    @JdbcType(PostgreSQLJsonPGObjectJsonbType.class)
+    private QrCodeModel qrCode;
 
     @Column
     private String partnerId;

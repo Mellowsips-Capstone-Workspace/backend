@@ -6,5 +6,8 @@ import lombok.Data;
 @Data
 public class QrCodeModel extends BaseModel {
     private String name;
+
     private String storeId;
+
+    private String code;
 }
