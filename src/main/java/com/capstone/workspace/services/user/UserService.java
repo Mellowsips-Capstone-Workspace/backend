@@ -81,7 +81,8 @@ public class UserService {
         User entity = upsert(null, dto);
         String username = entity.getUsername();
 
-        validateUsername(username);
+        // TODO: prevent login from devices that do not support user type
+        // validateUsername(username);
 
         if (AppHelper.isEmail(username)) {
             throw new BadRequestException("Username must not be an email");
