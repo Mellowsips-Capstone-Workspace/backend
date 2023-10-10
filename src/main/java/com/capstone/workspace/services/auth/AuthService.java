@@ -90,7 +90,6 @@ public class AuthService {
     @Transactional
     public void addUserToGroup(String groupName, String username) {
         userService.addUserToGroup(groupName, username);
-        cognitoService.addUserToGroup(groupName, username);
     }
 
     public void resetPassword(ResetPasswordDto dto) {

@@ -3,7 +3,6 @@ package com.capstone.workspace.services.auth;
 import com.capstone.workspace.dtos.user.RegisterUserDto;
 import com.capstone.workspace.enums.auth.AuthErrorCode;
 import com.capstone.workspace.exceptions.AppDefinedException;
-import com.capstone.workspace.exceptions.NotFoundException;
 import com.capstone.workspace.exceptions.UnauthorizedException;
 import com.capstone.workspace.helpers.shared.AppHelper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -155,43 +154,6 @@ public class CognitoService {
 
     private boolean isValidClientIp(String clientIp) {
         return !(clientIp == null || clientIp.isEmpty() || "unknown".equalsIgnoreCase(clientIp));
-    }
-
-    void addUserToGroup(String groupName, String username) {
-        try {
-            getGroup(groupName);
-        } catch (ResourceNotFoundException ex) {
-            CreateGroupRequest request = CreateGroupRequest.builder()
-                    .userPoolId(POOL_ID)
-                    .groupName(groupName)
-                    .precedence(1)
-                    .build();
-
-            cognitoIdentityProviderClient.createGroup(request);
-        }
-
-        AdminAddUserToGroupRequest request = AdminAddUserToGroupRequest.builder()
-                .userPoolId(POOL_ID)
-                .groupName(groupName)
-                .username(username)
-                .build();
-
-        cognitoIdentityProviderClient.adminAddUserToGroup(request);
-    }
-
-    private GroupType getGroup(String groupName) {
-        GetGroupRequest request = GetGroupRequest.builder()
-                .userPoolId(POOL_ID)
-                .groupName(groupName)
-                .build();
-        GetGroupResponse response = cognitoIdentityProviderClient.getGroup(request);
-
-        GroupType group = response.group();
-        if (group == null) {
-            throw new NotFoundException("Group not found");
-        }
-
-        return group;
     }
 
     public void resetPassword(String username, String newPassword) {
