@@ -1,5 +1,6 @@
 package com.capstone.workspace.dtos.order;
 
+import com.capstone.workspace.enums.order.TransactionMethod;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -16,4 +17,7 @@ public class CreateOrderDto {
     private UUID qrId;
 
     private String qrCode;
+
+    @NotNull
+    private TransactionMethod initialTransactionMethod;
 }

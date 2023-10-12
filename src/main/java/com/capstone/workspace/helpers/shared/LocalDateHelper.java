@@ -1,4 +1,4 @@
-package com.capstone.workspace.helpers.application;
+package com.capstone.workspace.helpers.shared;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.NonNull;

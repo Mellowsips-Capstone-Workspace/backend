@@ -5,6 +5,7 @@ import com.capstone.workspace.enums.partner.BusinessType;
 import com.capstone.workspace.enums.partner.IdentityType;
 import com.capstone.workspace.exceptions.BadRequestException;
 import com.capstone.workspace.helpers.shared.BeanHelper;
+import com.capstone.workspace.helpers.shared.LocalDateHelper;
 import com.capstone.workspace.models.application.RepresentativeModel;
 import com.capstone.workspace.models.partner.PartnerModel;
 import com.capstone.workspace.models.store.StoreModel;
@@ -40,7 +41,7 @@ public class ApplicationHelper {
     @NonNull
     private final Validator validator;
 
-    private Logger logger = LoggerFactory.getLogger(ApplicationHelper.class);
+    private static Logger logger = LoggerFactory.getLogger(ApplicationHelper.class);
 
     public void validate(Application data) {
         switch (data.getType()) {

@@ -20,7 +20,7 @@ import java.util.Arrays;
 
 @ControllerAdvice
 public class ExternalExceptionHandler {
-    private Logger logger = LoggerFactory.getLogger(ExternalExceptionHandler.class);
+    private static Logger logger = LoggerFactory.getLogger(ExternalExceptionHandler.class);
 
     @ExceptionHandler(BaseException.class)
     public ResponseEntity<ErrorResponse> handleRuntimeExceptions(BaseException ex, WebRequest request) {

@@ -15,4 +15,6 @@ public class OrderModel extends BaseModel {
     private CartDetailsModel details;
 
     private QrCodeModel qrCode;
+
+    private TransactionModel latestTransaction;
 }

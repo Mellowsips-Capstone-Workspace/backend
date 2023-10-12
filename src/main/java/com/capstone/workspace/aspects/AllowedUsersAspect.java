@@ -21,7 +21,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class AllowedUsersAspect {
-    private Logger logger = LoggerFactory.getLogger(AllowedUsersAspect.class);
+    private static Logger logger = LoggerFactory.getLogger(AllowedUsersAspect.class);
 
     @NonNull
     private IdentityService identityService;
