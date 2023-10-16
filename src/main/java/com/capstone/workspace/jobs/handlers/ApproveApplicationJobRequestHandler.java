@@ -24,7 +24,7 @@ public class ApproveApplicationJobRequestHandler implements JobRequestHandler<Ap
     @NonNull
     private final ApplicationService applicationService;
 
-    private Logger logger = LoggerFactory.getLogger(ApproveApplicationJobRequestHandler.class);
+    private static Logger logger = LoggerFactory.getLogger(ApproveApplicationJobRequestHandler.class);
 
     @Override
     @Job(name = "Approve application job")

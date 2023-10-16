@@ -15,6 +15,9 @@ public class QrCode extends BaseEntity implements IStoreEntity {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false, unique = true, length = 6)
+    private String code;
+
     @Column
     private String storeId;
 }

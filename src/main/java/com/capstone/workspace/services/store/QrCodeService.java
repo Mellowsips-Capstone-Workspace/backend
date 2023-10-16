@@ -34,6 +34,7 @@ public class QrCodeService {
         QrCode entity = new QrCode();
         entity.setName(dto.getName());
         entity.setStoreId(storeId);
+        entity.setCode(getCodeSequence());
 
         return repository.save(entity);
     }
@@ -62,5 +63,20 @@ public class QrCodeService {
         QrCode entity = getOneById(id);
         BeanUtils.copyProperties(dto, entity, AppHelper.commonProperties);
         return repository.save(entity);
+    }
+
+    private String getCodeSequence() {
+        int number = repository.getCodeSequenceNextValue();
+        return String.format("%06d", number);
+    }
+
+    public QrCode getOneByCode(String code) {
+        QrCode entity = repository.findByCode(code);
+
+        if (entity == null) {
+            throw new NotFoundException("QR Code not found");
+        }
+
+        return entity;
     }
 }

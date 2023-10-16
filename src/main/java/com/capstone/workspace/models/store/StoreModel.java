@@ -29,7 +29,7 @@ public class StoreModel extends BaseModel {
 
     private Boolean isOpen;
 
-    private Map<DayOfWeek, List<Period<Time>>> operationalHours;
+    private Map<DayOfWeek, List<Period>> operationalHours;
 
     private String partnerId;
 }

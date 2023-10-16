@@ -59,7 +59,7 @@ public class ApplicationService {
     @NonNull
     private final DocumentService documentService;
 
-    private Logger logger = LoggerFactory.getLogger(ApplicationService.class);
+    private static Logger logger = LoggerFactory.getLogger(ApplicationService.class);
 
     @Transactional
     public Application create(CreateApplicationDto dto) {
