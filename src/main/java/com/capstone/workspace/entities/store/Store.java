@@ -14,7 +14,9 @@ import org.hibernate.annotations.Where;
 import org.hibernate.dialect.PostgreSQLJsonPGObjectJsonbType;
 
 import java.sql.Time;
+import java.time.DayOfWeek;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @Entity
@@ -52,7 +54,7 @@ public class Store extends BaseEntity implements IPartnerEntity {
     @Convert(converter = PeriodListConverter.class)
     @Column
     @JdbcType(PostgreSQLJsonPGObjectJsonbType.class)
-    private List<Period<Time>> operationalHours;
+    private Map<DayOfWeek, List<Period<Time>>> operationalHours;
 
     @Column
     private String partnerId;
