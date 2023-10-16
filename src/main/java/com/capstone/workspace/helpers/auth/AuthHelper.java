@@ -2,9 +2,7 @@ package com.capstone.workspace.helpers.auth;
 
 import com.capstone.workspace.entities.user.User;
 import com.capstone.workspace.enums.auth.AuthErrorCode;
-import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.exceptions.AppDefinedException;
-import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.services.auth.JwtService;
 import com.capstone.workspace.services.user.UserService;
@@ -14,8 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
 
 @Component
 @RequiredArgsConstructor
@@ -45,29 +41,12 @@ public class AuthHelper {
         UserIdentity userIdentity = new UserIdentity();
 
         String username = tokenPayload.get("username", String.class);
+        User user = userService.getUserByUsername(username);
+
         userIdentity.setUsername(username);
-
-        ArrayList<String> groups = tokenPayload.get("cognito:groups", ArrayList.class);
-        if (groups != null && !groups.isEmpty()) {
-            if (groups.get(0).equals("mellowsips_admin")) {
-                userIdentity.setUserType(UserType.ADMIN);
-            } else {
-                userIdentity.setPartnerId(groups.get(0));
-            }
-        }
-
-        if (userIdentity.getUserType() == null) {
-            if (AppHelper.isVietnamNumberPhone(username)) {
-                userIdentity.setUserType(UserType.CUSTOMER);
-            } else {
-                userIdentity.setUserType(UserType.EMPLOYEE);
-            }
-        }
-
-        if (userIdentity.getUserType() == UserType.EMPLOYEE) {
-            User user = userService.getUserByUsername(username);
-            userIdentity.setStoreId(user.getStoreId());
-        }
+        userIdentity.setUserType(user.getType());
+        userIdentity.setStoreId(user.getStoreId());
+        userIdentity.setPartnerId(user.getPartnerId());
 
         return userIdentity;
     }

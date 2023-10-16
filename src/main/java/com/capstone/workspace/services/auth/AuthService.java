@@ -54,7 +54,8 @@ public class AuthService {
     }
 
     public Map loginByPassword(PasswordLoginDto dto) {
-        userService.validateUsername(dto.getUsername());
+        // TODO: prevent login from devices that do not support user type
+        // userService.validateUsername(dto.getUsername());
         userService.getUserByUsername(dto.getUsername());
         return cognitoService.loginUserByPassword(dto.getUsername(), dto.getPassword());
     }
@@ -89,7 +90,6 @@ public class AuthService {
     @Transactional
     public void addUserToGroup(String groupName, String username) {
         userService.addUserToGroup(groupName, username);
-        cognitoService.addUserToGroup(groupName, username);
     }
 
     public void resetPassword(ResetPasswordDto dto) {

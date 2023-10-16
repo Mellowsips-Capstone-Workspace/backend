@@ -5,7 +5,9 @@ import com.capstone.workspace.models.shared.Period;
 import lombok.Data;
 
 import java.sql.Time;
+import java.time.DayOfWeek;
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class StoreModel extends BaseModel {
@@ -27,7 +29,7 @@ public class StoreModel extends BaseModel {
 
     private Boolean isOpen;
 
-    private List<Period> operationalHours;
+    private Map<DayOfWeek, List<Period>> operationalHours;
 
     private String partnerId;
 }

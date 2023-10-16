@@ -9,16 +9,18 @@ import jakarta.persistence.Converter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+import java.time.DayOfWeek;
 import java.util.List;
+import java.util.Map;
 
 @Converter
 @RequiredArgsConstructor
-public class PeriodListConverter<T> implements AttributeConverter<List<Period<T>>, String> {
+public class PeriodListConverter<T> implements AttributeConverter<Map<DayOfWeek, List<Period<T>>>, String> {
     @NonNull
     private final ObjectMapper objectMapper;
 
     @Override
-    public String convertToDatabaseColumn(List<Period<T>> periods) {
+    public String convertToDatabaseColumn(Map<DayOfWeek, List<Period<T>>> periods) {
         try {
             return objectMapper.writeValueAsString(periods);
         } catch (Exception e) {
@@ -27,7 +29,7 @@ public class PeriodListConverter<T> implements AttributeConverter<List<Period<T>
     }
 
     @Override
-    public List<Period<T>> convertToEntityAttribute(String dbData) {
+    public Map<DayOfWeek, List<Period<T>>> convertToEntityAttribute(String dbData) {
         try {
             return objectMapper.readValue(dbData, new TypeReference<>() {
             });
