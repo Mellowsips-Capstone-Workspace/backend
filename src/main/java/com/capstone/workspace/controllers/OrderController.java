@@ -49,4 +49,11 @@ public class OrderController {
         logger.info("ZaloPay callback called");
         return orderService.receiveZaloPayCallback(jsonStr);
     }
+
+    @PutMapping("/{id}/events/{event}")
+    public ResponseModel<OrderModel> transition(@PathVariable UUID id, @PathVariable String event) {
+        Order entity = orderService.transition(id, event);
+        OrderModel model = mapper.map(entity, OrderModel.class);
+        return ResponseModel.<OrderModel>builder().data(model).build();
+    }
 }

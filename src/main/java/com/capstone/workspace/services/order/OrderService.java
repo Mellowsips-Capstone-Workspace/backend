@@ -4,6 +4,7 @@ import com.capstone.workspace.dtos.order.CreateOrderDto;
 import com.capstone.workspace.entities.order.Order;
 import com.capstone.workspace.entities.order.Transaction;
 import com.capstone.workspace.entities.store.QrCode;
+import com.capstone.workspace.enums.order.OrderEvent;
 import com.capstone.workspace.enums.order.OrderStatus;
 import com.capstone.workspace.enums.order.TransactionMethod;
 import com.capstone.workspace.enums.user.UserType;
@@ -146,5 +147,11 @@ public class OrderService {
 
     public String receiveZaloPayCallback(String jsonStr) throws JsonProcessingException {
         return transactionService.receiveZaloPayCallback(jsonStr);
+    }
+
+    public Order transition(UUID id, String event) {
+        Order order = getOneById(id);
+        OrderEvent orderEvent = OrderEvent.valueOf(event.toUpperCase());
+        return null;
     }
 }
