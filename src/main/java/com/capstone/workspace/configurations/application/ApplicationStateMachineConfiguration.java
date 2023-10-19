@@ -20,7 +20,7 @@ import org.springframework.statemachine.guard.Guard;
 import java.util.UUID;
 
 @Configuration
-@EnableStateMachine
+@EnableStateMachine(name = {"applicationStateMachineConfig"})
 @RequiredArgsConstructor
 public class ApplicationStateMachineConfiguration extends EnumStateMachineConfigurerAdapter<ApplicationStatus, ApplicationEvent> {
     @NonNull

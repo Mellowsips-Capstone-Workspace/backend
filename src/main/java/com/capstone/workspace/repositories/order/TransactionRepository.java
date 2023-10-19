@@ -12,4 +12,6 @@ import java.util.UUID;
 public interface TransactionRepository extends JpaRepository<Transaction, UUID> {
     @Query(value = "SELECT t FROM Transaction t WHERE t.isDeleted=FALSE AND jsonb_extract_path_text(t.externalPaymentInfo,:key)=:value")
     Transaction getByExternalPaymentInfo(@Param("key") String key, @Param("value") String value);
+
+    Transaction findByOrder_IdOrderByCreatedAtDesc(UUID orderId);
 }

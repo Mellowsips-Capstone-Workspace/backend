@@ -1,123 +1,114 @@
-package com.capstone.workspace.configurations.application;
+package com.capstone.workspace.configurations.order;
 
-import com.capstone.workspace.enums.application.ApplicationEvent;
-import com.capstone.workspace.enums.application.ApplicationStatus;
+import com.capstone.workspace.enums.order.OrderEvent;
+import com.capstone.workspace.enums.order.OrderStatus;
 import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.services.auth.IdentityService;
-import com.capstone.workspace.services.shared.JobService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.action.Action;
 import org.springframework.statemachine.config.EnableStateMachine;
 import org.springframework.statemachine.config.EnumStateMachineConfigurerAdapter;
 import org.springframework.statemachine.config.builders.StateMachineStateConfigurer;
 import org.springframework.statemachine.config.builders.StateMachineTransitionConfigurer;
 import org.springframework.statemachine.guard.Guard;
 
-import java.util.UUID;
-
 @Configuration
-@EnableStateMachine
+@EnableStateMachine(name = {"orderStateMachineConfig"})
 @RequiredArgsConstructor
-public class ApplicationStateMachineConfiguration extends EnumStateMachineConfigurerAdapter<ApplicationStatus, ApplicationEvent> {
-    @NonNull
-    private final JobService jobService;
-
+public class OrderStateMachineConfiguration extends EnumStateMachineConfigurerAdapter<OrderStatus, OrderEvent> {
     @NonNull
     private final IdentityService identityService;
 
     @Override
-    public void configure(StateMachineStateConfigurer<ApplicationStatus, ApplicationEvent> states) throws Exception {
+    public void configure(StateMachineStateConfigurer<OrderStatus, OrderEvent> states) throws Exception {
         states
             .withStates()
-            .initial(ApplicationStatus.INITIAL)
-            .state(ApplicationStatus.DRAFT)
-            .state(ApplicationStatus.WAITING_FOR_APPROVAL)
-            .state(ApplicationStatus.PROCESSING)
-            .state(ApplicationStatus.REJECTED)
-            .state(ApplicationStatus.APPROVED);
+            .initial(OrderStatus.INITIAL)
+            .state(OrderStatus.PENDING)
+            .state(OrderStatus.ORDERED)
+            .state(OrderStatus.CANCELED)
+            .state(OrderStatus.REJECTED)
+            .state(OrderStatus.PROCESSING)
+            .state(OrderStatus.COMPLETED)
+            .state(OrderStatus.RECEIVED)
+            .state(OrderStatus.DECLINED);
     }
 
     @Override
-    public void configure(StateMachineTransitionConfigurer<ApplicationStatus, ApplicationEvent> transitions) throws Exception {
+    public void configure(StateMachineTransitionConfigurer<OrderStatus, OrderEvent> transitions) throws Exception {
         transitions
 
             // Init real state
             .withExternal()
-                .source(ApplicationStatus.INITIAL)
-                .target(ApplicationStatus.DRAFT)
-                .event(ApplicationEvent.TO_DRAFT)
-                .guard(hasActions())
+                .source(OrderStatus.INITIAL)
+                .target(OrderStatus.ORDERED)
+                .event(OrderEvent.TO_ORDERED)
                 .and()
             .withExternal()
-                .source(ApplicationStatus.INITIAL)
-                .target(ApplicationStatus.WAITING_FOR_APPROVAL)
-                .event(ApplicationEvent.TO_WAITING_FOR_APPROVAL)
-                .guard(hasActions())
+                .source(OrderStatus.INITIAL)
+                .target(OrderStatus.PROCESSING)
+                .event(OrderEvent.TO_PROCESSING)
                 .and()
             .withExternal()
-                .source(ApplicationStatus.INITIAL)
-                .target(ApplicationStatus.PROCESSING)
-                .event(ApplicationEvent.TO_PROCESSING)
-                .guard(hasActions())
+                .source(OrderStatus.INITIAL)
+                .target(OrderStatus.COMPLETED)
+                .event(OrderEvent.TO_COMPLETED)
                 .and()
 
             // Real state transitions
             .withExternal()
-                .source(ApplicationStatus.DRAFT)
-                .target(ApplicationStatus.WAITING_FOR_APPROVAL)
-                .event(ApplicationEvent.SUBMIT)
-                .guard(hasActions())
+                .source(OrderStatus.ORDERED)
+                .target(OrderStatus.CANCELED)
+                .event(OrderEvent.CANCEL)
+                .guard(isCustomer())
                 .and()
             .withExternal()
-                .source(ApplicationStatus.WAITING_FOR_APPROVAL)
-                .target(ApplicationStatus.DRAFT)
-                .event(ApplicationEvent.AMEND)
-                .guard(hasActions())
+                .source(OrderStatus.ORDERED)
+                .target(OrderStatus.REJECTED)
+                .event(OrderEvent.REJECT)
+                .guard(isEmployee())
                 .and()
             .withExternal()
-                .source(ApplicationStatus.WAITING_FOR_APPROVAL)
-                .target(ApplicationStatus.PROCESSING)
-                .event(ApplicationEvent.PROCESS)
-                .guard(isAdmin())
+                .source(OrderStatus.ORDERED)
+                .target(OrderStatus.PROCESSING)
+                .event(OrderEvent.PROCESS)
+                .guard(isEmployee())
                 .and()
             .withExternal()
-                .source(ApplicationStatus.PROCESSING)
-                .target(ApplicationStatus.REJECTED)
-                .event(ApplicationEvent.REJECT)
-                .guard(isAdmin())
+                .source(OrderStatus.PROCESSING)
+                .target(OrderStatus.COMPLETED)
+                .event(OrderEvent.COMPLETE)
+                .guard(isEmployee())
                 .and()
             .withExternal()
-                .source(ApplicationStatus.PROCESSING)
-                .target(ApplicationStatus.APPROVED)
-                .event(ApplicationEvent.APPROVE)
-                .action(approve())
-                .guard(isAdmin());
+                .source(OrderStatus.COMPLETED)
+                .target(OrderStatus.RECEIVED)
+                .event(OrderEvent.RECEIVE)
+                .guard(isEmployee())
+                .and()
+            .withExternal()
+                .source(OrderStatus.COMPLETED)
+                .target(OrderStatus.DECLINED)
+                .event(OrderEvent.DECLINE)
+                .guard(isEmployee());
     }
 
     @Bean
-    public Action<ApplicationStatus, ApplicationEvent> approve() {
-        return context -> {
-            UUID applicationId = (UUID) context.getExtendedState().getVariables().get("applicationId");
-            jobService.publishApprovedApplicationJob(applicationId);
-        };
-    }
-
-    @Bean
-    public Guard<ApplicationStatus, ApplicationEvent> hasActions() {
-        return context -> {
-            return true;
-        };
-    }
-
-    @Bean
-    public Guard<ApplicationStatus, ApplicationEvent> isAdmin() {
+    public Guard<OrderStatus, OrderEvent> isEmployee() {
         return context -> {
             UserIdentity userIdentity = identityService.getUserIdentity();
-            return userIdentity != null && userIdentity.getUserType() == UserType.ADMIN;
+            return userIdentity != null && userIdentity.getUserType() == UserType.EMPLOYEE;
+        };
+    }
+
+    @Bean
+    public Guard<OrderStatus, OrderEvent> isCustomer() {
+        return context -> {
+            UserIdentity userIdentity = identityService.getUserIdentity();
+            return userIdentity != null && userIdentity.getUserType() == UserType.CUSTOMER;
         };
     }
 }

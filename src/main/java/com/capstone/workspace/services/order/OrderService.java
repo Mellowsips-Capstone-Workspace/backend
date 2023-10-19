@@ -7,6 +7,7 @@ import com.capstone.workspace.entities.store.QrCode;
 import com.capstone.workspace.enums.order.OrderEvent;
 import com.capstone.workspace.enums.order.OrderStatus;
 import com.capstone.workspace.enums.order.TransactionMethod;
+import com.capstone.workspace.enums.order.TransactionStatus;
 import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.exceptions.BadRequestException;
 import com.capstone.workspace.exceptions.ConflictException;
@@ -19,6 +20,7 @@ import com.capstone.workspace.models.order.TransactionModel;
 import com.capstone.workspace.models.store.QrCodeModel;
 import com.capstone.workspace.models.store.StoreModel;
 import com.capstone.workspace.repositories.order.OrderRepository;
+import com.capstone.workspace.repositories.order.TransactionRepository;
 import com.capstone.workspace.services.auth.IdentityService;
 import com.capstone.workspace.services.cart.CartService;
 import com.capstone.workspace.services.store.QrCodeService;
@@ -60,6 +62,12 @@ public class OrderService {
 
     @NonNull
     private final ModelMapper mapper;
+
+    @NonNull
+    private final OrderStateMachine orderStateMachine;
+
+    @NonNull
+    private final TransactionRepository transactionRepository;
 
     @Transactional
     public OrderModel create(CreateOrderDto dto) {
@@ -140,7 +148,7 @@ public class OrderService {
         String username = userIdentity.getUsername();
 
         List<Order> orders = repository.findByCreatedByAndStatusIn(username, ACTIVE_ORDER_STATUSES);
-        if (orders.size() >= 3) {
+        if (orders.size() >= MAX_ALLOWED_ACTIVE_ORDERS) {
             throw new BadRequestException("Exceeded max allowed active orders");
         }
     }
@@ -149,9 +157,33 @@ public class OrderService {
         return transactionService.receiveZaloPayCallback(jsonStr);
     }
 
+    @Transactional
     public Order transition(UUID id, String event) {
-        Order order = getOneById(id);
+        Order entity = getOneById(id);
         OrderEvent orderEvent = OrderEvent.valueOf(event.toUpperCase());
-        return null;
+
+        orderStateMachine.init(id);
+
+        OrderStatus newStatus = orderStateMachine.transition(entity.getStatus(), orderEvent);
+        entity.setStatus(newStatus);
+
+        switch (newStatus) {
+            case DECLINED:
+                // TODO: Xử lí bom hàng
+                break;
+            case REJECTED, CANCELED:
+                // TODO: Xử lí Cashback
+                break;
+            case RECEIVED:
+                Transaction transaction = transactionRepository.findByOrder_IdOrderByCreatedAtDesc(id);
+                if (transaction.getStatus() != TransactionStatus.SUCCESS) {
+                    throw new BadRequestException("Transaction is not completed yet");
+                }
+                break;
+            default:
+                break;
+        }
+
+        return repository.save(entity);
     }
 }

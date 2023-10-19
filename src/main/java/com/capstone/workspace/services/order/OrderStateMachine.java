@@ -1,10 +1,10 @@
-package com.capstone.workspace.services.application.application_machine;
+package com.capstone.workspace.services.order;
 
-import com.capstone.workspace.entities.application.Application;
-import com.capstone.workspace.enums.application.ApplicationEvent;
-import com.capstone.workspace.enums.application.ApplicationStatus;
+import com.capstone.workspace.entities.order.Order;
+import com.capstone.workspace.enums.order.OrderEvent;
+import com.capstone.workspace.enums.order.OrderStatus;
 import com.capstone.workspace.exceptions.ForbiddenException;
-import com.capstone.workspace.repositories.application.ApplicationRepository;
+import com.capstone.workspace.repositories.order.OrderRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.statemachine.StateMachine;
@@ -16,44 +16,42 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
-public class ApplicationStateMachine {
+public class OrderStateMachine {
     @NonNull
-    private StateMachine<ApplicationStatus, ApplicationEvent> stateMachine;
+    private StateMachine<OrderStatus, OrderEvent> stateMachine;
 
     @NonNull
-    private final ApplicationRepository applicationRepository;
+    private final OrderRepository orderRepository;
 
-    public void init(UUID applicationId) {
-        Application application = applicationRepository.findById(applicationId).orElse(null);
+    public void init(UUID orderId) {
+        Order order = orderRepository.findById(orderId).orElse(null);
 
-        if (application != null) {
+        if (order != null) {
             stateMachine.start();
 
-            ApplicationStatus initialState = application.getStatus();
-            ApplicationEvent initialEvent = ApplicationEvent.valueOf("TO_" + initialState);
+            OrderStatus initialState = order.getStatus();
+            OrderEvent initialEvent = OrderEvent.valueOf("TO_" + initialState);
             stateMachine.sendEvent(initialEvent);
 
-            stateMachine.getExtendedState().getVariables().put("applicationId", applicationId);
-            // stateMachine.getExtendedState().getVariables().put("actions", userActions);
-            stateMachine.getExtendedState().getVariables().put("application", application);
+            stateMachine.getExtendedState().getVariables().put("orderId", orderId);
         }
     }
 
-    private boolean can(ApplicationStatus currentState, ApplicationEvent eventType) {
-        Collection<Transition<ApplicationStatus, ApplicationEvent>> transitions = stateMachine.getTransitions();
+    private boolean can(OrderStatus currentState, OrderEvent eventType) {
+        Collection<Transition<OrderStatus, OrderEvent>> transitions = stateMachine.getTransitions();
         return transitions.stream()
             .anyMatch(
                 transition -> transition.getSource().getId() == currentState && transition.getTrigger().getEvent() == eventType
             );
     }
 
-    public ApplicationStatus transition(ApplicationStatus currentState, ApplicationEvent eventType) {
+    public OrderStatus transition(OrderStatus currentState, OrderEvent eventType) {
         if (!can(currentState, eventType)) {
             throw new ForbiddenException("Event is not accepted");
         }
 
         stateMachine.sendEvent(eventType);
-        ApplicationStatus newState = stateMachine.getState().getId();
+        OrderStatus newState = stateMachine.getState().getId();
         stateMachine.stop();
 
         if (newState == currentState) {
