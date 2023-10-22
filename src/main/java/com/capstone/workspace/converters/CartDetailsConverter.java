@@ -18,7 +18,7 @@ public class CartDetailsConverter implements AttributeConverter<CartDetailsModel
     @Override
     public String convertToDatabaseColumn(CartDetailsModel data) {
         try {
-            return objectMapper.writeValueAsString(data);
+            return data == null ? null : objectMapper.writeValueAsString(data);
         } catch (Exception e) {
             throw new InternalServerErrorException(e);
         }
@@ -27,7 +27,7 @@ public class CartDetailsConverter implements AttributeConverter<CartDetailsModel
     @Override
     public CartDetailsModel convertToEntityAttribute(String dbData) {
         try {
-            return objectMapper.readValue(dbData, new TypeReference<>() {
+            return dbData == null || dbData.equals("null") ? null : objectMapper.readValue(dbData, new TypeReference<>() {
             });
         } catch (Exception e) {
             throw new InternalServerErrorException(e);

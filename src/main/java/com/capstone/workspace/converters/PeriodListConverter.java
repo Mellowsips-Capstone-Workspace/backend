@@ -22,7 +22,7 @@ public class PeriodListConverter<T> implements AttributeConverter<Map<DayOfWeek,
     @Override
     public String convertToDatabaseColumn(Map<DayOfWeek, List<Period<T>>> periods) {
         try {
-            return objectMapper.writeValueAsString(periods);
+            return periods == null ? null : objectMapper.writeValueAsString(periods);
         } catch (Exception e) {
             throw new InternalServerErrorException(e);
         }
@@ -31,7 +31,7 @@ public class PeriodListConverter<T> implements AttributeConverter<Map<DayOfWeek,
     @Override
     public Map<DayOfWeek, List<Period<T>>> convertToEntityAttribute(String dbData) {
         try {
-            return objectMapper.readValue(dbData, new TypeReference<>() {
+            return dbData == null || dbData.equals("null") ? null : objectMapper.readValue(dbData, new TypeReference<>() {
             });
         } catch (Exception e) {
             throw new InternalServerErrorException(e);
