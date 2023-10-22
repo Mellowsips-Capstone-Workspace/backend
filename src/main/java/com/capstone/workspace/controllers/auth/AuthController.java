@@ -1,4 +1,4 @@
-package com.capstone.workspace.controllers;
+package com.capstone.workspace.controllers.auth;
 
 import com.capstone.workspace.dtos.auth.PasswordLoginDto;
 import com.capstone.workspace.dtos.auth.ResendConfirmationCodeDto;

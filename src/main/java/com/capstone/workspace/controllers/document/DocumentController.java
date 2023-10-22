@@ -1,4 +1,4 @@
-package com.capstone.workspace.controllers;
+package com.capstone.workspace.controllers.document;
 
 import com.capstone.workspace.entities.document.Document;
 import com.capstone.workspace.models.document.DocumentModel;
