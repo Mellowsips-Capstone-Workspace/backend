@@ -44,6 +44,11 @@ public class OrderStateMachineConfiguration extends EnumStateMachineConfigurerAd
             // Init real state
             .withExternal()
                 .source(OrderStatus.INITIAL)
+                .target(OrderStatus.PENDING)
+                .event(OrderEvent.TO_PENDING)
+                .and()
+            .withExternal()
+                .source(OrderStatus.INITIAL)
                 .target(OrderStatus.ORDERED)
                 .event(OrderEvent.TO_ORDERED)
                 .and()
@@ -59,6 +64,12 @@ public class OrderStateMachineConfiguration extends EnumStateMachineConfigurerAd
                 .and()
 
             // Real state transitions
+            .withExternal()
+                .source(OrderStatus.PENDING)
+                .target(OrderStatus.CANCELED)
+                .event(OrderEvent.CANCEL)
+                .guard(isCustomer())
+                .and()
             .withExternal()
                 .source(OrderStatus.ORDERED)
                 .target(OrderStatus.CANCELED)
