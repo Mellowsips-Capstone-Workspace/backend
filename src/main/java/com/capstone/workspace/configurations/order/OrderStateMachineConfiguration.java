@@ -68,6 +68,7 @@ public class OrderStateMachineConfiguration extends EnumStateMachineConfigurerAd
                 .source(OrderStatus.PENDING)
                 .target(OrderStatus.CANCELED)
                 .event(OrderEvent.CANCEL)
+                .guard(isCustomer())
                 .and()
             .withExternal()
                 .source(OrderStatus.ORDERED)
