@@ -1,6 +1,8 @@
 package com.capstone.workspace.services.shared;
 
+import com.capstone.workspace.dtos.notification.PushNotificationDto;
 import com.capstone.workspace.jobs.requests.ApproveApplicationJobRequest;
+import com.capstone.workspace.jobs.requests.PushNotificationJobRequest;
 import com.capstone.workspace.services.auth.IdentityService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,12 @@ public class JobService {
                 identityService.getUserIdentity(),
                 applicationId
             )
+        );
+    }
+
+    public void publishPushNotificationJob(PushNotificationDto dto) {
+        BackgroundJobRequest.enqueue(
+            new PushNotificationJobRequest(dto)
         );
     }
 }

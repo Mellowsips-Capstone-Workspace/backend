@@ -21,10 +21,10 @@ public class NotificationSocketController {
     @NonNull
     private final ModelMapper mapper;
 
-    @MessageMapping("/push-notification")
-    @SendTo("/topic/notifications")
-    public NotificationModel pushNotification(@Valid PushNotificationDto dto) {
-        Notification entity = notificationService.create(dto);
-        return mapper.map(entity, NotificationModel.class);
-    }
+//    @MessageMapping("/push-notification")
+//    @SendTo("/topic/notifications")
+//    public NotificationModel pushNotification(@Valid PushNotificationDto dto) {
+//        Notification entity = notificationService.create(dto);
+//        return mapper.map(entity, NotificationModel.class);
+//    }
 }

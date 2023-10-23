@@ -3,6 +3,7 @@ package com.capstone.workspace.services.notification;
 import com.capstone.workspace.dtos.notification.PushNotificationDto;
 import com.capstone.workspace.entities.notification.Notification;
 import com.capstone.workspace.enums.user.UserType;
+import com.capstone.workspace.exceptions.BadRequestException;
 import com.capstone.workspace.exceptions.ForbiddenException;
 import com.capstone.workspace.exceptions.NotFoundException;
 import com.capstone.workspace.helpers.shared.AppHelper;
@@ -15,8 +16,10 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -28,16 +31,27 @@ public class NotificationService {
     private final NotificationRepository repository;
 
     @NonNull
-    private final ModelMapper mapper;
-
-    @NonNull
     private final IdentityService identityService;
 
-    public Notification create(PushNotificationDto dto) {
-        logger.info("Pushing notification...");
+    @NonNull
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
-        Notification entity = upsert(null, dto);
-        return repository.save(entity);
+    public void createPrivateNotification(PushNotificationDto dto) {
+        if (dto.getReceivers() == null || dto.getReceivers().isEmpty()) {
+            throw new BadRequestException("This notification has no recipients");
+        }
+
+        List<String> receivers = (List<String>) AppHelper.removeDuplicates(dto.getReceivers());
+
+        List<Notification> entities = receivers.stream().map(receiver -> {
+            Notification entity = upsert(null, dto);
+            entity.setReceiver(receiver);
+            return entity;
+        }).toList();
+
+        repository.saveAll(entities);
+
+        entities.forEach(entity -> simpMessagingTemplate.convertAndSend("/topic/notifications", entity));
     }
 
     private Notification upsert(UUID id, Object dto) {
@@ -47,7 +61,9 @@ public class NotificationService {
             return entity;
         }
 
-        return mapper.map(dto, Notification.class);
+        Notification entity = new Notification();
+        BeanUtils.copyProperties(dto, entity, "receivers");
+        return entity;
     }
 
     public Notification getOneById(UUID id) {

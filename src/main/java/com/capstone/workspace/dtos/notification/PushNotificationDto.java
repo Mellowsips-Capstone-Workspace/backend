@@ -6,14 +6,16 @@ import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
 
+import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 
 @Builder
 @Data
-public class PushNotificationDto {
+public class PushNotificationDto implements Serializable {
     @NotNull
     @NotBlank
-    private String receiver;
+    private List<String> receivers;
 
     @NotNull
     @NotBlank

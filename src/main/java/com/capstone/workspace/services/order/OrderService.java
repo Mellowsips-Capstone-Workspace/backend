@@ -1,5 +1,6 @@
 package com.capstone.workspace.services.order;
 
+import com.capstone.workspace.dtos.notification.PushNotificationDto;
 import com.capstone.workspace.dtos.order.CreateOrderDto;
 import com.capstone.workspace.entities.order.Order;
 import com.capstone.workspace.entities.order.Transaction;
@@ -23,6 +24,7 @@ import com.capstone.workspace.repositories.order.OrderRepository;
 import com.capstone.workspace.repositories.order.TransactionRepository;
 import com.capstone.workspace.services.auth.IdentityService;
 import com.capstone.workspace.services.cart.CartService;
+import com.capstone.workspace.services.shared.JobService;
 import com.capstone.workspace.services.store.QrCodeService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.NonNull;
@@ -68,6 +70,9 @@ public class OrderService {
 
     @NonNull
     private final TransactionRepository transactionRepository;
+
+    @NonNull
+    private final JobService jobService;
 
     @Transactional
     public OrderModel create(CreateOrderDto dto) {
@@ -184,6 +189,19 @@ public class OrderService {
                 break;
         }
 
-        return repository.save(entity);
+        Order saved = repository.save(entity);
+
+        UserIdentity userIdentity = identityService.getUserIdentity();
+        String username = userIdentity.getUsername();
+
+        PushNotificationDto notificationDto = PushNotificationDto.builder()
+            .receivers(List.of(username))
+            .subject("Đơn hàng của bạn đang được xử lí")
+            .shortDescription("Nhấp vào để xem chi tiết")
+            .content("Chúng tôi sẽ cập nhật liên tục trạng thái của đơn hàng")
+            .build();
+        jobService.publishPushNotificationJob(notificationDto);
+
+        return saved;
     }
 }

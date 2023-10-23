@@ -49,4 +49,8 @@ public class AppHelper {
         fmt.setCalendar(cal);
         return fmt.format(cal.getTimeInMillis());
     }
+
+    public static List removeDuplicates(List data) {
+        return List.of(new HashSet<>(data));
+    }
 }
