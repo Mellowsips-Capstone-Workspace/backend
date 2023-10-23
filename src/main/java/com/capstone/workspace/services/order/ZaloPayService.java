@@ -71,7 +71,7 @@ public class ZaloPayService {
                 put("description", "Mellow Sips - Payment for the order #" + orderEntity.getId());
                 put("bank_code", "zalopayapp");
                 put("callback_url", callbackUrl);
-                put("item", objectMapper.writeValueAsString(orderEntity.getDetails().getCartItems()));
+                put("item", objectMapper.writeValueAsString(Collections.emptyList()));
                 put("embed_data", objectMapper.writeValueAsString(embedData));
             }};
 
