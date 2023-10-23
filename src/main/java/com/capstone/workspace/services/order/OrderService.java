@@ -172,7 +172,7 @@ public class OrderService {
                 // TODO: Xử lí bom hàng
                 break;
             case REJECTED, CANCELED:
-                // TODO: Xử lí Cashback
+                // TODO: Xử lí Cashback, change transaction status khi hủy lúc PENDING
                 break;
             case RECEIVED:
                 Transaction transaction = transactionRepository.findByOrder_IdOrderByCreatedAtDesc(id);
