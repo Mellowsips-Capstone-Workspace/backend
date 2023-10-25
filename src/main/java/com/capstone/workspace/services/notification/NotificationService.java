@@ -8,6 +8,7 @@ import com.capstone.workspace.exceptions.ForbiddenException;
 import com.capstone.workspace.exceptions.NotFoundException;
 import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
+import com.capstone.workspace.models.notification.NotificationModel;
 import com.capstone.workspace.repositories.notification.NotificationRepository;
 import com.capstone.workspace.services.auth.IdentityService;
 import lombok.NonNull;
@@ -36,6 +37,9 @@ public class NotificationService {
     @NonNull
     private final SimpMessagingTemplate simpMessagingTemplate;
 
+    @NonNull
+    private final ModelMapper mapper;
+
     public void createPrivateNotification(PushNotificationDto dto) {
         if (dto.getReceivers() == null || dto.getReceivers().isEmpty()) {
             throw new BadRequestException("This notification has no recipients");
@@ -51,7 +55,7 @@ public class NotificationService {
 
         repository.saveAll(entities);
 
-        entities.forEach(entity -> simpMessagingTemplate.convertAndSend("/topic/notifications", entity));
+        entities.forEach(entity -> simpMessagingTemplate.convertAndSendToUser(entity.getReceiver(), "/topic/notifications", mapper.map(entity, NotificationModel.class)));
     }
 
     private Notification upsert(UUID id, Object dto) {

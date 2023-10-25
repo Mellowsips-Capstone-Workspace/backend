@@ -10,15 +10,15 @@ import java.util.UUID;
 public class NotificationModel {
     private UUID id;
 
-    private String receiver;
+    private String key;
 
     private String subject;
 
-    private Map<String, String> subjectParams;
+    private String shortDescription;
 
-    private String description;
+    private String content;
 
-    private Map<String, String> descriptionParams;
+    private Map<String, String> metadata;
 
     private Boolean isSeen;
 

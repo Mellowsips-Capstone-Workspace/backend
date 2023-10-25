@@ -7,6 +7,7 @@ import com.capstone.workspace.services.application.ApplicationService;
 import com.capstone.workspace.services.application.application_approval.ApproveCreateOrganizationApplication;
 import com.capstone.workspace.services.application.application_approval.BaseApproveApplication;
 import com.capstone.workspace.services.auth.IdentityService;
+import com.capstone.workspace.services.notification.NotificationService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.jobrunr.jobs.annotations.Job;
@@ -23,6 +24,9 @@ public class ApproveApplicationJobRequestHandler implements JobRequestHandler<Ap
 
     @NonNull
     private final ApplicationService applicationService;
+
+    @NonNull
+    private final NotificationService notificationService;
 
     private static Logger logger = LoggerFactory.getLogger(ApproveApplicationJobRequestHandler.class);
 

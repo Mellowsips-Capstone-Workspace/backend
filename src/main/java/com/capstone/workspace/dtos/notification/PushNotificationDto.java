@@ -3,8 +3,10 @@ package com.capstone.workspace.dtos.notification;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.List;
@@ -12,6 +14,8 @@ import java.util.Map;
 
 @Builder
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class PushNotificationDto implements Serializable {
     @NotNull
     @NotBlank
@@ -19,18 +23,20 @@ public class PushNotificationDto implements Serializable {
 
     @NotNull
     @NotBlank
-    private String subject;
+    @Size(max = 255)
+    private String key;
 
-    private Map<String, String> subjectParams;
+    @NotNull
+    @NotBlank
+    @Size(max = 255)
+    private String subject;
 
     @Size(max = 255)
     private String shortDescription;
-
-    private Map<String, String> shortDescriptionParams;
 
     @NotNull
     @NotBlank
     private String content;
 
-    private Map<String, String> contentParams;
+    private Map<String, String> metadata;
 }

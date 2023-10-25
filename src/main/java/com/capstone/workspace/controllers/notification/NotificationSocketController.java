@@ -1,15 +1,9 @@
 package com.capstone.workspace.controllers.notification;
 
-import com.capstone.workspace.dtos.notification.PushNotificationDto;
-import com.capstone.workspace.entities.notification.Notification;
-import com.capstone.workspace.models.notification.NotificationModel;
 import com.capstone.workspace.services.notification.NotificationService;
-import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController

@@ -1,6 +1,5 @@
 package com.capstone.workspace.services.order;
 
-import com.capstone.workspace.dtos.notification.PushNotificationDto;
 import com.capstone.workspace.dtos.order.CreateOrderDto;
 import com.capstone.workspace.entities.order.Order;
 import com.capstone.workspace.entities.order.Transaction;
@@ -189,19 +188,6 @@ public class OrderService {
                 break;
         }
 
-        Order saved = repository.save(entity);
-
-        UserIdentity userIdentity = identityService.getUserIdentity();
-        String username = userIdentity.getUsername();
-
-        PushNotificationDto notificationDto = PushNotificationDto.builder()
-            .receivers(List.of(username))
-            .subject("Đơn hàng của bạn đang được xử lí")
-            .shortDescription("Nhấp vào để xem chi tiết")
-            .content("Chúng tôi sẽ cập nhật liên tục trạng thái của đơn hàng")
-            .build();
-        jobService.publishPushNotificationJob(notificationDto);
-
-        return saved;
+        return repository.save(entity);
     }
 }

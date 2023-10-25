@@ -26,31 +26,26 @@ public class Notification implements Serializable {
     @Column
     private String receiver;
 
-    @Column
-    private String subject;
+    @Column(nullable = false)
+    private String key;
 
-    @Column
-    @JdbcTypeCode(SqlTypes.JSON)
-    private Map<String, String> subjectParams;
+    @Column(nullable = false)
+    private String subject;
 
     @Column
     private String shortDescription;
 
-    @Column
-    @JdbcTypeCode(SqlTypes.JSON)
-    private Map<String, String> shortDescriptionParams;
-
-    @Column
+    @Column(nullable = false)
     private String content;
 
     @Column
     @JdbcTypeCode(SqlTypes.JSON)
-    private Map<String, String> contentParams;
+    private Map<String, String> metadata;
 
     @Column(columnDefinition = "BOOLEAN DEFAULT false")
     private Boolean isSeen = false;
 
-    @Column(nullable = false)
+    @Column
     private Instant seenAt;
 
     @Column(nullable = false)

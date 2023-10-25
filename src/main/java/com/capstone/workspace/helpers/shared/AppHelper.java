@@ -51,6 +51,6 @@ public class AppHelper {
     }
 
     public static List removeDuplicates(List data) {
-        return List.of(new HashSet<>(data));
+        return new ArrayList<>(new HashSet<>(data));
     }
 }
