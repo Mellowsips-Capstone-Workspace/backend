@@ -23,6 +23,7 @@ import com.capstone.workspace.repositories.order.OrderRepository;
 import com.capstone.workspace.repositories.order.TransactionRepository;
 import com.capstone.workspace.services.auth.IdentityService;
 import com.capstone.workspace.services.cart.CartService;
+import com.capstone.workspace.services.shared.JobService;
 import com.capstone.workspace.services.store.QrCodeService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.NonNull;
@@ -68,6 +69,9 @@ public class OrderService {
 
     @NonNull
     private final TransactionRepository transactionRepository;
+
+    @NonNull
+    private final JobService jobService;
 
     @Transactional
     public OrderModel create(CreateOrderDto dto) {

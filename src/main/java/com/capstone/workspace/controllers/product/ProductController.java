@@ -1,4 +1,4 @@
-package com.capstone.workspace.controllers;
+package com.capstone.workspace.controllers.product;
 
 import com.capstone.workspace.entities.product.Product;
 import com.capstone.workspace.models.product.ProductDetailsModel;

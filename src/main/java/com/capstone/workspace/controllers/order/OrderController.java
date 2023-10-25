@@ -1,4 +1,4 @@
-package com.capstone.workspace.controllers;
+package com.capstone.workspace.controllers.order;
 
 import com.capstone.workspace.annotations.AllowedUsers;
 import com.capstone.workspace.dtos.order.CreateOrderDto;
