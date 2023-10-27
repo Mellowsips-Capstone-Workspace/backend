@@ -5,12 +5,12 @@ import com.capstone.workspace.enums.application.ApplicationType;
 import com.capstone.workspace.models.shared.BaseModel;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Map;
 
 @Data
 public class ApplicationModel extends BaseModel {
-    private LocalDateTime approvedAt;
+    private Instant approvedAt;
 
     private String approvedBy;
 
