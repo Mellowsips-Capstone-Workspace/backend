@@ -19,8 +19,6 @@ public class TransactionModel extends BaseModel {
 
     private TransactionStatus status;
 
-    private Order order;
-
     private Map<String, Object> externalPaymentInfo;
 
     private String partnerId;
