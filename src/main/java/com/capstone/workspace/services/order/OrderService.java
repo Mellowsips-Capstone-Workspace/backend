@@ -1,6 +1,8 @@
 package com.capstone.workspace.services.order;
 
 import com.capstone.workspace.dtos.order.CreateOrderDto;
+import com.capstone.workspace.dtos.order.SearchOrderCriteriaDto;
+import com.capstone.workspace.dtos.order.SearchOrderDto;
 import com.capstone.workspace.entities.order.Order;
 import com.capstone.workspace.entities.order.Transaction;
 import com.capstone.workspace.entities.store.QrCode;
@@ -13,10 +15,12 @@ import com.capstone.workspace.exceptions.BadRequestException;
 import com.capstone.workspace.exceptions.ConflictException;
 import com.capstone.workspace.exceptions.GoneException;
 import com.capstone.workspace.exceptions.NotFoundException;
+import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.models.cart.CartDetailsModel;
 import com.capstone.workspace.models.order.OrderModel;
 import com.capstone.workspace.models.order.TransactionModel;
+import com.capstone.workspace.models.shared.PaginationResponseModel;
 import com.capstone.workspace.models.store.QrCodeModel;
 import com.capstone.workspace.models.store.StoreModel;
 import com.capstone.workspace.repositories.order.OrderRepository;
@@ -29,12 +33,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -189,5 +196,38 @@ public class OrderService {
         }
 
         return repository.save(entity);
+    }
+
+    public PaginationResponseModel<OrderModel> search(SearchOrderDto dto) {
+        String[] searchableFields = new String[]{};
+        Map<String, Object> filterParams = Collections.emptyMap();
+
+        SearchOrderCriteriaDto criteria = dto.getCriteria();
+        String keyword = null;
+        Map orderCriteria = null;
+
+        if (criteria != null) {
+            if (criteria.getFilter() != null) {
+                filterParams = AppHelper.copyPropertiesToMap(criteria.getFilter());
+            }
+            keyword = criteria.getKeyword();
+            orderCriteria = criteria.getOrder();
+        }
+
+        PaginationResponseModel result = repository.searchBy(
+                keyword,
+                searchableFields,
+                filterParams,
+                orderCriteria,
+                dto.getPagination()
+        );
+
+        List<OrderModel> orderModels = mapper.map(
+                result.getResults(),
+                new TypeToken<List<OrderModel>>() {}.getType()
+        );
+        result.setResults(orderModels);
+
+        return result;
     }
 }
