@@ -2,9 +2,11 @@ package com.capstone.workspace.controllers.order;
 
 import com.capstone.workspace.annotations.AllowedUsers;
 import com.capstone.workspace.dtos.order.CreateOrderDto;
+import com.capstone.workspace.dtos.order.SearchOrderDto;
 import com.capstone.workspace.entities.order.Order;
 import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.models.order.OrderModel;
+import com.capstone.workspace.models.shared.PaginationResponseModel;
 import com.capstone.workspace.models.shared.ResponseModel;
 import com.capstone.workspace.services.order.OrderService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -55,5 +57,11 @@ public class OrderController {
         Order entity = orderService.transition(id, event);
         OrderModel model = mapper.map(entity, OrderModel.class);
         return ResponseModel.<OrderModel>builder().data(model).build();
+    }
+
+    @PostMapping("/search")
+    public ResponseModel<PaginationResponseModel<OrderModel>> search(@Valid @RequestBody SearchOrderDto dto) {
+        PaginationResponseModel<OrderModel> data = orderService.search(dto);
+        return ResponseModel.<PaginationResponseModel<OrderModel>>builder().data(data).build();
     }
 }

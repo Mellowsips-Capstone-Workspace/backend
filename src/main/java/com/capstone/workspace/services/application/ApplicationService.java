@@ -240,6 +240,8 @@ public class ApplicationService {
             throw new ForbiddenException("Not allow to update application after close");
         }
 
+        updateApplicationDocument(entity);
+
         return repository.save(entity);
     }
 }
