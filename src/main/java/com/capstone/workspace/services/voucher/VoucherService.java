@@ -7,6 +7,7 @@ import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.enums.voucher.VoucherDiscountType;
 import com.capstone.workspace.exceptions.BadRequestException;
 import com.capstone.workspace.exceptions.ConflictException;
+import com.capstone.workspace.exceptions.GoneException;
 import com.capstone.workspace.exceptions.NotFoundException;
 import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
@@ -84,7 +85,17 @@ public class VoucherService {
     }
 
     public Voucher update(UUID id, UpdateVoucherDto dto) {
-        Voucher entity = upsert(id, dto);
+        Voucher entity = getOneById(id);
+
+        if (entity.getStartDate().isBefore(Instant.now())) {
+            if (entity.getEndDate().isBefore(Instant.now())) {
+                throw new GoneException("Voucher has expired");
+            }
+            BeanUtils.copyProperties(dto, entity, "discountType", "startDate", "minOrderAmount", "maxDiscountAmount");
+        } else {
+            BeanUtils.copyProperties(dto, entity, AppHelper.commonProperties);
+        }
+
         return repository.save(entity);
     }
 }
