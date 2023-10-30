@@ -37,5 +37,7 @@ public class CreateVoucherDto {
     @Size(max = 9)
     private String code;
 
+    private Boolean isHidden;
+
     private String storeId;
 }

@@ -41,6 +41,9 @@ public class Voucher extends BaseEntity implements IPartnerEntity, IStoreEntity 
     private String code;
 
     @Column
+    private Boolean isHidden = false;
+
+    @Column
     private String partnerId;
 
     @Column
