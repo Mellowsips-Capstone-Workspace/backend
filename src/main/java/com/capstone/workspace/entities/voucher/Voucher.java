@@ -15,7 +15,7 @@ import java.time.Instant;
 @Table(name = "voucher", schema = "public")
 @Where(clause = "is_deleted=false")
 public class Voucher extends BaseEntity implements IPartnerEntity, IStoreEntity {
-    @Column
+    @Column(nullable = false)
     private int quantity;
 
     @Column(nullable = false)
@@ -28,16 +28,16 @@ public class Voucher extends BaseEntity implements IPartnerEntity, IStoreEntity 
     @Column
     private Instant endDate;
 
-    @Column
+    @Column(nullable = false)
     private int maxUsesPerUser;
 
     @Column
     private Long maxDiscountAmount;
 
-    @Column
+    @Column(nullable = false)
     private Long minOrderAmount;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 9)
     private String code;
 
     @Column

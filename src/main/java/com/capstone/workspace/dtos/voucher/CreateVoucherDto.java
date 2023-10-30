@@ -23,12 +23,14 @@ public class CreateVoucherDto {
 
     private Instant endDate;
 
+    @NotNull
     @Min(1)
     private int maxUsesPerUser;
 
     @Min(1000)
     private Long maxDiscountAmount;
 
+    @NotNull
     @Min(0)
     private Long minOrderAmount;
 
