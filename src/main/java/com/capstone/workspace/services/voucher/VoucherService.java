@@ -44,7 +44,7 @@ public class VoucherService {
         }
 
         UserIdentity userIdentity = identityService.getUserIdentity();
-        if (userIdentity.getUserType() != UserType.EMPLOYEE) {
+        if (userIdentity.getUserType() != UserType.OWNER) {
             entity.setStoreId(null);
         }
 

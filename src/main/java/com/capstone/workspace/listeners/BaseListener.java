@@ -16,6 +16,7 @@ import jakarta.persistence.PreUpdate;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -32,7 +33,7 @@ public class BaseListener<E extends BaseEntity> {
             entity.setCreatedBy(userIdentity.getUsername());
             entity.setUpdatedBy(userIdentity.getUsername());
 
-            if (userIdentity.getUserType() == UserType.EMPLOYEE) {
+            if (List.of(UserType.OWNER, UserType.STORE_MANAGER, UserType.STAFF).contains(userIdentity.getUserType())) {
                 if (entity instanceof IPartnerEntity) {
                     ((IPartnerEntity) entity).setPartnerId(userIdentity.getPartnerId());
                 }
@@ -66,7 +67,7 @@ public class BaseListener<E extends BaseEntity> {
     }
 
     private void verifyUser(UserIdentity userIdentity, E entity) {
-        if (userIdentity.getUserType() != UserType.EMPLOYEE) {
+        if (!List.of(UserType.OWNER, UserType.STORE_MANAGER, UserType.STAFF).contains(userIdentity.getUserType())) {
             return;
         }
 

@@ -15,6 +15,8 @@ import org.springframework.statemachine.config.builders.StateMachineStateConfigu
 import org.springframework.statemachine.config.builders.StateMachineTransitionConfigurer;
 import org.springframework.statemachine.guard.Guard;
 
+import java.util.List;
+
 @Configuration
 @EnableStateMachine(name = {"orderStateMachineConfig"})
 @RequiredArgsConstructor
@@ -111,7 +113,7 @@ public class OrderStateMachineConfiguration extends EnumStateMachineConfigurerAd
     public Guard<OrderStatus, OrderEvent> isEmployee() {
         return context -> {
             UserIdentity userIdentity = identityService.getUserIdentity();
-            return userIdentity != null && userIdentity.getUserType() == UserType.EMPLOYEE;
+            return userIdentity != null && List.of(UserType.OWNER, UserType.STORE_MANAGER, UserType.STAFF).contains(userIdentity.getUserType());
         };
     }
 

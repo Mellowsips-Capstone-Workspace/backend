@@ -26,7 +26,7 @@ public class VoucherController {
     @NonNull
     private final ModelMapper mapper;
 
-    @AllowedUsers(userTypes = {UserType.EMPLOYEE, UserType.ADMIN})
+    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER, UserType.ADMIN})
     @PostMapping
     public ResponseModel<VoucherModel> create(@Valid @RequestBody CreateVoucherDto dto) {
         Voucher entity = voucherService.create(dto);

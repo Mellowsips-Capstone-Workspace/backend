@@ -28,7 +28,7 @@ public class ApplicationController {
     @NonNull
     private final ModelMapper mapper;
 
-    @AllowedUsers(userTypes = {UserType.EMPLOYEE})
+    @AllowedUsers(userTypes = {UserType.OWNER})
     @PostMapping
     public ResponseModel<ApplicationModel> create(@Valid @RequestBody CreateApplicationDto params) {
         Application entity = applicationService.create(params);
@@ -36,7 +36,7 @@ public class ApplicationController {
         return ResponseModel.<ApplicationModel>builder().data(model).build();
     }
 
-    @AllowedUsers(userTypes = {UserType.EMPLOYEE, UserType.ADMIN})
+    @AllowedUsers(userTypes = {UserType.OWNER, UserType.ADMIN})
     @PutMapping("/{id}/events/{event}")
     public ResponseModel<ApplicationModel> transition(@PathVariable UUID id, @PathVariable String event) {
         Application entity = applicationService.transition(id, event);
@@ -44,7 +44,7 @@ public class ApplicationController {
         return ResponseModel.<ApplicationModel>builder().data(model).build();
     }
 
-    @AllowedUsers(userTypes = {UserType.EMPLOYEE, UserType.ADMIN})
+    @AllowedUsers(userTypes = {UserType.OWNER, UserType.ADMIN})
     @GetMapping("/{id}")
     public ResponseModel<ApplicationModel> getApplicationById(@PathVariable UUID id) {
         Application entity = applicationService.getApplicationById(id);
@@ -52,14 +52,14 @@ public class ApplicationController {
         return ResponseModel.<ApplicationModel>builder().data(model).build();
     }
 
-    @AllowedUsers(userTypes = {UserType.EMPLOYEE, UserType.ADMIN})
+    @AllowedUsers(userTypes = {UserType.OWNER, UserType.ADMIN})
     @PostMapping("/search")
     public ResponseModel<PaginationResponseModel<ApplicationModel>> search(@Valid @RequestBody SearchApplicationDto dto) {
         PaginationResponseModel<ApplicationModel> data = applicationService.search(dto);
         return ResponseModel.<PaginationResponseModel<ApplicationModel>>builder().data(data).build();
     }
 
-    @AllowedUsers(userTypes = {UserType.EMPLOYEE})
+    @AllowedUsers(userTypes = {UserType.OWNER})
     @PutMapping("/{id}")
     public ResponseModel<ApplicationModel> update(@PathVariable UUID id, @Valid @RequestBody UpdateApplicationDto params) {
         Application entity = applicationService.update(id, params);

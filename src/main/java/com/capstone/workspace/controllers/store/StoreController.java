@@ -46,7 +46,7 @@ public class StoreController {
         return ResponseModel.<PaginationResponseModel<StoreModel>>builder().data(data).build();
     }
 
-    @AllowedUsers(userTypes = {UserType.EMPLOYEE, UserType.ADMIN})
+    @AllowedUsers(userTypes = {UserType.OWNER, UserType.ADMIN})
     @PostMapping("/search")
     public ResponseModel<PaginationResponseModel<StoreModel>> search(@Valid @RequestBody SearchStoreDto dto) {
         PaginationResponseModel<StoreModel> data = storeService.search(dto);
@@ -60,7 +60,7 @@ public class StoreController {
         return ResponseModel.<MenuModel>builder().data(model).build();
     }
 
-    @AllowedUsers(userTypes = {UserType.EMPLOYEE})
+    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER})
     @PostMapping("/{id}/qrcodes")
     public ResponseModel<QrCodeModel> createQrCode(@PathVariable(name = "id") String storeId, @Valid @RequestBody QrCodeDto dto) {
         QrCode entity = qrCodeService.create(storeId, dto);
@@ -68,7 +68,7 @@ public class StoreController {
         return ResponseModel.<QrCodeModel>builder().data(model).build();
     }
 
-    @AllowedUsers(userTypes = {UserType.EMPLOYEE})
+    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER})
     @GetMapping("/{id}/qrcodes")
     public ResponseModel<List<QrCodeModel>> getStoreQrCodes(@PathVariable(name = "id") String storeId) {
         List<QrCodeModel> data = qrCodeService.getStoreQrCodes(storeId);
