@@ -1,0 +1,5 @@
+ALTER TABLE store
+    DROP COLUMN is_open;
+
+ALTER TABLE voucher
+    ADD COLUMN is_hidden BOOLEAN DEFAULT FALSE;

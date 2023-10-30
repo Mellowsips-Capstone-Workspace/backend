@@ -12,10 +12,12 @@ import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.services.auth.IdentityService;
 import com.capstone.workspace.services.store.StoreService;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreRemove;
 import jakarta.persistence.PreUpdate;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -32,7 +34,7 @@ public class BaseListener<E extends BaseEntity> {
             entity.setCreatedBy(userIdentity.getUsername());
             entity.setUpdatedBy(userIdentity.getUsername());
 
-            if (userIdentity.getUserType() == UserType.EMPLOYEE) {
+            if (List.of(UserType.OWNER, UserType.STORE_MANAGER, UserType.STAFF).contains(userIdentity.getUserType())) {
                 if (entity instanceof IPartnerEntity) {
                     ((IPartnerEntity) entity).setPartnerId(userIdentity.getPartnerId());
                 }
@@ -65,8 +67,17 @@ public class BaseListener<E extends BaseEntity> {
         }
     }
 
+    @PreRemove
+    public void preRemove(E entity) {
+        IdentityService identityService = BeanHelper.getBean(IdentityService.class);
+        UserIdentity userIdentity = identityService.getUserIdentity();
+        if (userIdentity != null) {
+            verifyUser(userIdentity, entity);
+        }
+    }
+
     private void verifyUser(UserIdentity userIdentity, E entity) {
-        if (userIdentity.getUserType() != UserType.EMPLOYEE) {
+        if (!List.of(UserType.OWNER, UserType.STORE_MANAGER, UserType.STAFF).contains(userIdentity.getUserType())) {
             return;
         }
 

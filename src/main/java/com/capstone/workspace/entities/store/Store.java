@@ -48,9 +48,6 @@ public class Store extends BaseEntity implements IPartnerEntity {
     @Column
     private Boolean isActive;
 
-    @Column
-    private Boolean isOpen;
-
     @Convert(converter = PeriodListConverter.class)
     @Column
     @JdbcType(PostgreSQLJsonPGObjectJsonbType.class)

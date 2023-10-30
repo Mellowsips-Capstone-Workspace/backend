@@ -1,7 +1,6 @@
 package com.capstone.workspace.interceptors;
 
 import com.capstone.workspace.enums.auth.AuthErrorCode;
-import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.exceptions.AppDefinedException;
 import com.capstone.workspace.helpers.auth.AuthHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
@@ -31,10 +30,6 @@ public class AuthUserInterceptor implements HandlerInterceptor {
 
             UserIdentity userIdentity = authHelper.parseUserIdentity(authorization);
             authContextService.setUserIdentity(userIdentity);
-
-            if (userIdentity.getUserType() != null && userIdentity.getUserType() != UserType.EMPLOYEE) {
-                return true;
-            }
 
             return true;
         }

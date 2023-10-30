@@ -91,7 +91,7 @@ public class UserService {
                 throw new BadRequestException("Email must not be null or empty");
             }
             entity.setProvider(AuthProviderType.USERNAME);
-            entity.setType(UserType.EMPLOYEE);
+            entity.setType(UserType.OWNER);
         }
 
         return repository.save(entity);

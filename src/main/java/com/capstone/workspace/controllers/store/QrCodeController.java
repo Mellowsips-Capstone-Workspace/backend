@@ -32,7 +32,7 @@ public class QrCodeController {
         return ResponseModel.<QrCodeModel>builder().data(model).build();
     }
 
-    @AllowedUsers(userTypes = {UserType.EMPLOYEE})
+    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER})
     @PutMapping("/{id}")
     public ResponseModel<QrCodeModel> updateQrCodeById(@PathVariable UUID id, @Valid @RequestBody QrCodeDto dto) {
         QrCode entity = qrCodeService.update(id, dto);

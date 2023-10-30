@@ -146,7 +146,7 @@ public class OrderService {
         if (
             entity == null
             || (userType == UserType.CUSTOMER && !username.equals(entity.getCreatedBy()))
-            || (userType == UserType.EMPLOYEE && (!entity.getPartnerId().equals(userIdentity.getPartnerId()) || (userIdentity.getStoreId() != null && !userIdentity.getStoreId().equals(entity.getStoreId()))))
+            || (List.of(UserType.OWNER, UserType.STORE_MANAGER, UserType.STAFF).contains(userType) && (!entity.getPartnerId().equals(userIdentity.getPartnerId()) || (userIdentity.getStoreId() != null && !userIdentity.getStoreId().equals(entity.getStoreId()))))
         ) {
             throw new NotFoundException("Order not found");
         }
@@ -169,7 +169,7 @@ public class OrderService {
     }
 
     @Transactional
-    public Order transition(UUID id, String event) {
+    public synchronized Order transition(UUID id, String event) {
         Order entity = getOneById(id);
         OrderEvent orderEvent = OrderEvent.valueOf(event.toUpperCase());
 

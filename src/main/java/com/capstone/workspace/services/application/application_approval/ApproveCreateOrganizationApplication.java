@@ -1,19 +1,15 @@
 package com.capstone.workspace.services.application.application_approval;
 
 import com.capstone.workspace.dtos.notification.PushNotificationDto;
-import com.capstone.workspace.dtos.user.CreateRoleDto;
 import com.capstone.workspace.entities.application.Application;
 import com.capstone.workspace.entities.application.BankAccount;
 import com.capstone.workspace.entities.application.Controller;
 import com.capstone.workspace.entities.application.Representative;
 import com.capstone.workspace.entities.partner.Partner;
 import com.capstone.workspace.entities.store.Store;
-import com.capstone.workspace.entities.user.Permission;
-import com.capstone.workspace.entities.user.Role;
 import com.capstone.workspace.enums.application.ApplicationStatus;
 import com.capstone.workspace.enums.notification.NotificationKey;
 import com.capstone.workspace.enums.user.UserType;
-import com.capstone.workspace.exceptions.BadRequestException;
 import com.capstone.workspace.helpers.application.ApplicationHelper;
 import com.capstone.workspace.models.application.RepresentativeModel;
 import com.capstone.workspace.models.auth.UserIdentity;
@@ -28,8 +24,6 @@ import com.capstone.workspace.services.auth.IdentityService;
 import com.capstone.workspace.services.notification.NotificationService;
 import com.capstone.workspace.services.partner.PartnerService;
 import com.capstone.workspace.services.store.StoreService;
-import com.capstone.workspace.services.user.PermissionService;
-import com.capstone.workspace.services.user.RoleService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -60,12 +54,6 @@ public class ApproveCreateOrganizationApplication extends BaseApproveApplication
     private final PartnerService partnerService;
 
     @NonNull
-    private final PermissionService permissionService;
-
-    @NonNull
-    private final RoleService roleService;
-
-    @NonNull
     private final AuthService authService;
 
     @NonNull
@@ -92,7 +80,7 @@ public class ApproveCreateOrganizationApplication extends BaseApproveApplication
 
             String creator = application.getCreatedBy();
             userIdentity.setUsername(creator);
-            userIdentity.setUserType(UserType.EMPLOYEE);
+            userIdentity.setUserType(UserType.OWNER);
 
             Map jsonData = application.getJsonData();
             Partner partner = createPartner(jsonData.get("organization"));
@@ -105,24 +93,8 @@ public class ApproveCreateOrganizationApplication extends BaseApproveApplication
             createInvoiceController(jsonData.get("controller"));
             createStores(jsonData.get("merchant"));
 
-            // Create "owner" role
-            List<Permission> permissions = permissionService.getAll();
-            CreateRoleDto createRoleDto = CreateRoleDto.builder()
-                    .isAllowedEdit(false)
-                    .name("Owner")
-                    .description("Default owner role with full permissions")
-                    .permissions(permissions.stream().map(p -> p.getId()).toList())
-                    .build();
-            Role ownerRole = roleService.create(createRoleDto);
-
             userIdentity.setUsername(approver);
             userIdentity.setUserType(UserType.ADMIN);
-
-            // Assign application creator to owner role
-            if (creator == null) {
-                throw new BadRequestException("Application missing creator");
-            }
-            roleService.assignUserToRole(ownerRole.getId(), creator);
 
             // Application
             application.setStatus(ApplicationStatus.APPROVED);
