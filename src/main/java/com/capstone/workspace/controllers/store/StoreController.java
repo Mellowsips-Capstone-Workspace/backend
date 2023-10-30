@@ -7,6 +7,7 @@ import com.capstone.workspace.entities.store.Menu;
 import com.capstone.workspace.entities.store.QrCode;
 import com.capstone.workspace.entities.store.Store;
 import com.capstone.workspace.enums.user.UserType;
+import com.capstone.workspace.helpers.store.StoreHelper;
 import com.capstone.workspace.models.shared.PaginationResponseModel;
 import com.capstone.workspace.models.shared.ResponseModel;
 import com.capstone.workspace.models.store.MenuModel;
@@ -40,17 +41,18 @@ public class StoreController {
     @NonNull
     private final ModelMapper mapper;
 
+    @NonNull
+    private final StoreHelper storeHelper;
+
     @PostMapping("/customer/search")
     public ResponseModel<PaginationResponseModel<StoreModel>> customerSearch(@Valid @RequestBody SearchStoreDto dto) {
-        PaginationResponseModel<StoreModel> data = storeService.search(dto);
-        return ResponseModel.<PaginationResponseModel<StoreModel>>builder().data(data).build();
+        return searchStore(dto);
     }
 
     @AllowedUsers(userTypes = {UserType.OWNER, UserType.ADMIN})
     @PostMapping("/search")
     public ResponseModel<PaginationResponseModel<StoreModel>> search(@Valid @RequestBody SearchStoreDto dto) {
-        PaginationResponseModel<StoreModel> data = storeService.search(dto);
-        return ResponseModel.<PaginationResponseModel<StoreModel>>builder().data(data).build();
+        return searchStore(dto);
     }
 
     @GetMapping("/{id}/menu")
@@ -79,6 +81,19 @@ public class StoreController {
     public ResponseModel<StoreModel> getStoreById(@PathVariable(name = "id") UUID storeId) {
         Store entity = storeService.getStoreById(storeId);
         StoreModel model = mapper.map(entity, StoreModel.class);
+        model.setIsOpen(storeHelper.isStoreOpening(model.getOperationalHours()));
         return ResponseModel.<StoreModel>builder().data(model).build();
+    }
+
+    private ResponseModel<PaginationResponseModel<StoreModel>> searchStore(SearchStoreDto dto) {
+        PaginationResponseModel<StoreModel> data = storeService.search(dto);
+
+        if (data.getResults() != null) {
+            data.getResults().forEach(item -> {
+                item.setIsOpen(storeHelper.isStoreOpening(item.getOperationalHours()));
+            });
+        }
+
+        return ResponseModel.<PaginationResponseModel<StoreModel>>builder().data(data).build();
     }
 }
