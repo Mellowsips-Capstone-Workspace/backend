@@ -1,6 +1,7 @@
 package com.capstone.workspace.services.voucher;
 
 import com.capstone.workspace.dtos.voucher.CreateVoucherDto;
+import com.capstone.workspace.dtos.voucher.UpdateVoucherDto;
 import com.capstone.workspace.entities.voucher.Voucher;
 import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.enums.voucher.VoucherDiscountType;
@@ -36,7 +37,7 @@ public class VoucherService {
         validate(dto);
 
         Voucher entity = upsert(null, dto);
-        if (dto.getStartDate() == null) {
+        if (dto.getStartDate() == null || dto.getStartDate().isBefore(Instant.now())) {
             entity.setStartDate(Instant.now());
         }
         if (dto.getDiscountType() == VoucherDiscountType.CASH) {
@@ -80,5 +81,10 @@ public class VoucherService {
         }
 
         return entity;
+    }
+
+    public Voucher update(UUID id, UpdateVoucherDto dto) {
+        Voucher entity = upsert(id, dto);
+        return repository.save(entity);
     }
 }
