@@ -5,10 +5,7 @@ import com.capstone.workspace.dtos.voucher.UpdateVoucherDto;
 import com.capstone.workspace.entities.voucher.Voucher;
 import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.enums.voucher.VoucherDiscountType;
-import com.capstone.workspace.exceptions.BadRequestException;
-import com.capstone.workspace.exceptions.ConflictException;
-import com.capstone.workspace.exceptions.GoneException;
-import com.capstone.workspace.exceptions.NotFoundException;
+import com.capstone.workspace.exceptions.*;
 import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.repositories.voucher.VoucherRepository;
@@ -36,10 +33,11 @@ public class VoucherService {
 
     public Voucher create(CreateVoucherDto dto) {
         validate(dto);
+        Instant now = Instant.now();
 
         Voucher entity = upsert(null, dto);
-        if (dto.getStartDate() == null || dto.getStartDate().isBefore(Instant.now())) {
-            entity.setStartDate(Instant.now());
+        if (dto.getStartDate() == null || dto.getStartDate().isBefore(now)) {
+            entity.setStartDate(now);
         }
         if (dto.getDiscountType() == VoucherDiscountType.CASH) {
             entity.setMaxDiscountAmount(null);
@@ -87,13 +85,51 @@ public class VoucherService {
     public Voucher update(UUID id, UpdateVoucherDto dto) {
         Voucher entity = getOneById(id);
 
-        if (entity.getStartDate().isBefore(Instant.now())) {
-            if (entity.getEndDate().isBefore(Instant.now())) {
+        UserIdentity userIdentity = identityService.getUserIdentity();
+        if (userIdentity.getUserType() == UserType.ADMIN && entity.getPartnerId() != null) {
+            throw new ForbiddenException("You are not allowed to update partner's voucher");
+        }
+
+        Instant now = Instant.now();
+        if (entity.getStartDate().isBefore(now)) {
+            if (entity.getEndDate().isBefore(now)) {
                 throw new GoneException("Voucher has expired");
             }
-            BeanUtils.copyProperties(dto, entity, "discountType", "startDate", "minOrderAmount", "maxDiscountAmount");
+            BeanUtils.copyProperties(dto, entity, "discountType", "startDate", "minOrderAmount", "maxDiscountAmount", "isHidden");
         } else {
             BeanUtils.copyProperties(dto, entity, AppHelper.commonProperties);
+        }
+
+        return repository.save(entity);
+    }
+
+    public void delete(UUID id) {
+        Voucher entity = getOneById(id);
+
+        UserIdentity userIdentity = identityService.getUserIdentity();
+        if (userIdentity.getUserType() == UserType.ADMIN && entity.getPartnerId() != null) {
+            throw new ForbiddenException("You are not allowed to delete partner's voucher");
+        }
+
+        if (entity.getStartDate().isBefore(Instant.now())) {
+            throw new BadRequestException("Promotion is ongoing or has ended");
+        }
+        repository.delete(entity);
+    }
+
+    public Voucher close(UUID id) {
+        Voucher entity = getOneById(id);
+
+        UserIdentity userIdentity = identityService.getUserIdentity();
+        if (userIdentity.getUserType() == UserType.ADMIN && entity.getPartnerId() != null) {
+            throw new ForbiddenException("You are not allowed to close partner's voucher");
+        }
+
+        Instant now = Instant.now();
+        if (entity.getStartDate().isBefore(now) && (entity.getEndDate() == null || entity.getEndDate().isAfter(now))) {
+            entity.setEndDate(now);
+        } else {
+            throw new BadRequestException("You cannot close the promotion");
         }
 
         return repository.save(entity);

@@ -12,6 +12,7 @@ import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.services.auth.IdentityService;
 import com.capstone.workspace.services.store.StoreService;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreRemove;
 import jakarta.persistence.PreUpdate;
 import org.springframework.stereotype.Component;
 
@@ -63,6 +64,15 @@ public class BaseListener<E extends BaseEntity> {
         if (userIdentity != null) {
             verifyUser(userIdentity, entity);
             entity.setUpdatedBy(userIdentity.getUsername());
+        }
+    }
+
+    @PreRemove
+    public void preRemove(E entity) {
+        IdentityService identityService = BeanHelper.getBean(IdentityService.class);
+        UserIdentity userIdentity = identityService.getUserIdentity();
+        if (userIdentity != null) {
+            verifyUser(userIdentity, entity);
         }
     }
 

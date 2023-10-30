@@ -30,4 +30,6 @@ public class UpdateVoucherDto {
 
     @Min(0)
     private Long minOrderAmount;
+
+    private Boolean isHidden;
 }

@@ -34,11 +34,33 @@ public class VoucherController {
         return ResponseModel.<VoucherModel>builder().data(model).build();
     }
 
+    @GetMapping("/details/{id}")
+    public ResponseModel<VoucherModel> getVoucherById(@PathVariable UUID id) {
+        Voucher entity = voucherService.getOneById(id);
+        VoucherModel model = mapper.map(entity, VoucherModel.class);
+        return ResponseModel.<VoucherModel>builder().data(model).build();
+    }
+
     @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER, UserType.ADMIN})
     @PutMapping("/{id}")
     public ResponseModel<VoucherModel> update(@PathVariable UUID id, @Valid @RequestBody UpdateVoucherDto dto) {
         Voucher entity = voucherService.update(id, dto);
         VoucherModel model = mapper.map(entity, VoucherModel.class);
         return ResponseModel.<VoucherModel>builder().data(model).build();
+    }
+
+    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER, UserType.ADMIN})
+    @PutMapping("/{id}/close")
+    public ResponseModel<VoucherModel> close(@PathVariable UUID id) {
+        Voucher entity = voucherService.close(id);
+        VoucherModel model = mapper.map(entity, VoucherModel.class);
+        return ResponseModel.<VoucherModel>builder().data(model).build();
+    }
+
+    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER, UserType.ADMIN})
+    @DeleteMapping("/{id}")
+    public ResponseModel delete(@PathVariable UUID id) {
+        voucherService.delete(id);
+        return ResponseModel.builder().message("Delete voucher successfully").build();
     }
 }
