@@ -5,6 +5,7 @@ import com.capstone.workspace.converters.QrCodeConverter;
 import com.capstone.workspace.entities.partner.IPartnerEntity;
 import com.capstone.workspace.entities.shared.BaseEntity;
 import com.capstone.workspace.entities.store.IStoreEntity;
+import com.capstone.workspace.entities.voucher.VoucherOrder;
 import com.capstone.workspace.enums.order.OrderStatus;
 import com.capstone.workspace.enums.order.TransactionMethod;
 import com.capstone.workspace.models.cart.CartDetailsModel;
@@ -41,6 +42,9 @@ public class Order extends BaseEntity implements IPartnerEntity, IStoreEntity {
 
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
     private List<Transaction> transactions;
+
+    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
+    private List<VoucherOrder> voucherOrders;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

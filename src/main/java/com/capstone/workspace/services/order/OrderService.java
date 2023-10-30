@@ -169,7 +169,7 @@ public class OrderService {
     }
 
     @Transactional
-    public Order transition(UUID id, String event) {
+    public synchronized Order transition(UUID id, String event) {
         Order entity = getOneById(id);
         OrderEvent orderEvent = OrderEvent.valueOf(event.toUpperCase());
 

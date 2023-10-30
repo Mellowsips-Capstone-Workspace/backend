@@ -118,7 +118,7 @@ public class ApplicationService {
         return entity;
     }
 
-    public Application transition(UUID id, String event) {
+    public synchronized Application transition(UUID id, String event) {
         Application entity = getApplicationById(id);
         ApplicationEvent applicationEvent = ApplicationEvent.valueOf(event.toUpperCase());
 

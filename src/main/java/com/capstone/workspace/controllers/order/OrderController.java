@@ -5,6 +5,7 @@ import com.capstone.workspace.dtos.order.CreateOrderDto;
 import com.capstone.workspace.dtos.order.SearchOrderDto;
 import com.capstone.workspace.entities.order.Order;
 import com.capstone.workspace.enums.user.UserType;
+import com.capstone.workspace.models.order.OrderDetailsModel;
 import com.capstone.workspace.models.order.OrderModel;
 import com.capstone.workspace.models.shared.PaginationResponseModel;
 import com.capstone.workspace.models.shared.ResponseModel;
@@ -40,10 +41,10 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
-    public ResponseModel<OrderModel> getOrderById(@PathVariable UUID id) {
+    public ResponseModel<OrderDetailsModel> getOrderById(@PathVariable UUID id) {
         Order entity = orderService.getOneById(id);
-        OrderModel model = mapper.map(entity, OrderModel.class);
-        return ResponseModel.<OrderModel>builder().data(model).build();
+        OrderDetailsModel model = mapper.map(entity, OrderDetailsModel.class);
+        return ResponseModel.<OrderDetailsModel>builder().data(model).build();
     }
 
     @PostMapping("/zalopay/callback")

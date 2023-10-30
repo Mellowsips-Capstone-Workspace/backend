@@ -32,10 +32,10 @@ public class Voucher extends BaseEntity implements IPartnerEntity, IStoreEntity 
     private int maxUsesPerUser;
 
     @Column
-    private long maxDiscountAmount;
+    private Long maxDiscountAmount;
 
     @Column
-    private long minOrderAmount;
+    private Long minOrderAmount;
 
     @Column(nullable = false, unique = true)
     private String code;
