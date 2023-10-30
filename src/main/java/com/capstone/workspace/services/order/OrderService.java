@@ -16,6 +16,7 @@ import com.capstone.workspace.exceptions.ConflictException;
 import com.capstone.workspace.exceptions.GoneException;
 import com.capstone.workspace.exceptions.NotFoundException;
 import com.capstone.workspace.helpers.shared.AppHelper;
+import com.capstone.workspace.helpers.store.StoreHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.models.cart.CartDetailsModel;
 import com.capstone.workspace.models.order.OrderModel;
@@ -27,7 +28,6 @@ import com.capstone.workspace.repositories.order.OrderRepository;
 import com.capstone.workspace.repositories.order.TransactionRepository;
 import com.capstone.workspace.services.auth.IdentityService;
 import com.capstone.workspace.services.cart.CartService;
-import com.capstone.workspace.services.shared.JobService;
 import com.capstone.workspace.services.store.QrCodeService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.NonNull;
@@ -78,7 +78,7 @@ public class OrderService {
     private final TransactionRepository transactionRepository;
 
     @NonNull
-    private final JobService jobService;
+    private final StoreHelper storeHelper;
 
     @Transactional
     public OrderModel create(CreateOrderDto dto) {
@@ -110,7 +110,7 @@ public class OrderService {
         if (!qrCode.getStoreId().equals(String.valueOf(store.getId()))) {
             throw new ConflictException("QR Code does not belong to this store");
         }
-        if (!Boolean.TRUE.equals(store.getIsActive()) || !Boolean.TRUE.equals(store.getIsOpen())) {
+        if (!Boolean.TRUE.equals(store.getIsActive()) || !storeHelper.isStoreOpening(store.getOperationalHours())) {
             throw new GoneException("Store is unavailable now");
         }
 
