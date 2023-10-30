@@ -1,0 +1,1 @@
+DROP TABLE "user_role", "role_permission", "role", "permission";
