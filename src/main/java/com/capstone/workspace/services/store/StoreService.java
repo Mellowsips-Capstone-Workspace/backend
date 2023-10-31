@@ -2,13 +2,11 @@ package com.capstone.workspace.services.store;
 
 import com.capstone.workspace.dtos.store.SearchStoreCriteriaDto;
 import com.capstone.workspace.dtos.store.SearchStoreDto;
+import com.capstone.workspace.dtos.store.UpdateStoreProfileImgDto;
 import com.capstone.workspace.entities.partner.Partner;
 import com.capstone.workspace.entities.store.Store;
 import com.capstone.workspace.enums.partner.BusinessType;
-import com.capstone.workspace.exceptions.BadRequestException;
-import com.capstone.workspace.exceptions.ConflictException;
-import com.capstone.workspace.exceptions.NotFoundException;
-import com.capstone.workspace.exceptions.UnauthorizedException;
+import com.capstone.workspace.exceptions.*;
 import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.models.shared.PaginationResponseModel;
@@ -111,5 +109,11 @@ public class StoreService {
         }
 
         return entity;
+    }
+
+    public Store updateStoreProfileImg(UUID id, UpdateStoreProfileImgDto dto){
+        Store store = getStoreById(id);
+        BeanUtils.copyProperties(dto, store, AppHelper.commonProperties);
+        return repository.save(store);
     }
 }

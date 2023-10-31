@@ -14,6 +14,7 @@ import com.capstone.workspace.services.store.StoreService;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreRemove;
 import jakarta.persistence.PreUpdate;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -61,6 +62,7 @@ public class BaseListener<E extends BaseEntity> {
 
         IdentityService identityService = BeanHelper.getBean(IdentityService.class);
         UserIdentity userIdentity = identityService.getUserIdentity();
+        LoggerFactory.getLogger(BaseListener.class).info(userIdentity.toString());
         if (userIdentity != null) {
             verifyUser(userIdentity, entity);
             entity.setUpdatedBy(userIdentity.getUsername());

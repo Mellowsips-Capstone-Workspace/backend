@@ -21,7 +21,6 @@ public class ProductService {
         if (entity == null) {
             throw new NotFoundException("Product not found");
         }
-
         return entity;
     }
 }

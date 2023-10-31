@@ -3,6 +3,7 @@ package com.capstone.workspace.controllers.store;
 import com.capstone.workspace.annotations.AllowedUsers;
 import com.capstone.workspace.dtos.store.QrCodeDto;
 import com.capstone.workspace.dtos.store.SearchStoreDto;
+import com.capstone.workspace.dtos.store.UpdateStoreProfileImgDto;
 import com.capstone.workspace.entities.store.Menu;
 import com.capstone.workspace.entities.store.QrCode;
 import com.capstone.workspace.entities.store.Store;
@@ -95,5 +96,13 @@ public class StoreController {
         }
 
         return ResponseModel.<PaginationResponseModel<StoreModel>>builder().data(data).build();
+    }
+
+    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER})
+    @PutMapping("/{id}/update-profile-image")
+    public ResponseModel<StoreModel> updateStoreProfileImg(@PathVariable(name="id") UUID storeId, @Valid @RequestBody UpdateStoreProfileImgDto dto){
+        Store store = storeService.updateStoreProfileImg(storeId, dto);
+        StoreModel model = mapper.map(store, StoreModel.class);
+        return ResponseModel.<StoreModel>builder().data(model).build();
     }
 }
