@@ -1,7 +1,5 @@
 package com.capstone.workspace.helpers.shared;
 
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -12,30 +10,17 @@ import java.time.ZoneId;
 @Component
 @RequiredArgsConstructor
 public class LocalDateHelper {
-    @NonNull
-    private final HttpServletRequest request;
+    public static final String ZONE_ID = "Asia/Saigon";
 
     public Object getLocalTimeAtZoneRequest(String unit) {
-        String zoneId = request.getHeader("Zone");
-
         switch (unit) {
             case "date":
-                if (hasZone(zoneId)) {
-                    return LocalDate.now(ZoneId.of(zoneId));
-                }
-                return LocalDate.now();
+                return LocalDate.now(ZoneId.of(ZONE_ID));
             case "datetime":
-                if (hasZone(zoneId)) {
-                    return LocalDateTime.now(ZoneId.of(zoneId));
-                }
-                return LocalDateTime.now();
+                return LocalDateTime.now(ZoneId.of(ZONE_ID));
             default:
                 return null;
         }
-    }
-
-    private boolean hasZone(String zoneId) {
-        return zoneId != null && ZoneId.getAvailableZoneIds().contains(zoneId);
     }
 }
 

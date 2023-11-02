@@ -46,6 +46,7 @@ public class BaseListener<E extends BaseEntity> {
                     }
 
                     String storeId = ((IStoreEntity) entity).getStoreId();
+                    if (storeId == null) return;
                     StoreService storeService = BeanHelper.getBean(StoreService.class);
                     Store store = storeService.getStoreById(UUID.fromString(storeId));
                     if (!store.getPartnerId().equals(userIdentity.getPartnerId())) {

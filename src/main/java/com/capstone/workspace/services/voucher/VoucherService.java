@@ -13,6 +13,8 @@ import com.capstone.workspace.services.auth.IdentityService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +24,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class VoucherService {
+    private static Logger logger = LoggerFactory.getLogger(VoucherService.class);
+
     @NonNull
     private final VoucherRepository repository;
 
@@ -33,12 +37,17 @@ public class VoucherService {
 
     public Voucher create(CreateVoucherDto dto) {
         validate(dto);
-        Instant now = Instant.now();
+        Voucher duplicate = repository.findByCode(dto.getCode());
+        if (duplicate != null) {
+            throw new ConflictException("Voucher code already exists");
+        }
 
+        Instant now = Instant.now();
         Voucher entity = upsert(null, dto);
         if (dto.getStartDate() == null || dto.getStartDate().isBefore(now)) {
             entity.setStartDate(now);
         }
+
         if (dto.getDiscountType() == VoucherDiscountType.CASH) {
             entity.setMaxDiscountAmount(null);
         }
@@ -52,13 +61,16 @@ public class VoucherService {
     }
 
     private void validate(CreateVoucherDto dto) {
-        Voucher duplicate = repository.findByCode(dto.getCode());
-        if (duplicate != null) {
-            throw new ConflictException("Voucher code already exists");
+        if (dto.getStartDate() != null && dto.getEndDate() != null && (dto.getEndDate().isBefore(Instant.now()) || dto.getStartDate().isAfter(dto.getEndDate()))) {
+            throw new BadRequestException("End date must be after start date and in the future");
         }
 
-        if (dto.getEndDate().isBefore(Instant.now()) || (dto.getStartDate() != null && dto.getEndDate() != null && dto.getStartDate().isAfter(dto.getEndDate()))) {
-            throw new BadRequestException("End date must be after start date and in the future");
+        if (dto.getDiscountType() == VoucherDiscountType.CASH && dto.getValue() < 1000L) {
+            throw new BadRequestException("Voucher discount amount must be equals or greater than 1000 VND");
+        }
+
+        if (dto.getDiscountType() == VoucherDiscountType.PERCENT && (dto.getValue() < 1L || dto.getValue() > 100L)) {
+            throw new BadRequestException("Voucher discount percent value must be between 1 and 100");
         }
     }
 
@@ -95,8 +107,13 @@ public class VoucherService {
             if (entity.getEndDate().isBefore(now)) {
                 throw new GoneException("Voucher has expired");
             }
-            BeanUtils.copyProperties(dto, entity, "discountType", "startDate", "minOrderAmount", "maxDiscountAmount", "isHidden");
+
+            if (dto.getEndDate() != null && dto.getEndDate().isBefore(now)) {
+                throw new BadRequestException("End date must be in the future");
+            }
+            BeanUtils.copyProperties(dto, entity, "discountType", "startDate", "minOrderAmount", "maxDiscountAmount", "isHidden", "value");
         } else {
+            validate(mapper.map(dto, CreateVoucherDto.class));
             BeanUtils.copyProperties(dto, entity, AppHelper.commonProperties);
         }
 
