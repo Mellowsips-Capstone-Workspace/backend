@@ -16,6 +16,9 @@ import java.time.Instant;
 @Where(clause = "is_deleted=false")
 public class Voucher extends BaseEntity implements IPartnerEntity, IStoreEntity {
     @Column(nullable = false)
+    private Long value;
+
+    @Column(nullable = false)
     private int quantity;
 
     @Column(nullable = false)
