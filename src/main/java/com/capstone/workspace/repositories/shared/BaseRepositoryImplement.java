@@ -78,7 +78,7 @@ public class BaseRepositoryImplement<T extends BaseEntity, ID extends Serializab
                     queryString.deleteCharAt(queryString.length() - 1);
                     queryString.append(")");
                 } catch (Exception e) {
-                    queryString.append(" AND ").append(entry.getKey()).append(" = ").append(String.valueOf(entry.getValue()));
+                    queryString.append(" AND ").append(entry.getKey()).append(" = '").append(String.valueOf(entry.getValue())).append("'");
                 }
             }
         }
