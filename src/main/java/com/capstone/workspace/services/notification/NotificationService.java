@@ -1,6 +1,8 @@
 package com.capstone.workspace.services.notification;
 
 import com.capstone.workspace.dtos.notification.PushNotificationDto;
+import com.capstone.workspace.dtos.notification.SearchNotificationDto;
+import com.capstone.workspace.dtos.store.SearchStoreCriteriaDto;
 import com.capstone.workspace.entities.notification.Notification;
 import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.exceptions.BadRequestException;
@@ -9,19 +11,21 @@ import com.capstone.workspace.exceptions.NotFoundException;
 import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.models.notification.NotificationModel;
+import com.capstone.workspace.models.shared.PaginationResponseModel;
+import com.capstone.workspace.models.store.StoreModel;
 import com.capstone.workspace.repositories.notification.NotificationRepository;
 import com.capstone.workspace.services.auth.IdentityService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -86,5 +90,35 @@ public class NotificationService {
         }
 
         return entity;
+    }
+
+    public PaginationResponseModel<NotificationModel> search(SearchNotificationDto dto) {
+        String[] searchableFields = new String[]{};
+
+        UserIdentity userIdentity = identityService.getUserIdentity();
+        Map<String, Object> filterParams = new HashMap<>(){{
+            put("receiver", userIdentity.getUsername());
+        }};
+
+        String keyword = null;
+        Map orderCriteria = new HashMap<>(){{
+            put("createdAt", "DESC");
+        }};
+
+        PaginationResponseModel result = repository.searchBy(
+                keyword,
+                searchableFields,
+                filterParams,
+                orderCriteria,
+                dto.getPagination()
+        );
+
+        List<NotificationModel> notificationModels = mapper.map(
+                result.getResults(),
+                new TypeToken<List<NotificationModel>>() {}.getType()
+        );
+        result.setResults(notificationModels);
+
+        return result;
     }
 }
