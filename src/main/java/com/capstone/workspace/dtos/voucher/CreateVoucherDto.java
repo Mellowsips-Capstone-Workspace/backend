@@ -15,6 +15,10 @@ import java.time.Instant;
 public class CreateVoucherDto {
     @NotNull
     @Min(1)
+    private Long value;
+
+    @NotNull
+    @Min(1)
     private int quantity;
 
     private VoucherDiscountType discountType;
@@ -34,7 +38,8 @@ public class CreateVoucherDto {
     @Min(0)
     private Long minOrderAmount;
 
-    @Size(max = 9)
+    @NotNull
+    @Size(max = 9, min = 5)
     private String code;
 
     private Boolean isHidden;

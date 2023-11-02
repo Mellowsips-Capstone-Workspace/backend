@@ -5,6 +5,8 @@ import com.capstone.workspace.models.shared.BaseModel;
 import lombok.Data;
 
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 @Data
 public class VoucherModel extends BaseModel {
@@ -12,9 +14,9 @@ public class VoucherModel extends BaseModel {
 
     private VoucherDiscountType discountType;
 
-    private Instant startDate;
+    private ZonedDateTime startDate;
 
-    private Instant endDate;
+    private ZonedDateTime endDate;
 
     private int maxUsesPerUser;
 
@@ -27,4 +29,11 @@ public class VoucherModel extends BaseModel {
     private String partnerId;
 
     private String storeId;
+
+    public void setStartDate(Instant startDate) {
+        this.startDate = startDate == null ? null : startDate.atZone(ZoneId.of("Asia/Saigon"));
+    }
+    public void setEndDate(Instant endDate) {
+        this.endDate = endDate == null ? null : endDate.atZone(ZoneId.of("Asia/Saigon"));
+    }
 }
