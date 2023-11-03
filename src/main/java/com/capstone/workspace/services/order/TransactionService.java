@@ -7,6 +7,8 @@ import com.capstone.workspace.enums.order.TransactionMethod;
 import com.capstone.workspace.enums.order.TransactionStatus;
 import com.capstone.workspace.enums.order.TransactionType;
 import com.capstone.workspace.exceptions.BadRequestException;
+import com.capstone.workspace.models.order.ZaloPayCallbackData;
+import com.capstone.workspace.models.order.ZaloPayCallbackResult;
 import com.capstone.workspace.repositories.order.OrderRepository;
 import com.capstone.workspace.repositories.order.TransactionRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -76,24 +78,24 @@ public class TransactionService {
 
     @Transactional
     public String receiveZaloPayCallback(String jsonStr) throws JsonProcessingException {
-        Map cbData = objectMapper.convertValue(jsonStr, HashMap.class);
-        String dataStr = (String) cbData.get("data");
-        Map data = objectMapper.convertValue(dataStr, HashMap.class);
+        ZaloPayCallbackResult cbData = objectMapper.convertValue(jsonStr, ZaloPayCallbackResult.class);
+        String dataStr = cbData.getData();
+        ZaloPayCallbackData data = objectMapper.convertValue(dataStr, ZaloPayCallbackData.class);
 
         Map<String, Object> result = zaloPayService.receiveCallback(jsonStr);
 
         if ((int) result.get("return_code") == 1) {
-            String appTransId = (String) data.get("app_trans_id");
+            String appTransId = data.getApp_trans_id();
             Transaction transaction = repository.getByExternalPaymentInfo("appTransId", appTransId);
             transaction.setStatus(TransactionStatus.SUCCESS);
 
             Map<String, Object> externalPaymentInfo = transaction.getExternalPaymentInfo();
-            externalPaymentInfo.put("amount", data.get("amount"));
-            externalPaymentInfo.put("zpTransId", data.get("zp_trans_id"));
-            externalPaymentInfo.put("serverTime", data.get("server_time"));
-            externalPaymentInfo.put("merchantUserId", data.get("merchant_user_id"));
-            externalPaymentInfo.put("userFeeAmount", data.get("user_fee_amount"));
-            externalPaymentInfo.put("discountAmount", data.get("discount_amount"));
+            externalPaymentInfo.put("amount", data.getAmount());
+            externalPaymentInfo.put("zpTransId", data.getZp_trans_id());
+            externalPaymentInfo.put("serverTime", data.getServer_time());
+            externalPaymentInfo.put("merchantUserId", data.getMerchant_user_id());
+            externalPaymentInfo.put("userFeeAmount", data.getUser_fee_amount());
+            externalPaymentInfo.put("discountAmount", data.getDiscount_amount());
 
             transaction.setExternalPaymentInfo(externalPaymentInfo);
             repository.save(transaction);
