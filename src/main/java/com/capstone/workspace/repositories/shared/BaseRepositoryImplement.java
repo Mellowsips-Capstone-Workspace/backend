@@ -49,7 +49,7 @@ public class BaseRepositoryImplement<T extends BaseEntity, ID extends Serializab
 
         if (userIdentity != null) {
             if (userIdentity.getPartnerId() == null) {
-                if (userIdentity.getUsername() != null && userIdentity.getUserType() != UserType.ADMIN) {
+                if (userIdentity.getUsername() != null && userIdentity.getUserType() != UserType.ADMIN && BaseEntity.class.isAssignableFrom(getDomainClass())) {
                     queryString.append(" AND createdBy = ").append("'").append(userIdentity.getUsername()).append("'");
                 }
             } else {
@@ -73,12 +73,20 @@ public class BaseRepositoryImplement<T extends BaseEntity, ID extends Serializab
 
                     queryString.append(" AND ").append(entry.getKey()).append(" IN (");
                     for (Object item: convertedValue) {
-                        queryString.append("'").append(String.valueOf(item)).append("',");
+                        if (item instanceof String) {
+                            queryString.append("'").append(item).append("',");
+                        } else {
+                            queryString.append(item).append(",");
+                        }
                     }
                     queryString.deleteCharAt(queryString.length() - 1);
                     queryString.append(")");
                 } catch (Exception e) {
-                    queryString.append(" AND ").append(entry.getKey()).append(" = '").append(String.valueOf(entry.getValue())).append("'");
+                    if (entry.getValue() instanceof String) {
+                        queryString.append(" AND ").append(entry.getKey()).append(" = '").append(entry.getValue()).append("'");
+                    } else {
+                        queryString.append(" AND ").append(entry.getKey()).append(" = ").append(entry.getValue());
+                    }
                 }
             }
         }
