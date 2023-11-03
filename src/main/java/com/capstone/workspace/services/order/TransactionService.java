@@ -78,9 +78,9 @@ public class TransactionService {
 
     @Transactional
     public String receiveZaloPayCallback(String jsonStr) throws JsonProcessingException {
-        ZaloPayCallbackResult cbData = objectMapper.convertValue(jsonStr, ZaloPayCallbackResult.class);
+        ZaloPayCallbackResult cbData = objectMapper.readValue(jsonStr, ZaloPayCallbackResult.class);
         String dataStr = cbData.getData();
-        ZaloPayCallbackData data = objectMapper.convertValue(dataStr, ZaloPayCallbackData.class);
+        ZaloPayCallbackData data = objectMapper.readValue(dataStr, ZaloPayCallbackData.class);
 
         Map<String, Object> result = zaloPayService.receiveCallback(jsonStr);
 

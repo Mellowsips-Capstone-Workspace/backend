@@ -100,10 +100,10 @@ public class ZaloPayService {
     }
 
     public Map<String, Object> receiveCallback(String jsonStr) {
-        Map<String, Object> result = Collections.emptyMap();
+        Map<String, Object> result = new HashMap<>();
 
         try {
-            ZaloPayCallbackResult cbData = objectMapper.convertValue(jsonStr, ZaloPayCallbackResult.class);
+            ZaloPayCallbackResult cbData = objectMapper.readValue(jsonStr, ZaloPayCallbackResult.class);
             String dataStr = cbData.getData();
             String reqMac = cbData.getMac();
 
