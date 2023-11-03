@@ -4,6 +4,7 @@ import com.capstone.workspace.entities.order.Order;
 import com.capstone.workspace.exceptions.InternalServerErrorException;
 import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
+import com.capstone.workspace.models.order.ZaloPayCallbackResult;
 import com.capstone.workspace.services.auth.IdentityService;
 import com.capstone.workspace.utils.zalopay.crypto.HMACUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -102,9 +103,9 @@ public class ZaloPayService {
         Map<String, Object> result = Collections.emptyMap();
 
         try {
-            Map cbData = objectMapper.convertValue(jsonStr, HashMap.class);
-            String dataStr = (String) cbData.get("data");
-            String reqMac = (String) cbData.get("mac");
+            ZaloPayCallbackResult cbData = objectMapper.convertValue(jsonStr, ZaloPayCallbackResult.class);
+            String dataStr = cbData.getData();
+            String reqMac = cbData.getMac();
 
             String mac = HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, key2, dataStr);
             if (!reqMac.equals(mac)) {
