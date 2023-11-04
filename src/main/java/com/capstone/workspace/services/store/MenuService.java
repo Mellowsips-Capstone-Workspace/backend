@@ -9,8 +9,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -41,21 +41,7 @@ public class MenuService {
         return entity;
     }
 
-/*    public Menu create(CreateMenuDto dto){
-        Menu entity = mapper.map(dto, Menu.class);
-
-        Menu menu = repository.save(entity);
-
-        if (dto.getMenuSections() != null && !dto.getMenuSections().isEmpty()) {
-            List<MenuSection> menuSections = new ArrayList<>();
-            dto.getMenuSections().forEach(addonDto -> {
-                MenuSection menuSection = menuSectionService.create(entity, addonDto);
-                menuSections.add(menuSection);
-            });
-            menu.setMenuSections(menuSections);
-        }
-        return menu;
-    }*/
+    @Transactional
     public Menu create(CreateMenuDto dto) {
         Menu entity = mapper.map(dto, Menu.class);
         Menu menu = repository.save(entity);

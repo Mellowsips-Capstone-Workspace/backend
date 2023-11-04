@@ -12,6 +12,7 @@ import java.util.List;
 @Data
 public class CreateMenuDto {
     private String storeId;
+
     @Valid
     @NotEmpty
     private List<CreateMenuSectionDto> menuSections;
