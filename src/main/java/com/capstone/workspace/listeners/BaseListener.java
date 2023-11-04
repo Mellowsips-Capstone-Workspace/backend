@@ -63,7 +63,6 @@ public class BaseListener<E extends BaseEntity> {
 
         IdentityService identityService = BeanHelper.getBean(IdentityService.class);
         UserIdentity userIdentity = identityService.getUserIdentity();
-        LoggerFactory.getLogger(BaseListener.class).info(userIdentity.toString());
         if (userIdentity != null) {
             verifyUser(userIdentity, entity);
             entity.setUpdatedBy(userIdentity.getUsername());

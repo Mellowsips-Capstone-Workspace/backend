@@ -45,9 +45,7 @@ public class ProductService {
         return entity;
     }
     public Product createProduct(CreateProductDto dto) {
-        UserIdentity userIdentity = identityService.getUserIdentity();
         Product entity = mapper.map(dto, Product.class);
-        entity.setPartnerId(userIdentity.getPartnerId());
 
         repository.save(entity);
 
