@@ -1,19 +1,13 @@
 package com.capstone.workspace.services.product;
 
-import com.capstone.workspace.dtos.product.CreateProductAddonDto;
 import com.capstone.workspace.dtos.product.CreateProductDto;
-import com.capstone.workspace.dtos.product.CreateProductOptionSectionDto;
 import com.capstone.workspace.entities.product.Product;
 import com.capstone.workspace.entities.product.ProductOptionSection;
 import com.capstone.workspace.exceptions.NotFoundException;
-import com.capstone.workspace.helpers.shared.AppHelper;
-import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.repositories.product.ProductRepository;
-import com.capstone.workspace.services.auth.IdentityService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,9 +27,6 @@ public class ProductService {
 
     @NonNull
     private final ModelMapper mapper;
-
-    @NonNull
-    private final IdentityService identityService;
 
     public Product getProductById(UUID id) {
         Product entity = repository.findById(id).orElse(null);
