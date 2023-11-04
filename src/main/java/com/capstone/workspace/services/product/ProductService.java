@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -44,6 +45,8 @@ public class ProductService {
         }
         return entity;
     }
+
+    @Transactional
     public Product createProduct(CreateProductDto dto) {
         Product entity = mapper.map(dto, Product.class);
 
