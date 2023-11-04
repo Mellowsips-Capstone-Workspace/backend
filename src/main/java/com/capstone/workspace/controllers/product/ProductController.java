@@ -35,7 +35,7 @@ public class ProductController {
         return ResponseModel.<ProductDetailsModel>builder().data(model).build();
     }
 
-    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STAFF})
+    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STAFF, UserType.STORE_MANAGER})
     @PostMapping
     public ResponseModel<ProductModel> create(@Valid @RequestBody CreateProductDto dto){
         Product product = productService.createProduct(dto);
