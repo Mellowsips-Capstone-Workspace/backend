@@ -5,6 +5,7 @@ import com.capstone.workspace.entities.store.Menu;
 import com.capstone.workspace.entities.store.MenuSection;
 import com.capstone.workspace.exceptions.NotFoundException;
 import com.capstone.workspace.repositories.store.MenuRepository;
+import com.capstone.workspace.services.auth.IdentityService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -52,9 +53,6 @@ public class MenuService {
                     .collect(Collectors.toList());
             menu.setMenuSections(menuSections);
         }
-
         return menu;
     }
-
-
 }
