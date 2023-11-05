@@ -4,7 +4,7 @@ import com.capstone.workspace.dtos.auth.PasswordLoginDto;
 import com.capstone.workspace.dtos.auth.ResendConfirmationCodeDto;
 import com.capstone.workspace.dtos.auth.ResetPasswordDto;
 import com.capstone.workspace.dtos.auth.VerifyUserDto;
-import com.capstone.workspace.dtos.user.RegisterUserDto;
+import com.capstone.workspace.dtos.auth.RegisterUserDto;
 import com.capstone.workspace.entities.user.User;
 import com.capstone.workspace.models.shared.ResponseModel;
 import com.capstone.workspace.models.user.UserModel;

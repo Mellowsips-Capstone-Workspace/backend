@@ -4,12 +4,12 @@ import com.capstone.workspace.dtos.auth.PasswordLoginDto;
 import com.capstone.workspace.dtos.auth.ResendConfirmationCodeDto;
 import com.capstone.workspace.dtos.auth.ResetPasswordDto;
 import com.capstone.workspace.dtos.auth.VerifyUserDto;
-import com.capstone.workspace.dtos.user.RegisterUserDto;
+import com.capstone.workspace.dtos.auth.RegisterUserDto;
+import com.capstone.workspace.dtos.user.AddEmployeeDto;
 import com.capstone.workspace.entities.user.User;
 import com.capstone.workspace.exceptions.BadRequestException;
 import com.capstone.workspace.exceptions.ConflictException;
 import com.capstone.workspace.exceptions.NotFoundException;
-import com.capstone.workspace.exceptions.UnauthorizedException;
 import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.services.user.UserService;
@@ -38,7 +38,7 @@ public class AuthService {
         try {
             User user = userService.getUserByUsername(dto.getUsername());
             if (user != null) {
-                throwConflictUsernameException(dto);
+                throwConflictUsernameException(dto.getUsername());
             }
         } catch (NotFoundException notFoundException) {
             try {
@@ -46,7 +46,7 @@ public class AuthService {
                 cognitoService.registerUserByPassword(dto);
                 return createdEntity;
             } catch (UsernameExistsException usernameExistsException) {
-                throwConflictUsernameException(dto);
+                throwConflictUsernameException(dto.getUsername());
             }
         }
 
@@ -57,7 +57,7 @@ public class AuthService {
         // TODO: prevent login from devices that do not support user type
         // userService.validateUsername(dto.getUsername());
         userService.getUserByUsername(dto.getUsername());
-        return cognitoService.loginUserByPassword(dto.getUsername(), dto.getPassword());
+        return cognitoService.loginUserByPassword(dto.getUsername(), dto.getPassword(), true);
     }
 
     @Transactional
@@ -82,8 +82,8 @@ public class AuthService {
         cognitoService.resendConfirmationCode(dto.getUsername());
     }
 
-    private void throwConflictUsernameException(RegisterUserDto dto) {
-        String usernameType = AppHelper.isVietnamNumberPhone(dto.getUsername()) ? "phone" : "username";
+    private void throwConflictUsernameException(String username) {
+        String usernameType = AppHelper.isVietnamNumberPhone(username) ? "phone" : "username";
         throw new ConflictException("User with this " + usernameType + " already exists");
     }
 
@@ -99,10 +99,27 @@ public class AuthService {
             throw new BadRequestException("New password must be different from current one");
         }
 
+        cognitoService.loginUserByPassword(dto.getUsername(), dto.getPassword(), false);
+        cognitoService.resetPassword(dto.getUsername(), dto.getNewPassword());
+    }
+
+    @Transactional
+    public User addEmployee(AddEmployeeDto dto) {
         try {
-            cognitoService.loginUserByPassword(dto.getUsername(), dto.getPassword());
-        } catch (UnauthorizedException ex) {
-            cognitoService.resetPassword(dto.getUsername(), dto.getNewPassword());
+            User user = userService.getUserByUsername(dto.getUsername());
+            if (user != null) {
+                throwConflictUsernameException(dto.getUsername());
+            }
+        } catch (NotFoundException notFoundException) {
+            try {
+                User createdEntity = userService.addEmployee(dto);
+                cognitoService.adminCreateUser(dto);
+                return createdEntity;
+            } catch (UsernameExistsException usernameExistsException) {
+                throwConflictUsernameException(dto.getUsername());
+            }
         }
+
+        return null;
     }
 }
