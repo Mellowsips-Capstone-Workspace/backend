@@ -2,12 +2,13 @@ package com.capstone.workspace.controllers.product;
 
 import com.capstone.workspace.annotations.AllowedUsers;
 import com.capstone.workspace.dtos.product.CreateProductDto;
+import com.capstone.workspace.dtos.product.SearchProductDto;
 import com.capstone.workspace.entities.product.Product;
 import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.models.product.ProductDetailsModel;
 import com.capstone.workspace.models.product.ProductModel;
+import com.capstone.workspace.models.shared.PaginationResponseModel;
 import com.capstone.workspace.models.shared.ResponseModel;
-import com.capstone.workspace.repositories.product.ProductRepository;
 import com.capstone.workspace.services.product.ProductService;
 import jakarta.validation.Valid;
 import lombok.NonNull;
@@ -41,5 +42,21 @@ public class ProductController {
         Product product = productService.createProduct(dto);
         ProductModel model = mapper.map(product, ProductModel.class);
         return ResponseModel.<ProductModel>builder().data(model).build();
+    }
+
+    @PostMapping("/customer/search")
+    public ResponseModel<PaginationResponseModel<ProductModel>> customerSearch(@Valid @RequestBody SearchProductDto dto) {
+        return searchProduct(dto);
+    }
+
+    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER, UserType.STAFF})
+    @PostMapping("/search")
+    public ResponseModel<PaginationResponseModel<ProductModel>> search(@Valid @RequestBody SearchProductDto dto) {
+        return searchProduct(dto);
+    }
+
+    private ResponseModel<PaginationResponseModel<ProductModel>> searchProduct(SearchProductDto dto) {
+        PaginationResponseModel<ProductModel> data = productService.search(dto);
+        return ResponseModel.<PaginationResponseModel<ProductModel>>builder().data(data).build();
     }
 }
