@@ -15,7 +15,8 @@ public enum AuthErrorCode implements ErrorCode {
     VERIFICATION_LIMIT_EXCEED("auth/verification-limit-exceed", HttpStatus.TOO_MANY_REQUESTS, "Exceeded verification attempts"),
     USER_NOT_FOUND("auth/user-not-found", HttpStatus.NOT_FOUND, "User not found"),
     USER_NOT_CONFIRMED("auth/user-not-confirmed", HttpStatus.UNAUTHORIZED, "User is not confirmed"),
-    INVALID_CREDENTIALS("auth/invalid-credentials", HttpStatus.BAD_REQUEST, "Incorrect username or password");
+    INVALID_CREDENTIALS("auth/invalid-credentials", HttpStatus.BAD_REQUEST, "Incorrect username or password"),
+    CHANGE_TEMP_PASSWORD("auth/change-temp-password", HttpStatus.BAD_REQUEST, "You must change your temporary password");
 
     private String value;
     private HttpStatus httpStatus;

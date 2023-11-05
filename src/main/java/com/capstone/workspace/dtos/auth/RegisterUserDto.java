@@ -1,4 +1,4 @@
-package com.capstone.workspace.dtos.user;
+package com.capstone.workspace.dtos.auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

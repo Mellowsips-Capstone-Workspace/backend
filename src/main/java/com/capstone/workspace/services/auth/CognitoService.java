@@ -1,6 +1,7 @@
 package com.capstone.workspace.services.auth;
 
-import com.capstone.workspace.dtos.user.RegisterUserDto;
+import com.capstone.workspace.dtos.auth.RegisterUserDto;
+import com.capstone.workspace.dtos.user.AddEmployeeDto;
 import com.capstone.workspace.enums.auth.AuthErrorCode;
 import com.capstone.workspace.exceptions.AppDefinedException;
 import com.capstone.workspace.exceptions.UnauthorizedException;
@@ -54,7 +55,7 @@ public class CognitoService {
         cognitoIdentityProviderClient.signUp(request);
     }
 
-    Map loginUserByPassword(String username, String password) {
+    Map loginUserByPassword(String username, String password, boolean isLogin) {
         try {
             Map<String, String> authParameters = new HashMap<String, String>();
             authParameters.put("USERNAME", username);
@@ -79,7 +80,9 @@ public class CognitoService {
                 );
             }
 
-            throw new UnauthorizedException("Authentication failed");
+            if (isLogin) {
+                throw AppDefinedException.builder().errorCode(AuthErrorCode.CHANGE_TEMP_PASSWORD).build();
+            } else return null;
         } catch (NotAuthorizedException ex) {
             throw AppDefinedException.builder().errorCode(AuthErrorCode.INVALID_CREDENTIALS).build();
         } catch (UserNotConfirmedException ex) {
@@ -165,5 +168,20 @@ public class CognitoService {
             .build();
 
         cognitoIdentityProviderClient.adminSetUserPassword(request);
+    }
+
+    public void adminCreateUser(AddEmployeeDto dto) {
+        AttributeType attribute = AttributeType.builder()
+                .name("email")
+                .value(dto.getEmail())
+                .build();
+
+        AdminCreateUserRequest request = AdminCreateUserRequest.builder()
+                .userPoolId(POOL_ID)
+                .username(dto.getUsername())
+                .userAttributes(attribute)
+                .build();
+
+        cognitoIdentityProviderClient.adminCreateUser(request);
     }
 }
