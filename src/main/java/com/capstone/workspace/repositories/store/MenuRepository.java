@@ -8,5 +8,5 @@ import java.util.UUID;
 
 @Repository
 public interface MenuRepository extends JpaRepository<Menu, UUID> {
-    Menu findByStoreId(String storeId);
+    Menu findByStoreIdAndIsActiveTrue(String storeId);
 }

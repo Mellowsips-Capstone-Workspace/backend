@@ -29,23 +29,19 @@ public class MenuSectionService {
 
     public MenuSection create(Menu menu, CreateMenuSectionDto dto) {
         MenuSection entity = mapper.map(dto, MenuSection.class);
-        String storeId = menu.getStoreId();
-
-        if (dto.getProductIds() != null) {
-            List<Product> products = dto.getProductIds().stream()
-                    .map(productId -> {
-                        Product product = productService.getProductById(UUID.fromString(productId));
-                        if (!storeId.equals(product.getStoreId())){
-                            throw new BadRequestException("Product with id " + productId + " does not belong to the store");
-                        }
-                        return product;
-                    })
-                    .toList();
-            entity.setProducts(products);
-        }
-
         entity.setMenu(menu);
+
+        List<Product> products = dto.getProductIds().stream()
+            .map(productId -> {
+                Product product = productService.getProductById(UUID.fromString(productId));
+                if (!menu.getStoreId().equals(product.getStoreId())){
+                    throw new BadRequestException("Product with id " + productId + " does not belong to the store");
+                }
+                return product;
+            })
+            .toList();
+        entity.setProducts(products);
+
         return repository.save(entity);
     }
-
 }

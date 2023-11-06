@@ -21,6 +21,7 @@ public class CreateMenuSectionDto {
     @Min(1)
     private int priority;
 
+    @NotNull
     @NotEmpty
     private List<String> productIds;
 }

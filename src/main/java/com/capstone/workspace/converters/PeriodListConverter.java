@@ -37,5 +37,4 @@ public class PeriodListConverter<T> implements AttributeConverter<Map<DayOfWeek,
             throw new InternalServerErrorException(e);
         }
     }
-
 }

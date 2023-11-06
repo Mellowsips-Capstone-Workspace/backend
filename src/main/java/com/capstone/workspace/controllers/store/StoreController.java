@@ -127,8 +127,16 @@ public class StoreController {
     @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER, UserType.STAFF})
     @PostMapping("/{id}/menus")
     public ResponseModel<MenuModel> create(@PathVariable UUID id, @Valid @RequestBody CreateMenuDto dto){
-        Menu menu = menuService.create(id, dto);
-        MenuModel model = mapper.map(menu, MenuModel.class);
+        Menu entity = menuService.create(id, dto);
+        MenuModel model = mapper.map(entity, MenuModel.class);
+        return ResponseModel.<MenuModel>builder().data(model).build();
+    }
+
+    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER, UserType.STAFF})
+    @PostMapping("/menus/{id}")
+    public ResponseModel<MenuModel> getMenuById(@PathVariable UUID id){
+        Menu entity = menuService.getMenuById(id);
+        MenuModel model = mapper.map(entity, MenuModel.class);
         return ResponseModel.<MenuModel>builder().data(model).build();
     }
 }
