@@ -9,7 +9,7 @@ import java.util.List;
 public class ProductOptionSectionModel extends BaseModel {
     private String name;
 
-    private int order;
+    private int priority;
 
     private Boolean isRequired;
 
