@@ -1,6 +1,7 @@
 package com.capstone.workspace.services.store;
 
 import com.capstone.workspace.dtos.store.CreateMenuDto;
+import com.capstone.workspace.dtos.store.CreateMenuSectionDto;
 import com.capstone.workspace.entities.store.Menu;
 import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.exceptions.NotFoundException;
@@ -13,6 +14,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -57,7 +60,12 @@ public class MenuService {
             }
         }
 
-        repository.save(entity);
+        List<CreateMenuSectionDto> menuSections = dto.getMenuSections();
+        if (menuSections.size() >= 2) {
+            menuSections.sort(Comparator.comparingInt(CreateMenuSectionDto::getPriority));
+        }
+
+        repository.save(entity);ff
 
         dto.getMenuSections().forEach(section -> menuSectionService.create(entity, section));
 
