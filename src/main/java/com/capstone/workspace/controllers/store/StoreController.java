@@ -1,8 +1,7 @@
 package com.capstone.workspace.controllers.store;
 
 import com.capstone.workspace.annotations.AllowedUsers;
-import com.capstone.workspace.dtos.store.QrCodeDto;
-import com.capstone.workspace.dtos.store.SearchStoreDto;
+import com.capstone.workspace.dtos.store.*;
 import com.capstone.workspace.entities.store.Menu;
 import com.capstone.workspace.entities.store.QrCode;
 import com.capstone.workspace.entities.store.Store;
@@ -22,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
 import java.util.List;
 import java.util.UUID;
 
@@ -95,5 +95,32 @@ public class StoreController {
         }
 
         return ResponseModel.<PaginationResponseModel<StoreModel>>builder().data(data).build();
+    }
+
+    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER})
+    @PutMapping("/{id}/profile-image")
+    public ResponseModel<StoreModel> updateStoreProfileImg(@PathVariable UUID id, @Valid @RequestBody UpdateStoreProfileImgDto dto) throws ParseException {
+        Store store = storeService.updateStore(id, mapper.map(dto, UpdateStoreDto.class));
+        StoreModel model = mapper.map(store, StoreModel.class);
+        model.setIsOpen(storeHelper.isStoreOpening(model.getOperationalHours()));
+        return ResponseModel.<StoreModel>builder().data(model).build();
+    }
+
+    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER})
+    @PutMapping("/{id}/cover-image")
+    public ResponseModel<StoreModel> updateStoreCoverImg(@PathVariable UUID id, @Valid @RequestBody UpdateStoreCoverImgDto dto) throws ParseException {
+        Store store = storeService.updateStore(id, mapper.map(dto, UpdateStoreDto.class));
+        StoreModel model = mapper.map(store, StoreModel.class);
+        model.setIsOpen(storeHelper.isStoreOpening(model.getOperationalHours()));
+        return ResponseModel.<StoreModel>builder().data(model).build();
+    }
+
+    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER})
+    @PutMapping("/{id}/operational-hours")
+    public ResponseModel<StoreModel> updateStoreOperationalHours(@PathVariable UUID id, @Valid @RequestBody UpdateStoreOperationalHoursDto dto) throws ParseException {
+        Store store = storeService.updateStore(id, mapper.map(dto, UpdateStoreDto.class));
+        StoreModel model = mapper.map(store, StoreModel.class);
+        model.setIsOpen(storeHelper.isStoreOpening(model.getOperationalHours()));
+        return ResponseModel.<StoreModel>builder().data(model).build();
     }
 }

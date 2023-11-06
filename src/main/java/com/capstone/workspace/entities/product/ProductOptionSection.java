@@ -16,7 +16,7 @@ public class ProductOptionSection extends BaseEntity {
     private String name;
 
     @Column(nullable = false)
-    private int order;
+    private int priority;
 
     @Column
     private Boolean isRequired;
