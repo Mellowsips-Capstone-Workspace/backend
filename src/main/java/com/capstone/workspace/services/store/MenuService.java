@@ -65,7 +65,7 @@ public class MenuService {
             menuSections.sort(Comparator.comparingInt(CreateMenuSectionDto::getPriority));
         }
 
-        repository.save(entity);ff
+        repository.save(entity);
 
         dto.getMenuSections().forEach(section -> menuSectionService.create(entity, section));
 
