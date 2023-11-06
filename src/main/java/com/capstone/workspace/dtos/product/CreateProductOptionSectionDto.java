@@ -18,6 +18,7 @@ public class CreateProductOptionSectionDto {
     @NotBlank
     private String name;
 
+    @NotNull
     @Min(0)
     private int priority;
 

@@ -1,10 +1,10 @@
 package com.capstone.workspace.services.product;
 
 import com.capstone.workspace.dtos.product.CreateProductDto;
+import com.capstone.workspace.dtos.product.CreateProductOptionSectionDto;
 import com.capstone.workspace.entities.product.Product;
 import com.capstone.workspace.entities.product.ProductOptionSection;
 import com.capstone.workspace.enums.user.UserType;
-import com.capstone.workspace.exceptions.BadRequestException;
 import com.capstone.workspace.exceptions.NotFoundException;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.repositories.product.ProductRepository;
@@ -15,6 +15,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -53,6 +55,11 @@ public class ProductService {
             entity.setStoreId(null);
         }
 
+        List<CreateProductOptionSectionDto> productOptionSections = dto.getProductOptionSections();
+        if (productOptionSections != null && productOptionSections.size() >= 2) {
+            productOptionSections.sort(Comparator.comparingInt(CreateProductOptionSectionDto::getPriority));
+        }
+
         repository.save(entity);
 
         if (dto.getProductOptionSections() != null && !dto.getProductOptionSections().isEmpty()) {
@@ -67,5 +74,4 @@ public class ProductService {
 
         return entity;
     }
-
 }
