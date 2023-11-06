@@ -27,7 +27,6 @@ public class MenuSectionService {
     @NonNull
     private final ModelMapper mapper;
 
-
     public MenuSection create(Menu menu, CreateMenuSectionDto dto) {
         MenuSection entity = mapper.map(dto, MenuSection.class);
         String storeId = menu.getStoreId();
