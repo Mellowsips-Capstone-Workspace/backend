@@ -33,5 +33,4 @@ public class QrCodeConverter implements AttributeConverter<QrCodeModel, String> 
             throw new InternalServerErrorException(e);
         }
     }
-
 }

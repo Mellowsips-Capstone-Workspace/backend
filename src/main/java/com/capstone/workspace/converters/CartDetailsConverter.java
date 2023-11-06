@@ -33,5 +33,4 @@ public class CartDetailsConverter implements AttributeConverter<CartDetailsModel
             throw new InternalServerErrorException(e);
         }
     }
-
 }

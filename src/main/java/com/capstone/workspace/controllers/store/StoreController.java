@@ -123,4 +123,19 @@ public class StoreController {
         model.setIsOpen(storeHelper.isStoreOpening(model.getOperationalHours()));
         return ResponseModel.<StoreModel>builder().data(model).build();
     }
+
+    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER, UserType.STAFF})
+    @PostMapping("/{id}/menus")
+    public ResponseModel create(@PathVariable UUID id, @Valid @RequestBody CreateMenuDto dto){
+        menuService.create(id, dto);
+        return ResponseModel.builder().message("Create menu successfully").build();
+    }
+
+    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER, UserType.STAFF})
+    @GetMapping("/menus/{id}")
+    public ResponseModel<MenuModel> getMenuById(@PathVariable UUID id){
+        Menu entity = menuService.getMenuById(id);
+        MenuModel model = mapper.map(entity, MenuModel.class);
+        return ResponseModel.<MenuModel>builder().data(model).build();
+    }
 }
