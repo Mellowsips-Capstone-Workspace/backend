@@ -48,7 +48,7 @@ public class MenuService {
     }
 
     @Transactional
-    public Menu create(UUID storeId, CreateMenuDto dto) {
+    public void create(UUID storeId, CreateMenuDto dto) {
         Menu entity = mapper.map(dto, Menu.class);
         entity.setStoreId(String.valueOf(storeId));
 
@@ -68,8 +68,6 @@ public class MenuService {
         repository.save(entity);
 
         dto.getMenuSections().forEach(section -> menuSectionService.create(entity, section));
-
-        return entity;
     }
 
     public Menu getMenuById(UUID id) {
