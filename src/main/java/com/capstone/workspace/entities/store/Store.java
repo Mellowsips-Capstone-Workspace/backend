@@ -51,7 +51,7 @@ public class Store extends BaseEntity implements IPartnerEntity {
     @Convert(converter = PeriodListConverter.class)
     @Column
     @JdbcType(PostgreSQLJsonPGObjectJsonbType.class)
-    private Map<DayOfWeek, List<Period<Time>>> operationalHours;
+    private Map<DayOfWeek, List<Period<String>>> operationalHours;
 
     @Column
     private String partnerId;
