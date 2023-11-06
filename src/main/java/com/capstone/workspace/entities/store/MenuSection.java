@@ -17,7 +17,7 @@ public class MenuSection extends BaseEntity {
     private String name;
 
     @Column(nullable = false)
-    private int priority;
+    private int order;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "menu_id")
