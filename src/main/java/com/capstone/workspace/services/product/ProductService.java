@@ -3,8 +3,12 @@ package com.capstone.workspace.services.product;
 import com.capstone.workspace.dtos.product.CreateProductDto;
 import com.capstone.workspace.entities.product.Product;
 import com.capstone.workspace.entities.product.ProductOptionSection;
+import com.capstone.workspace.enums.user.UserType;
+import com.capstone.workspace.exceptions.BadRequestException;
 import com.capstone.workspace.exceptions.NotFoundException;
+import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.repositories.product.ProductRepository;
+import com.capstone.workspace.services.auth.IdentityService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -28,6 +32,9 @@ public class ProductService {
     @NonNull
     private final ModelMapper mapper;
 
+    @NonNull
+    private final IdentityService identityService;
+
     public Product getProductById(UUID id) {
         Product entity = repository.findById(id).orElse(null);
 
@@ -41,17 +48,20 @@ public class ProductService {
     public Product createProduct(CreateProductDto dto) {
         Product entity = mapper.map(dto, Product.class);
 
+        UserIdentity userIdentity = identityService.getUserIdentity();
+        if (userIdentity.getUserType() != UserType.OWNER) {
+            entity.setStoreId(null);
+        }
+
         repository.save(entity);
 
         if (dto.getProductOptionSections() != null && !dto.getProductOptionSections().isEmpty()) {
             dto.getProductOptionSections().forEach(sectionDto -> {
                 ProductOptionSection optionSection = productOptionSectionService.create(entity, sectionDto);
 
-                if (sectionDto.getProductAddons() != null && !sectionDto.getProductAddons().isEmpty()) {
-                    sectionDto.getProductAddons().forEach(addonDto -> {
-                        productAddonService.create(optionSection, addonDto);
-                    });
-                }
+                sectionDto.getProductAddons().forEach(addonDto -> {
+                    productAddonService.create(optionSection, addonDto);
+                });
             });
         }
 

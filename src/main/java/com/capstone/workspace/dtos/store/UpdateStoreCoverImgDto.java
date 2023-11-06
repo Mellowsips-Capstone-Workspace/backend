@@ -8,8 +8,8 @@ import lombok.Setter;
 
 @Setter(AccessLevel.NONE)
 @Data
-public class UpdateStoreProfileImgDto {
+public class UpdateStoreCoverImgDto {
     @NotNull
     @NotBlank
-    private String profileImage;
+    private String coverImage;
 }

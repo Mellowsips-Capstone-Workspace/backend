@@ -7,7 +7,6 @@ import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.models.product.ProductDetailsModel;
 import com.capstone.workspace.models.product.ProductModel;
 import com.capstone.workspace.models.shared.ResponseModel;
-import com.capstone.workspace.repositories.product.ProductRepository;
 import com.capstone.workspace.services.product.ProductService;
 import jakarta.validation.Valid;
 import lombok.NonNull;
@@ -21,7 +20,6 @@ import java.util.UUID;
 @RequestMapping( "/api/products")
 @RequiredArgsConstructor
 public class ProductController {
-
     @NonNull
     private final ProductService productService;
 
@@ -35,7 +33,7 @@ public class ProductController {
         return ResponseModel.<ProductDetailsModel>builder().data(model).build();
     }
 
-    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STAFF, UserType.STORE_MANAGER})
+    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER, UserType.STAFF})
     @PostMapping
     public ResponseModel<ProductModel> create(@Valid @RequestBody CreateProductDto dto){
         Product product = productService.createProduct(dto);

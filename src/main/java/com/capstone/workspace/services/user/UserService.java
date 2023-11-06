@@ -3,7 +3,6 @@ package com.capstone.workspace.services.user;
 import com.capstone.workspace.dtos.auth.VerifyUserDto;
 import com.capstone.workspace.dtos.auth.RegisterUserDto;
 import com.capstone.workspace.dtos.user.AddEmployeeDto;
-import com.capstone.workspace.entities.store.Store;
 import com.capstone.workspace.entities.user.User;
 import com.capstone.workspace.enums.auth.AuthProviderType;
 import com.capstone.workspace.enums.user.UserType;
@@ -12,7 +11,6 @@ import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.repositories.user.UserRepository;
 import com.capstone.workspace.services.auth.IdentityService;
-import com.capstone.workspace.services.store.StoreService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -38,9 +36,6 @@ public class UserService {
 
     @NonNull
     private final HttpServletRequest httpServletRequest;
-
-    @NonNull
-    private final StoreService storeService;
 
     public User getUserByUsername(String username) {
         User user = repository.findByUsername(username);
@@ -109,12 +104,6 @@ public class UserService {
 
         // TODO: prevent login from devices that do not support user type
         // validateUsername(username);
-
-        UserIdentity userIdentity = identityService.getUserIdentity();
-        Store store = storeService.getStoreById(UUID.fromString(dto.getStoreId()));
-        if (!store.getPartnerId().equals(userIdentity.getPartnerId())) {
-            throw new BadRequestException("Store does not belong to your business");
-        }
 
         if (dto.getType() != UserType.STORE_MANAGER && dto.getType() != UserType.STAFF) {
             throw new BadRequestException("Not allow to create this type of user");
