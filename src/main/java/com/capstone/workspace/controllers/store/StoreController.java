@@ -123,4 +123,12 @@ public class StoreController {
         model.setIsOpen(storeHelper.isStoreOpening(model.getOperationalHours()));
         return ResponseModel.<StoreModel>builder().data(model).build();
     }
+
+    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER, UserType.STAFF})
+    @PostMapping("/{id}/menus")
+    public ResponseModel<MenuModel> create(@PathVariable UUID id, @Valid @RequestBody CreateMenuDto dto){
+        Menu menu = menuService.create(id, dto);
+        MenuModel model = mapper.map(menu, MenuModel.class);
+        return ResponseModel.<MenuModel>builder().data(model).build();
+    }
 }
