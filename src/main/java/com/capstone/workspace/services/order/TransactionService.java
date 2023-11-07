@@ -7,14 +7,17 @@ import com.capstone.workspace.enums.order.TransactionMethod;
 import com.capstone.workspace.enums.order.TransactionStatus;
 import com.capstone.workspace.enums.order.TransactionType;
 import com.capstone.workspace.exceptions.BadRequestException;
+import com.capstone.workspace.models.order.OrderModel;
 import com.capstone.workspace.models.order.ZaloPayCallbackData;
 import com.capstone.workspace.models.order.ZaloPayCallbackResult;
 import com.capstone.workspace.repositories.order.OrderRepository;
 import com.capstone.workspace.repositories.order.TransactionRepository;
+import com.capstone.workspace.services.shared.JobService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -40,6 +43,12 @@ public class TransactionService {
 
     @NonNull
     private final OrderRepository orderRepository;
+
+    @NonNull
+    private final JobService jobService;
+
+    @NonNull
+    private final ModelMapper mapper;
 
     @Transactional
     public Transaction createInitialTransaction(Order order) {
@@ -103,6 +112,7 @@ public class TransactionService {
             Order order = transaction.getOrder();
             order.setStatus(OrderStatus.ORDERED);
             orderRepository.save(order);
+            jobService.publishPushNotificationOrderChangesJob(mapper.map(order, OrderModel.class));
         }
 
         return objectMapper.writeValueAsString(result);
