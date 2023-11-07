@@ -9,7 +9,7 @@ import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.helpers.store.StoreHelper;
 import com.capstone.workspace.models.shared.PaginationResponseModel;
 import com.capstone.workspace.models.shared.ResponseModel;
-import com.capstone.workspace.models.store.MenuModel;
+import com.capstone.workspace.models.store.MenuDetailsModel;
 import com.capstone.workspace.models.store.QrCodeModel;
 import com.capstone.workspace.models.store.StoreModel;
 import com.capstone.workspace.services.store.MenuService;
@@ -56,10 +56,10 @@ public class StoreController {
     }
 
     @GetMapping("/{id}/menu")
-    public ResponseModel<MenuModel> getStoreMenu(@PathVariable(name = "id") String storeId) {
+    public ResponseModel<MenuDetailsModel> getStoreMenu(@PathVariable(name = "id") String storeId) {
         Menu entity = menuService.getStoreMenu(storeId);
-        MenuModel model = mapper.map(entity, MenuModel.class);
-        return ResponseModel.<MenuModel>builder().data(model).build();
+        MenuDetailsModel model = mapper.map(entity, MenuDetailsModel.class);
+        return ResponseModel.<MenuDetailsModel>builder().data(model).build();
     }
 
     @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER})
@@ -122,20 +122,5 @@ public class StoreController {
         StoreModel model = mapper.map(store, StoreModel.class);
         model.setIsOpen(storeHelper.isStoreOpening(model.getOperationalHours()));
         return ResponseModel.<StoreModel>builder().data(model).build();
-    }
-
-    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER, UserType.STAFF})
-    @PostMapping("/{id}/menus")
-    public ResponseModel create(@PathVariable UUID id, @Valid @RequestBody CreateMenuDto dto){
-        menuService.create(id, dto);
-        return ResponseModel.builder().message("Create menu successfully").build();
-    }
-
-    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER, UserType.STAFF})
-    @GetMapping("/menus/{id}")
-    public ResponseModel<MenuModel> getMenuById(@PathVariable UUID id){
-        Menu entity = menuService.getMenuById(id);
-        MenuModel model = mapper.map(entity, MenuModel.class);
-        return ResponseModel.<MenuModel>builder().data(model).build();
     }
 }

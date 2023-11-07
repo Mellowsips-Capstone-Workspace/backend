@@ -3,6 +3,7 @@ package com.capstone.workspace.repositories.shared;
 import com.capstone.workspace.dtos.shared.PaginationDto;
 import com.capstone.workspace.entities.partner.IPartnerEntity;
 import com.capstone.workspace.entities.shared.BaseEntity;
+import com.capstone.workspace.entities.store.IStoreEntity;
 import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.helpers.shared.BeanHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
@@ -56,7 +57,9 @@ public class BaseRepositoryImplement<T extends BaseEntity, ID extends Serializab
                 if (IPartnerEntity.class.isAssignableFrom(getDomainClass())) {
                     queryString.append(" AND partnerId = ").append("'").append(userIdentity.getPartnerId()).append("'");
                 }
-                // TODO: Implement if have store id
+                if (IStoreEntity.class.isAssignableFrom(getDomainClass()) && userIdentity.getStoreId() != null) {
+                    queryString.append(" AND storeId = ").append("'").append(userIdentity.getStoreId()).append("'");
+                }
             }
         }
 
