@@ -123,8 +123,12 @@ public class StoreService {
 
     public Store updateStore(UUID id, UpdateStoreDto dto) throws ParseException {
         Store store = getStoreById(id);
-        checkDocumentExist(dto.getProfileImage());
-        checkDocumentExist(dto.getCoverImage());
+        if (checkDocumentExist(dto.getProfileImage())) {
+            store.setProfileImage(dto.getProfileImage());
+        }
+        if (checkDocumentExist(dto.getCoverImage())) {
+            store.setCoverImage(dto.getCoverImage());
+        }
 
         if (dto.getOperationalHours() != null && !dto.getOperationalHours().isEmpty()) {
             DateFormat formatter = new SimpleDateFormat("HH:mm");
@@ -164,17 +168,20 @@ public class StoreService {
                     i = i - 1;
                 }
             }
+
+            store.setOperationalHours(dto.getOperationalHours());
         }
 
-        BeanUtils.copyProperties(dto, store, AppHelper.commonProperties);
         return repository.save(store);
     }
 
-    private void checkDocumentExist(String s) {
+    private boolean checkDocumentExist(String s) {
         if (s != null && !s.isBlank()) {
             String[] data = s.split("\\|");
             String documentId = data[data.length - 1];
             documentService.getDocumentById(UUID.fromString(documentId));
+            return true;
         }
+        return false;
     }
 }
