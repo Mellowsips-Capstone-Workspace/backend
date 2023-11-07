@@ -19,6 +19,7 @@ import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.helpers.store.StoreHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.models.cart.CartDetailsModel;
+import com.capstone.workspace.models.order.OrderDetailsModel;
 import com.capstone.workspace.models.order.OrderModel;
 import com.capstone.workspace.models.order.TransactionModel;
 import com.capstone.workspace.models.shared.PaginationResponseModel;
@@ -136,7 +137,7 @@ public class OrderService {
         return orderModel;
     }
 
-    public Order getOneById(UUID id) {
+    private Order getOneById(UUID id) {
         UserIdentity userIdentity = identityService.getUserIdentity();
         String username = userIdentity.getUsername();
         UserType userType = userIdentity.getUserType();
@@ -152,6 +153,17 @@ public class OrderService {
         }
 
         return entity;
+    }
+
+    public OrderDetailsModel getOrderDetailsById(UUID id) {
+        Order order = getOneById(id);
+        OrderDetailsModel orderModel = mapper.map(order, OrderDetailsModel.class);
+
+        Transaction transaction = transactionRepository.findByOrder_IdOrderByCreatedAtDesc(id);
+        TransactionModel transactionModel = mapper.map(transaction, TransactionModel.class);
+        orderModel.setLatestTransaction(transactionModel);
+
+        return orderModel;
     }
 
     private void validateActiveOrderOfUser() {
