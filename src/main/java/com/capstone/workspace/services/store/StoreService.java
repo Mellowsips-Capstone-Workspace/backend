@@ -3,7 +3,6 @@ package com.capstone.workspace.services.store;
 import com.capstone.workspace.dtos.store.SearchStoreCriteriaDto;
 import com.capstone.workspace.dtos.store.SearchStoreDto;
 import com.capstone.workspace.dtos.store.UpdateStoreDto;
-import com.capstone.workspace.dtos.store.UpdateStoreOperationalHoursDto;
 import com.capstone.workspace.entities.partner.Partner;
 import com.capstone.workspace.entities.store.Store;
 import com.capstone.workspace.enums.partner.BusinessType;
@@ -21,7 +20,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -174,7 +172,7 @@ public class StoreService {
 
     private void checkDocumentExist(String s) {
         if (s != null && !s.isBlank()) {
-            String[] data = s.split("|");
+            String[] data = s.split("\\|");
             String documentId = data[data.length - 1];
             documentService.getDocumentById(UUID.fromString(documentId));
         }
