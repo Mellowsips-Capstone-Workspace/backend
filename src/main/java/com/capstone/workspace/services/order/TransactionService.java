@@ -11,6 +11,7 @@ import com.capstone.workspace.models.order.ZaloPayCallbackData;
 import com.capstone.workspace.models.order.ZaloPayCallbackResult;
 import com.capstone.workspace.repositories.order.OrderRepository;
 import com.capstone.workspace.repositories.order.TransactionRepository;
+import com.capstone.workspace.services.shared.JobService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.NonNull;
@@ -40,6 +41,9 @@ public class TransactionService {
 
     @NonNull
     private final OrderRepository orderRepository;
+
+    @NonNull
+    private final JobService jobService;
 
     @Transactional
     public Transaction createInitialTransaction(Order order) {
@@ -103,6 +107,7 @@ public class TransactionService {
             Order order = transaction.getOrder();
             order.setStatus(OrderStatus.ORDERED);
             orderRepository.save(order);
+            jobService.publishPushNotificationOrderChangesJob(order);
         }
 
         return objectMapper.writeValueAsString(result);

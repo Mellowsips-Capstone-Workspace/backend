@@ -150,7 +150,7 @@ public class ApproveCreateOrganizationApplication extends BaseApproveApplication
                 .subject("Yêu cầu tạo doanh nghiệp đã được chấp nhận")
                 .content("<p>// TODO: Thêm content cho thng báo này</p>")
                 .metadata(new HashMap<>(){{
-                    put("applicationId", String.valueOf(application.getId()));
+                    put("applicationId", application.getId());
                 }})
                 .build();
         } else  {

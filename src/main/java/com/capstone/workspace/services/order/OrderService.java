@@ -16,6 +16,7 @@ import com.capstone.workspace.exceptions.ConflictException;
 import com.capstone.workspace.exceptions.GoneException;
 import com.capstone.workspace.exceptions.NotFoundException;
 import com.capstone.workspace.helpers.shared.AppHelper;
+import com.capstone.workspace.helpers.shared.BeanHelper;
 import com.capstone.workspace.helpers.store.StoreHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.models.cart.CartDetailsModel;
@@ -29,6 +30,7 @@ import com.capstone.workspace.repositories.order.OrderRepository;
 import com.capstone.workspace.repositories.order.TransactionRepository;
 import com.capstone.workspace.services.auth.IdentityService;
 import com.capstone.workspace.services.cart.CartService;
+import com.capstone.workspace.services.shared.JobService;
 import com.capstone.workspace.services.store.QrCodeService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.NonNull;
@@ -80,6 +82,9 @@ public class OrderService {
 
     @NonNull
     private final StoreHelper storeHelper;
+
+    @NonNull
+    private final JobService jobService;
 
     @Transactional
     public OrderModel create(CreateOrderDto dto) {
@@ -134,6 +139,10 @@ public class OrderService {
         TransactionModel transactionModel = mapper.map(transaction, TransactionModel.class);
         orderModel.setLatestTransaction(transactionModel);
 
+        if (saved.getStatus() == OrderStatus.ORDERED) {
+            jobService.publishPushNotificationOrderChangesJob(entity);
+        }
+
         return orderModel;
     }
 
@@ -187,15 +196,24 @@ public class OrderService {
 
         orderStateMachine.init(id);
 
-        OrderStatus newStatus = orderStateMachine.transition(entity.getStatus(), orderEvent);
+        OrderStatus currentStatus = entity.getStatus();
+        OrderStatus newStatus = orderStateMachine.transition(currentStatus, orderEvent);
         entity.setStatus(newStatus);
 
+        Order saved = repository.save(entity);
         switch (newStatus) {
+            case COMPLETED:
+            case PROCESSING:
+                jobService.publishPushNotificationOrderChangesJob(entity);
+                break;
             case DECLINED:
                 // TODO: Xử lí bom hàng
                 break;
             case REJECTED, CANCELED:
                 // TODO: Xử lí Cashback, change transaction status khi hủy lúc PENDING
+                if (currentStatus != OrderStatus.PENDING) {
+                    jobService.publishPushNotificationOrderChangesJob(entity);
+                }
                 break;
             case RECEIVED:
                 Transaction transaction = transactionRepository.findByOrder_IdOrderByCreatedAtDesc(id);
@@ -207,7 +225,7 @@ public class OrderService {
                 break;
         }
 
-        return repository.save(entity);
+        return saved;
     }
 
     public PaginationResponseModel<OrderModel> search(SearchOrderDto dto) {

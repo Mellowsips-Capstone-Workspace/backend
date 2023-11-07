@@ -34,9 +34,8 @@ public class PushNotificationDto implements Serializable {
     @Size(max = 255)
     private String shortDescription;
 
-    @NotNull
     @NotBlank
     private String content;
 
-    private Map<String, String> metadata;
+    private Map<String, Object> metadata;
 }
