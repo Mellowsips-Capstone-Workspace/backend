@@ -140,7 +140,7 @@ public class OrderService {
         orderModel.setLatestTransaction(transactionModel);
 
         if (saved.getStatus() == OrderStatus.ORDERED) {
-            jobService.publishPushNotificationOrderChangesJob(entity);
+            jobService.publishPushNotificationOrderChangesJob(orderModel);
         }
 
         return orderModel;
@@ -200,11 +200,10 @@ public class OrderService {
         OrderStatus newStatus = orderStateMachine.transition(currentStatus, orderEvent);
         entity.setStatus(newStatus);
 
-        Order saved = repository.save(entity);
         switch (newStatus) {
             case COMPLETED:
             case PROCESSING:
-                jobService.publishPushNotificationOrderChangesJob(entity);
+                jobService.publishPushNotificationOrderChangesJob(mapper.map(entity, OrderModel.class));
                 break;
             case DECLINED:
                 // TODO: Xử lí bom hàng
@@ -212,7 +211,7 @@ public class OrderService {
             case REJECTED, CANCELED:
                 // TODO: Xử lí Cashback, change transaction status khi hủy lúc PENDING
                 if (currentStatus != OrderStatus.PENDING) {
-                    jobService.publishPushNotificationOrderChangesJob(entity);
+                    jobService.publishPushNotificationOrderChangesJob(mapper.map(entity, OrderModel.class));
                 }
                 break;
             case RECEIVED:
@@ -225,7 +224,7 @@ public class OrderService {
                 break;
         }
 
-        return saved;
+        return repository.save(entity);
     }
 
     public PaginationResponseModel<OrderModel> search(SearchOrderDto dto) {

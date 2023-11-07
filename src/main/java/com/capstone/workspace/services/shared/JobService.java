@@ -5,6 +5,7 @@ import com.capstone.workspace.entities.order.Order;
 import com.capstone.workspace.jobs.requests.ApproveApplicationJobRequest;
 import com.capstone.workspace.jobs.requests.PushNotificationJobRequest;
 import com.capstone.workspace.jobs.requests.PushNotificationOrderChangesJobRequest;
+import com.capstone.workspace.models.order.OrderModel;
 import com.capstone.workspace.services.auth.IdentityService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +35,7 @@ public class JobService {
         );
     }
 
-    public void publishPushNotificationOrderChangesJob(Order order) {
+    public void publishPushNotificationOrderChangesJob(OrderModel order) {
         BackgroundJobRequest.enqueue(
             new PushNotificationOrderChangesJobRequest(order)
         );

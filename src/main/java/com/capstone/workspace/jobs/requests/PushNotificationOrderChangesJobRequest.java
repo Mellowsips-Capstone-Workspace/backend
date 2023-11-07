@@ -4,6 +4,7 @@ import com.capstone.workspace.dtos.notification.PushNotificationDto;
 import com.capstone.workspace.entities.order.Order;
 import com.capstone.workspace.jobs.handlers.PushNotificationJobRequestHandler;
 import com.capstone.workspace.jobs.handlers.PushNotificationOrderChangesJobRequestHandler;
+import com.capstone.workspace.models.order.OrderModel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -15,7 +16,7 @@ import org.jobrunr.jobs.lambdas.JobRequest;
 @RequiredArgsConstructor
 public class PushNotificationOrderChangesJobRequest implements JobRequest {
     @NonNull
-    private Order order;
+    private OrderModel order;
 
     @Override
     public Class<PushNotificationOrderChangesJobRequestHandler> getJobRequestHandler() {

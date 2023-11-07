@@ -6,6 +6,7 @@ import com.capstone.workspace.entities.user.User;
 import com.capstone.workspace.enums.notification.NotificationKey;
 import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.jobs.requests.PushNotificationOrderChangesJobRequest;
+import com.capstone.workspace.models.order.OrderModel;
 import com.capstone.workspace.repositories.user.UserRepository;
 import com.capstone.workspace.services.notification.NotificationService;
 import lombok.NonNull;
@@ -34,14 +35,16 @@ public class PushNotificationOrderChangesJobRequestHandler implements JobRequest
     @Override
     @Job(name = "Push notification job when order changes")
     public void run(PushNotificationOrderChangesJobRequest request) {
-        Order order = request.getOrder();
+        OrderModel order = request.getOrder();
         PushNotificationDto dto = null;
+        List<String> storeReceivers = null;
 
         switch (order.getStatus()) {
             case ORDERED:
+                storeReceivers = getStoreReceivers(order);
                 dto = PushNotificationDto.builder()
                     .key(String.valueOf(NotificationKey.HAVING_NEW_ORDER))
-                    .receivers(getStoreReceivers(order))
+                    .receivers(storeReceivers)
                     .subject("Bạn có đơn hàng mới")
                     .metadata(new HashMap<>(){{
                         put("orderId", order.getId());
@@ -69,9 +72,10 @@ public class PushNotificationOrderChangesJobRequestHandler implements JobRequest
                     .build();
                 break;
             case CANCELED:
+                storeReceivers = getStoreReceivers(order);
                 dto = PushNotificationDto.builder()
                     .key(String.valueOf(NotificationKey.ORDER_CANCELED))
-                    .receivers(getStoreReceivers(order))
+                    .receivers(storeReceivers)
                     .subject("Đơn hàng đã bị hủy")
                     .metadata(new HashMap<>(){{
                         put("orderId", order.getId());
@@ -100,7 +104,7 @@ public class PushNotificationOrderChangesJobRequestHandler implements JobRequest
         }
     }
 
-    private List<String> getStoreReceivers(Order order) {
+    private List<String> getStoreReceivers(OrderModel order) {
         List<User> businessOwners = userRepository.findByPartnerIdAndType(order.getPartnerId(), UserType.OWNER);
         List<User> storeManagersAndStaffs = userRepository.findByStoreId(order.getStoreId());
         return Stream.concat(businessOwners.stream(), storeManagersAndStaffs.stream()).map(User::getUsername).toList();
