@@ -27,11 +27,13 @@ public interface CartItemRepository extends JpaRepository<CartItem, UUID> {
         @Param("note") String note
     );
 
-    int countByCreatedBy(
-      @Param("createdBy") String createdBy
+    int countByCreatedByAndCart_StoreId(
+      @Param("createdBy") String createdBy,
+      @Param("storeId") String storeId
     );
 
-    List<CartItem> findAllByCreatedBy(
-      @Param("createdBy") String createdBy
+    List<CartItem> findAllByCreatedByAndCart_StoreId(
+      @Param("createdBy") String createdBy,
+      @Param("storeId") String storeId
     );
 }
