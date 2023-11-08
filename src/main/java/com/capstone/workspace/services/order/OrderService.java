@@ -1,20 +1,19 @@
 package com.capstone.workspace.services.order;
 
+import com.capstone.workspace.dtos.notification.PushNotificationDto;
 import com.capstone.workspace.dtos.order.CreateOrderDto;
 import com.capstone.workspace.dtos.order.SearchOrderCriteriaDto;
 import com.capstone.workspace.dtos.order.SearchOrderDto;
 import com.capstone.workspace.entities.order.Order;
 import com.capstone.workspace.entities.order.Transaction;
 import com.capstone.workspace.entities.store.QrCode;
+import com.capstone.workspace.enums.notification.NotificationKey;
 import com.capstone.workspace.enums.order.OrderEvent;
 import com.capstone.workspace.enums.order.OrderStatus;
 import com.capstone.workspace.enums.order.TransactionMethod;
 import com.capstone.workspace.enums.order.TransactionStatus;
 import com.capstone.workspace.enums.user.UserType;
-import com.capstone.workspace.exceptions.BadRequestException;
-import com.capstone.workspace.exceptions.ConflictException;
-import com.capstone.workspace.exceptions.GoneException;
-import com.capstone.workspace.exceptions.NotFoundException;
+import com.capstone.workspace.exceptions.*;
 import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.helpers.shared.BeanHelper;
 import com.capstone.workspace.helpers.store.StoreHelper;
@@ -30,6 +29,7 @@ import com.capstone.workspace.repositories.order.OrderRepository;
 import com.capstone.workspace.repositories.order.TransactionRepository;
 import com.capstone.workspace.services.auth.IdentityService;
 import com.capstone.workspace.services.cart.CartService;
+import com.capstone.workspace.services.notification.NotificationService;
 import com.capstone.workspace.services.shared.JobService;
 import com.capstone.workspace.services.store.QrCodeService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -42,10 +42,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -85,6 +82,9 @@ public class OrderService {
 
     @NonNull
     private final JobService jobService;
+
+    @NonNull
+    private final NotificationService notificationService;
 
     @Transactional
     public OrderModel create(CreateOrderDto dto) {
@@ -141,12 +141,14 @@ public class OrderService {
 
         if (saved.getStatus() == OrderStatus.ORDERED) {
             jobService.publishPushNotificationOrderChangesJob(orderModel);
+        } else {
+            jobService.expiringOrder(saved.getId());
         }
 
         return orderModel;
     }
 
-    private Order getOneById(UUID id) {
+    public Order getOneById(UUID id) {
         UserIdentity userIdentity = identityService.getUserIdentity();
         String username = userIdentity.getUsername();
         UserType userType = userIdentity.getUserType();
@@ -162,17 +164,6 @@ public class OrderService {
         }
 
         return entity;
-    }
-
-    public OrderDetailsModel getOrderDetailsById(UUID id) {
-        Order order = getOneById(id);
-        OrderDetailsModel orderModel = mapper.map(order, OrderDetailsModel.class);
-
-        Transaction transaction = transactionRepository.findByOrder_IdOrderByCreatedAtDesc(id);
-        TransactionModel transactionModel = mapper.map(transaction, TransactionModel.class);
-        orderModel.setLatestTransaction(transactionModel);
-
-        return orderModel;
     }
 
     private void validateActiveOrderOfUser() {
@@ -258,5 +249,60 @@ public class OrderService {
         result.setResults(orderModels);
 
         return result;
+    }
+
+    public Transaction requestTransaction(UUID id) {
+        Order order = getOneById(id);
+        if (order.getStatus() != OrderStatus.PENDING || order.getInitialTransactionMethod() == TransactionMethod.CASH) {
+            throw new BadRequestException("This order does not support requesting transaction now");
+        }
+
+        Transaction latestTransaction = transactionRepository.findByOrder_IdOrderByCreatedAtDesc(id);
+        int transactionStatusCode = transactionService.checkTransactionStatusCode(latestTransaction);
+
+        switch (transactionStatusCode) {
+            case 1:
+                throw new ConflictException("This order has been paid");
+            case 2:
+                return transactionService.createInitialTransaction(order);
+            case 3:
+                return latestTransaction;
+            case 4:
+                throw new ConflictException("Current transaction is processing");
+            default:
+                throw new NotAcceptableException("Transaction status code " + transactionStatusCode + " is not supported");
+        }
+    }
+
+    @Transactional
+    public void expiringOrder(UUID orderId) {
+        UserIdentity userIdentity = new UserIdentity();
+        userIdentity.setUsername("system");
+        userIdentity.setUserType(UserType.ADMIN);
+        identityService.setUserIdentity(userIdentity);
+
+        Order order = getOneById(orderId);
+        if (order.getInitialTransactionMethod() == TransactionMethod.CASH) {
+            throw new NotAcceptableException("Only support this feature for ZaloPay transaction");
+        }
+
+        if (order.getStatus() == OrderStatus.PENDING) {
+            order.setStatus(OrderStatus.EXPIRED);
+            repository.save(order);
+
+            Transaction transaction = transactionRepository.findByOrder_IdOrderByCreatedAtDesc(orderId);
+            transaction.setStatus(TransactionStatus.EXPIRED);
+            transactionRepository.save(transaction);
+        }
+
+        PushNotificationDto dto = PushNotificationDto.builder()
+            .key(String.valueOf(NotificationKey.ORDER_EXPIRED))
+            .receivers(List.of(order.getCreatedBy()))
+            .subject("Đơn hàng của bạn đã hết hạn")
+            .metadata(new HashMap<>(){{
+                put("orderId", order.getId());
+            }})
+            .build();
+        notificationService.createPrivateNotification(dto);
     }
 }
