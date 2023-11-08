@@ -11,7 +11,6 @@ import com.capstone.workspace.exceptions.*;
 import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.models.shared.PaginationResponseModel;
-import com.capstone.workspace.models.store.StoreModel;
 import com.capstone.workspace.models.voucher.VoucherModel;
 import com.capstone.workspace.repositories.voucher.VoucherRepository;
 import com.capstone.workspace.services.auth.IdentityService;
@@ -161,7 +160,7 @@ public class VoucherService {
         return repository.save(entity);
     }
 
-    public PaginationResponseModel<StoreModel> search(SearchVoucherDto dto) {
+    public PaginationResponseModel<VoucherModel> search(SearchVoucherDto dto) {
         String[] searchableFields = new String[]{"name"};
         Map<String, Object> filterParams = Collections.emptyMap();
 
