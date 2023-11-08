@@ -65,27 +65,13 @@ public class CartService {
         UserIdentity userIdentity = identityService.getUserIdentity();
         String username = userIdentity.getUsername();
 
+        List<Cart> carts = repository.findAllByCreatedBy(username);
+        if (carts.size() >= 10) {
+            throw new BadRequestException("Exceeded max allowed carts");
+        }
+
         Product product = productService.getProductById(dto.getProductId());
         List<ProductAddon> productAddons = getAddonList(product, dto.getAddons());
-
-        int cartCount = repository.countByCreatedBy(username);
-        if (cartCount >= 10){
-            throw new BadRequestException("You cannot create more carts, you need to delete carts if you want to continue adding.");
-        }
-
-        int cartItemCount = cartItemRepository.countByCreatedByAndCart_StoreId(username, product.getStoreId());
-        if (cartItemCount >= 10){
-            throw new BadRequestException("Cart is full. You cannot add more items.");
-        } else {
-            List<CartItem> cartItems = cartItemRepository.findAllByCreatedByAndCart_StoreId(username, product.getStoreId());
-            int totalQuantityInCart = cartItems.stream().mapToInt(CartItem::getQuantity).sum();
-            if (totalQuantityInCart >= 10) {
-                throw new BadRequestException("Cart is full. You cannot add more items.");
-            }
-            if (totalQuantityInCart + dto.getQuantity() > 10){
-                throw new BadRequestException(("The quantity added exceeds the cart limit, you need to reduce the quantity"));
-            }
-        }
 
         CartItem cartItem = cartItemRepository.findByCreatedByAndProduct_IdAndAddonsAndNote(
                 username,
@@ -94,7 +80,8 @@ public class CartService {
                 dto.getNote()
         );
 
-        if (cartItem != null) {
+        boolean isExistItem = cartItem != null;
+        if (isExistItem) {
             int newQuantity = cartItem.getQuantity() + dto.getQuantity();
             cartItem.setQuantity(newQuantity);
         } else {
@@ -115,6 +102,20 @@ public class CartService {
         }
 
         cartItem = cartItemRepository.save(cartItem);
+        Cart cart = cartItem.getCart();
+
+        int numberOfItems;
+        if (cart.getCartItems() == null) {
+            numberOfItems = cartItem.getQuantity();
+        } else {
+            int currentNoItems = cart.getCartItems().stream().reduce(0, (res, el) -> res + el.getQuantity(), Integer::sum);
+            numberOfItems = isExistItem ? currentNoItems : currentNoItems + cartItem.getQuantity();
+        }
+
+        if (numberOfItems > 10) {
+            throw new BadRequestException("Exceeded max allowed items in cart");
+        }
+
         return getCartItemModel(cartItem, productAddons);
     }
 

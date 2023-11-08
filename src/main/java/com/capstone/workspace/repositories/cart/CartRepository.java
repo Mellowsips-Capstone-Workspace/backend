@@ -12,6 +12,4 @@ public interface CartRepository extends JpaRepository<Cart, UUID> {
     Cart findByCreatedByAndStoreId(String createdBy, String storeId);
 
     List<Cart> findAllByCreatedBy(String createdBy);
-
-    int countByCreatedBy(String createdBy);
 }

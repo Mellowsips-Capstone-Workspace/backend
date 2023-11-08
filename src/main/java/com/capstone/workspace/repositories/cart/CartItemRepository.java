@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.UUID;
 
 @Repository
@@ -25,15 +24,5 @@ public interface CartItemRepository extends JpaRepository<CartItem, UUID> {
         @Param("productId") UUID productId,
         @Param("addons") UUID[] addons,
         @Param("note") String note
-    );
-
-    int countByCreatedByAndCart_StoreId(
-      @Param("createdBy") String createdBy,
-      @Param("storeId") String storeId
-    );
-
-    List<CartItem> findAllByCreatedByAndCart_StoreId(
-      @Param("createdBy") String createdBy,
-      @Param("storeId") String storeId
     );
 }
