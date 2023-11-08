@@ -68,6 +68,21 @@ public class CartService {
         Product product = productService.getProductById(dto.getProductId());
         List<ProductAddon> productAddons = getAddonList(product, dto.getAddons());
 
+        int cartItemCount = cartItemRepository.countByCreatedBy(username);
+        System.out.println(cartItemCount);
+        if (cartItemCount >= 10){
+            throw new BadRequestException("Cart is full. You cannot add more items.");
+        } else {
+            List<CartItem> cartItems = cartItemRepository.findAllByCreatedBy(username);
+            int totalQuantityInCart = cartItems.stream().mapToInt(CartItem::getQuantity).sum();
+            if (totalQuantityInCart >= 10) {
+                throw new BadRequestException("Cart is full. You cannot add more items.");
+            }
+            if (totalQuantityInCart + dto.getQuantity() > 10){
+                throw new BadRequestException(("The quantity added exceeds the cart limit, you need to reduce the quantity"));
+            }
+        }
+
         CartItem cartItem = cartItemRepository.findByCreatedByAndProduct_IdAndAddonsAndNote(
                 username,
                 dto.getProductId(),
