@@ -161,6 +161,7 @@ public class VoucherService {
     }
 
     public PaginationResponseModel<VoucherModel> search(SearchVoucherDto dto) {
+
         String[] searchableFields = new String[]{"name"};
         Map<String, Object> filterParams = Collections.emptyMap();
 
