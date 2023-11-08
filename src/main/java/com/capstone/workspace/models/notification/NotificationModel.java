@@ -18,7 +18,7 @@ public class NotificationModel {
 
     private String content;
 
-    private Map<String, String> metadata;
+    private Map<String, Object> metadata;
 
     private Boolean isSeen;
 

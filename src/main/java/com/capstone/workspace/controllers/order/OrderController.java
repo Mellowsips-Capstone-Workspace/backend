@@ -42,8 +42,7 @@ public class OrderController {
 
     @GetMapping("/{id}")
     public ResponseModel<OrderDetailsModel> getOrderById(@PathVariable UUID id) {
-        Order entity = orderService.getOneById(id);
-        OrderDetailsModel model = mapper.map(entity, OrderDetailsModel.class);
+        OrderDetailsModel model = orderService.getOrderDetailsById(id);
         return ResponseModel.<OrderDetailsModel>builder().data(model).build();
     }
 

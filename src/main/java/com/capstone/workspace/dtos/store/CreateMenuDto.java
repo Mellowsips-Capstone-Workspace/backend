@@ -23,4 +23,6 @@ public class CreateMenuDto {
     @NotNull
     @NotEmpty
     private List<CreateMenuSectionDto> menuSections;
+
+    private String storeId;
 }

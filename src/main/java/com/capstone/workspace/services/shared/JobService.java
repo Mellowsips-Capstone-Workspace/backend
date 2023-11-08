@@ -1,8 +1,11 @@
 package com.capstone.workspace.services.shared;
 
 import com.capstone.workspace.dtos.notification.PushNotificationDto;
+import com.capstone.workspace.entities.order.Order;
 import com.capstone.workspace.jobs.requests.ApproveApplicationJobRequest;
 import com.capstone.workspace.jobs.requests.PushNotificationJobRequest;
+import com.capstone.workspace.jobs.requests.PushNotificationOrderChangesJobRequest;
+import com.capstone.workspace.models.order.OrderModel;
 import com.capstone.workspace.services.auth.IdentityService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +32,12 @@ public class JobService {
     public void publishPushNotificationJob(PushNotificationDto dto) {
         BackgroundJobRequest.enqueue(
             new PushNotificationJobRequest(dto)
+        );
+    }
+
+    public void publishPushNotificationOrderChangesJob(OrderModel order) {
+        BackgroundJobRequest.enqueue(
+            new PushNotificationOrderChangesJobRequest(order)
         );
     }
 }

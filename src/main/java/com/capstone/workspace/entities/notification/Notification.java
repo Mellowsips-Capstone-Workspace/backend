@@ -40,7 +40,7 @@ public class Notification implements Serializable {
 
     @Column
     @JdbcTypeCode(SqlTypes.JSON)
-    private Map<String, String> metadata;
+    private Map<String, Object> metadata;
 
     @Column(columnDefinition = "BOOLEAN DEFAULT false")
     private Boolean isSeen = false;

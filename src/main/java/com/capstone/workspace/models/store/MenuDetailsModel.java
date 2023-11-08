@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class MenuModel extends BaseModel {
+public class MenuDetailsModel extends BaseModel {
     private String name;
 
     private Boolean isActive;
@@ -14,4 +14,6 @@ public class MenuModel extends BaseModel {
     private String partnerId;
 
     private String storeId;
+
+    private List<MenuSectionModel> menuSections;
 }
