@@ -4,9 +4,11 @@ import com.capstone.workspace.annotations.AllowedUsers;
 import com.capstone.workspace.dtos.order.CreateOrderDto;
 import com.capstone.workspace.dtos.order.SearchOrderDto;
 import com.capstone.workspace.entities.order.Order;
+import com.capstone.workspace.entities.order.Transaction;
 import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.models.order.OrderDetailsModel;
 import com.capstone.workspace.models.order.OrderModel;
+import com.capstone.workspace.models.order.TransactionModel;
 import com.capstone.workspace.models.shared.PaginationResponseModel;
 import com.capstone.workspace.models.shared.ResponseModel;
 import com.capstone.workspace.services.order.OrderService;
@@ -42,7 +44,8 @@ public class OrderController {
 
     @GetMapping("/{id}")
     public ResponseModel<OrderDetailsModel> getOrderById(@PathVariable UUID id) {
-        OrderDetailsModel model = orderService.getOrderDetailsById(id);
+        Order entity = orderService.getOneById(id);
+        OrderDetailsModel model = mapper.map(entity, OrderDetailsModel.class);
         return ResponseModel.<OrderDetailsModel>builder().data(model).build();
     }
 
@@ -63,5 +66,13 @@ public class OrderController {
     public ResponseModel<PaginationResponseModel<OrderModel>> search(@Valid @RequestBody SearchOrderDto dto) {
         PaginationResponseModel<OrderModel> data = orderService.search(dto);
         return ResponseModel.<PaginationResponseModel<OrderModel>>builder().data(data).build();
+    }
+
+    @AllowedUsers(userTypes = {UserType.CUSTOMER})
+    @PostMapping("/{id}/transactions")
+    public ResponseModel<TransactionModel> requestTransaction(@PathVariable UUID id) {
+        Transaction entity = orderService.requestTransaction(id);
+        TransactionModel model = mapper.map(entity, TransactionModel.class);
+        return ResponseModel.<TransactionModel>builder().data(model).build();
     }
 }

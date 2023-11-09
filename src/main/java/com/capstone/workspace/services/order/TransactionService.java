@@ -117,4 +117,11 @@ public class TransactionService {
 
         return objectMapper.writeValueAsString(result);
     }
+
+    public int checkTransactionStatusCode(Transaction transaction) {
+        if (transaction.getMethod() == TransactionMethod.CASH) {
+            throw new BadRequestException("Do not support cash transaction");
+        }
+        return zaloPayService.checkTransactionStatusCode(transaction);
+    }
 }
