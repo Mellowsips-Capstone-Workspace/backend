@@ -293,16 +293,16 @@ public class OrderService {
             Transaction transaction = transactionRepository.findByOrder_IdOrderByCreatedAtDesc(orderId);
             transaction.setStatus(TransactionStatus.EXPIRED);
             transactionRepository.save(transaction);
-        }
 
-        PushNotificationDto dto = PushNotificationDto.builder()
-            .key(String.valueOf(NotificationKey.ORDER_EXPIRED))
-            .receivers(List.of(order.getCreatedBy()))
-            .subject("Đơn hàng của bạn đã hết hạn")
-            .metadata(new HashMap<>(){{
-                put("orderId", order.getId());
-            }})
-            .build();
-        notificationService.createPrivateNotification(dto);
+            PushNotificationDto dto = PushNotificationDto.builder()
+                    .key(String.valueOf(NotificationKey.ORDER_EXPIRED))
+                    .receivers(List.of(order.getCreatedBy()))
+                    .subject("Đơn hàng của bạn đã hết hạn")
+                    .metadata(new HashMap<>(){{
+                        put("orderId", order.getId());
+                    }})
+                    .build();
+            notificationService.createPrivateNotification(dto);
+        }
     }
 }
