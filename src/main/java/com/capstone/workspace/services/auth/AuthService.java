@@ -37,7 +37,7 @@ public class AuthService {
     public User register(RegisterUserDto dto) {
         try {
             User user = userService.getUserByUsername(dto.getUsername());
-            if (user != null) {
+            if (user != null || dto.getUsername().equalsIgnoreCase("system")) {
                 throwConflictUsernameException(dto.getUsername());
             }
         } catch (NotFoundException notFoundException) {
@@ -107,7 +107,7 @@ public class AuthService {
     public User addEmployee(AddEmployeeDto dto) {
         try {
             User user = userService.getUserByUsername(dto.getUsername());
-            if (user != null) {
+            if (user != null || dto.getUsername().equalsIgnoreCase("system")) {
                 throwConflictUsernameException(dto.getUsername());
             }
         } catch (NotFoundException notFoundException) {
