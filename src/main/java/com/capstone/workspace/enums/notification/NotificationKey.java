@@ -7,5 +7,6 @@ public enum NotificationKey {
     ORDER_PROCESSING,
     ORDER_COMPLETED,
     ORDER_CANCELED,
-    ORDER_REJECTED
+    ORDER_REJECTED,
+    ORDER_EXPIRED
 }

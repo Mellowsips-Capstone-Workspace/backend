@@ -1,6 +1,7 @@
 package com.capstone.workspace.services.order;
 
 import com.capstone.workspace.entities.order.Order;
+import com.capstone.workspace.entities.order.Transaction;
 import com.capstone.workspace.exceptions.InternalServerErrorException;
 import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
@@ -11,6 +12,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.aspectj.apache.bcel.classfile.annotation.NameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,10 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -121,5 +120,30 @@ public class ZaloPayService {
         }
 
         return result;
+    }
+
+    public int checkTransactionStatusCode(Transaction transaction) {
+        Map<String, Object> externalPaymentInfo = transaction.getExternalPaymentInfo();
+        String appTransId = (String) externalPaymentInfo.get("appTransId");
+
+        String data = appId +"|"+ appTransId  +"|"+ key1;
+        String mac = HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, key1, data);
+
+        Map<String, Object> params = new HashMap<>() {{
+            put("app_id", appId);
+            put("app_trans_id", appTransId);
+            put("mac", mac);
+        }};
+
+        HttpEntity request = new HttpEntity(params);
+        ResponseEntity<HashMap> responseEntity = restTemplate.exchange(endpoint + "/query", HttpMethod.POST, request, HashMap.class);
+
+        Map<String, Object> response = responseEntity.getBody();
+        int statusCode = (int) response.get("return_code");
+        if (statusCode == 3) {
+            return ((String) response.get("return_message")).equals("Giao dịch chưa được thực hiện") ? 3 : 4;
+        }
+
+        return statusCode;
     }
 }

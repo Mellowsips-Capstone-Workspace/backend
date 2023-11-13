@@ -1,0 +1,2 @@
+UPDATE "order" SET status = 'EXPIRED' WHERE status = 'PENDING' AND initial_transaction_method = 'ZALO_PAY' AND now() - created_at >= interval '15 min';
+UPDATE transaction SET status = 'EXPIRED' WHERE status = 'PENDING' AND method = 'ZALO_PAY' AND now() - created_at >= interval '15 min';
