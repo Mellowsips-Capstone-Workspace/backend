@@ -58,4 +58,11 @@ public class ProductController {
         PaginationResponseModel<ProductModel> data = productService.search(dto);
         return ResponseModel.<PaginationResponseModel<ProductModel>>builder().data(data).build();
     }
+
+    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER, UserType.STAFF})
+    @DeleteMapping("/{id}")
+    public ResponseModel delete(@PathVariable UUID id) {
+        productService.delete(id);
+        return ResponseModel.builder().message("Delete product successfully").build();
+    }
 }

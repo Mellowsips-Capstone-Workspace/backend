@@ -14,6 +14,8 @@ import com.capstone.workspace.models.product.ProductModel;
 import com.capstone.workspace.models.shared.PaginationResponseModel;
 import com.capstone.workspace.repositories.product.ProductRepository;
 import com.capstone.workspace.services.auth.IdentityService;
+import com.capstone.workspace.services.cart.CartItemService;
+import com.capstone.workspace.services.cart.CartService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -44,6 +46,9 @@ public class ProductService {
 
     @NonNull
     private final IdentityService identityService;
+
+    @NonNull
+    private final CartItemService cartItemService;
 
     public Product getProductById(UUID id) {
         Product entity = repository.findById(id).orElse(null);
@@ -114,5 +119,12 @@ public class ProductService {
         result.setResults(productModels);
 
         return result;
+    }
+
+    @Transactional
+    public void delete(UUID id) {
+        Product entity = getProductById(id);
+        cartItemService.deleteCartItemByProductId(entity.getId());
+        repository.delete(entity);
     }
 }
