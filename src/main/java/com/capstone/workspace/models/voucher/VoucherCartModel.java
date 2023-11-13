@@ -9,7 +9,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 @Data
-public class VoucherModel extends BaseModel {
+public class VoucherCartModel extends BaseModel {
     private int quantity;
 
     private VoucherDiscountType discountType;
@@ -31,6 +31,10 @@ public class VoucherModel extends BaseModel {
     private String partnerId;
 
     private String storeId;
+
+    private long discountAmount;
+
+    private Boolean canUse;
 
     public void setStartDate(Instant startDate) {
         this.startDate = startDate == null ? null : startDate.atZone(ZoneId.of("Asia/Saigon"));

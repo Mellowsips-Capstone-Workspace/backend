@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -64,5 +65,13 @@ public class CartController {
     public ResponseModel deleteCart(@PathVariable UUID id) {
         cartService.deleteCart(id);
         return ResponseModel.builder().message("Delete successfully").build();
+    }
+
+
+    @AllowedUsers(userTypes = {UserType.CUSTOMER})
+    @GetMapping("/{id}/vouchers")
+    public ResponseModel<Map> getVouchers(@PathVariable UUID id) {
+        Map data = cartService.getVouchers(id);
+        return ResponseModel.<Map>builder().data(data).build();
     }
 }

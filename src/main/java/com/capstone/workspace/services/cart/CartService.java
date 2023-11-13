@@ -23,6 +23,7 @@ import com.capstone.workspace.services.auth.IdentityService;
 import com.capstone.workspace.services.product.ProductAddonService;
 import com.capstone.workspace.services.product.ProductService;
 import com.capstone.workspace.services.store.StoreService;
+import com.capstone.workspace.services.voucher.VoucherService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -31,10 +32,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -59,6 +57,9 @@ public class CartService {
 
     @NonNull
     private final ModelMapper mapper;
+
+    @NonNull
+    private final VoucherService voucherService;
 
     @Transactional
     public CartItemModel addProductToCart(AddProductToCartDto dto) {
@@ -257,5 +258,10 @@ public class CartService {
         }
 
         return entity;
+    }
+
+    public Map getVouchers(UUID cartId) {
+        CartDetailsModel cartDetailsModel = getCartDetails(cartId);
+        return voucherService.customerGetCartVoucher(cartDetailsModel);
     }
 }
