@@ -24,10 +24,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -163,7 +160,7 @@ public class VoucherService {
     public PaginationResponseModel<VoucherModel> search(SearchVoucherDto dto) {
 
         String[] searchableFields = new String[]{"name"};
-        Map<String, Object> filterParams = Collections.emptyMap();
+        Map<String, Object> filterParams = new HashMap<>();
 
         SearchVoucherCriteriaDto criteria = dto.getCriteria();
         String keyword = null;
@@ -175,6 +172,12 @@ public class VoucherService {
             }
             keyword = criteria.getKeyword();
             orderCriteria = criteria.getOrder();
+        }
+
+        UserIdentity userIdentity = identityService.getUserIdentity();
+        if (userIdentity.getUserType() == UserType.ADMIN) {
+            filterParams.put("partnerId", null);
+            filterParams.put("storeId", null);
         }
 
         PaginationResponseModel result = repository.searchBy(

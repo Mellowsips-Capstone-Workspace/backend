@@ -1,7 +1,6 @@
 package com.capstone.workspace.controllers.voucher;
 
 import com.capstone.workspace.annotations.AllowedUsers;
-import com.capstone.workspace.dtos.store.SearchStoreDto;
 import com.capstone.workspace.dtos.voucher.CreateVoucherDto;
 import com.capstone.workspace.dtos.voucher.SearchVoucherDto;
 import com.capstone.workspace.dtos.voucher.UpdateVoucherDto;
@@ -9,7 +8,6 @@ import com.capstone.workspace.entities.voucher.Voucher;
 import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.models.shared.PaginationResponseModel;
 import com.capstone.workspace.models.shared.ResponseModel;
-import com.capstone.workspace.models.store.StoreModel;
 import com.capstone.workspace.models.voucher.VoucherModel;
 import com.capstone.workspace.services.voucher.VoucherService;
 import jakarta.validation.Valid;
@@ -71,10 +69,6 @@ public class VoucherController {
     @AllowedUsers(userTypes = {UserType.OWNER,UserType.STORE_MANAGER, UserType.ADMIN})
     @PostMapping("/search")
     public ResponseModel<PaginationResponseModel<VoucherModel>> search(@Valid @RequestBody SearchVoucherDto dto) {
-        return searchStore(dto);
-    }
-
-    private ResponseModel<PaginationResponseModel<VoucherModel>> searchStore(SearchVoucherDto dto) {
         PaginationResponseModel<VoucherModel> data = voucherService.search(dto);
         return ResponseModel.<PaginationResponseModel<VoucherModel>>builder().data(data).build();
     }
