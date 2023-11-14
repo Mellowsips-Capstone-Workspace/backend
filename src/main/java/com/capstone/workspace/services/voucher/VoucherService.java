@@ -1,6 +1,8 @@
 package com.capstone.workspace.services.voucher;
 
 import com.capstone.workspace.dtos.voucher.CreateVoucherDto;
+import com.capstone.workspace.dtos.voucher.SearchVoucherCriteriaDto;
+import com.capstone.workspace.dtos.voucher.SearchVoucherDto;
 import com.capstone.workspace.dtos.voucher.UpdateVoucherDto;
 import com.capstone.workspace.entities.voucher.Voucher;
 import com.capstone.workspace.enums.user.UserType;
@@ -10,6 +12,8 @@ import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.models.cart.CartDetailsModel;
 import com.capstone.workspace.models.voucher.VoucherCartModel;
+import com.capstone.workspace.models.shared.PaginationResponseModel;
+import com.capstone.workspace.models.voucher.VoucherModel;
 import com.capstone.workspace.repositories.voucher.VoucherRepository;
 import com.capstone.workspace.services.auth.IdentityService;
 import lombok.NonNull;
@@ -22,10 +26,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -189,6 +191,46 @@ public class VoucherService {
 
         List<VoucherCartModel> businessVouchers = mappedModels.stream().filter(item -> item.getPartnerId() != null).toList();
         result.put("BUSINESS", businessVouchers);
+
+        return result;
+    }
+
+    public PaginationResponseModel<VoucherModel> search(SearchVoucherDto dto) {
+
+        String[] searchableFields = new String[]{"name"};
+        Map<String, Object> filterParams = new HashMap<>();
+
+        SearchVoucherCriteriaDto criteria = dto.getCriteria();
+        String keyword = null;
+        Map orderCriteria = null;
+
+        if (criteria != null) {
+            if (criteria.getFilter() != null) {
+                filterParams = AppHelper.copyPropertiesToMap(criteria.getFilter());
+            }
+            keyword = criteria.getKeyword();
+            orderCriteria = criteria.getOrder();
+        }
+
+        UserIdentity userIdentity = identityService.getUserIdentity();
+        if (userIdentity.getUserType() == UserType.ADMIN) {
+            filterParams.put("partnerId", null);
+            filterParams.put("storeId", null);
+        }
+
+        PaginationResponseModel result = repository.searchBy(
+                keyword,
+                searchableFields,
+                filterParams,
+                orderCriteria,
+                dto.getPagination()
+        );
+
+        List<VoucherModel> voucherModels = mapper.map(
+                result.getResults(),
+                new TypeToken<List<VoucherModel>>() {}.getType()
+        );
+        result.setResults(voucherModels);
 
         return result;
     }
