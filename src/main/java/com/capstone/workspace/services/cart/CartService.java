@@ -145,7 +145,7 @@ public class CartService {
     public CartDetailsModel getCartDetails(UUID id) {
         Cart entity = getCartById(id);
 
-        List<CartItemModel> cartItems = entity.getCartItems().stream().filter(item -> item != null).map(item -> {
+        List<CartItemModel> cartItems = entity.getCartItems().stream().map(item -> {
             List<ProductAddon> addons = productAddonService.getBulk(item.getAddons());
             return getCartItemModel(item, addons);
         }).toList();
