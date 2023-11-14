@@ -10,6 +10,8 @@ import com.capstone.workspace.enums.voucher.VoucherDiscountType;
 import com.capstone.workspace.exceptions.*;
 import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
+import com.capstone.workspace.models.cart.CartDetailsModel;
+import com.capstone.workspace.models.voucher.VoucherCartModel;
 import com.capstone.workspace.models.shared.PaginationResponseModel;
 import com.capstone.workspace.models.voucher.VoucherModel;
 import com.capstone.workspace.repositories.voucher.VoucherRepository;
@@ -24,6 +26,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.UUID;
 import java.util.*;
 
 @Service
@@ -155,6 +158,41 @@ public class VoucherService {
         }
 
         return repository.save(entity);
+    }
+
+    public Map customerGetCartVoucher(CartDetailsModel cartDetailsModel) {
+        Map<String, List<VoucherCartModel>> result = new HashMap<>();
+
+        List<Voucher> entities = repository.customerCartGetVouchers(
+            cartDetailsModel.getCreatedBy(),
+            cartDetailsModel.getStore().getPartnerId(),
+            String.valueOf(cartDetailsModel.getStore().getId())
+        );
+
+        List<VoucherCartModel> models = mapper.map(
+                entities,
+                new TypeToken<List<VoucherCartModel>>() {}.getType()
+        );
+
+        List<VoucherCartModel> mappedModels = models.stream()
+            .map(item -> {
+                item.setCanUse(item.getMinOrderAmount() <= cartDetailsModel.getTempPrice());
+                if (item.getDiscountType() == VoucherDiscountType.PERCENT) {
+                    long discountAmount = item.getValue() * cartDetailsModel.getTempPrice() / 100;
+                    item.setDiscountAmount(Math.min(discountAmount, item.getMaxDiscountAmount()));
+                } else {
+                    item.setDiscountAmount(item.getValue());
+                }
+                return item;
+            }).toList();
+
+        List<VoucherCartModel> systemVouchers = mappedModels.stream().filter(item -> item.getPartnerId() == null).toList();
+        result.put("SYSTEM", systemVouchers);
+
+        List<VoucherCartModel> businessVouchers = mappedModels.stream().filter(item -> item.getPartnerId() != null).toList();
+        result.put("BUSINESS", businessVouchers);
+
+        return result;
     }
 
     public PaginationResponseModel<VoucherModel> search(SearchVoucherDto dto) {
