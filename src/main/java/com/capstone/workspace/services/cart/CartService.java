@@ -72,6 +72,9 @@ public class CartService {
         }
 
         Product product = productService.getProductById(dto.getProductId());
+        if (product.getStoreId() == null){
+            throw new BadRequestException("This product cannot be added to the cart");
+        }
         List<ProductAddon> productAddons = getAddonList(product, dto.getAddons());
 
         CartItem cartItem = cartItemRepository.findByCreatedByAndProduct_IdAndAddonsAndNote(
@@ -142,7 +145,7 @@ public class CartService {
     public CartDetailsModel getCartDetails(UUID id) {
         Cart entity = getCartById(id);
 
-        List<CartItemModel> cartItems = entity.getCartItems().stream().map(item -> {
+        List<CartItemModel> cartItems = entity.getCartItems().stream().filter(item -> item != null).map(item -> {
             List<ProductAddon> addons = productAddonService.getBulk(item.getAddons());
             return getCartItemModel(item, addons);
         }).toList();
