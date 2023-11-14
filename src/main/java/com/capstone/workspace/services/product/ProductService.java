@@ -124,7 +124,7 @@ public class ProductService {
     @Transactional
     public void delete(UUID id) {
         Product entity = getProductById(id);
-        cartItemService.deleteCartItemByProductId(entity.getId());
+        cartItemService.deleteByProductId(entity.getId());
         repository.delete(entity);
     }
 }

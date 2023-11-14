@@ -7,8 +7,6 @@ import com.capstone.workspace.repositories.cart.CartRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 
 import java.util.List;
 import java.util.UUID;
@@ -22,25 +20,33 @@ public class CartItemService {
     @NonNull
     private final CartRepository cartRepository;
 
-    public void deleteCartItemByProductId(UUID productId) {
+    public void deleteByProductId(UUID productId) {
         List<CartItem> cartItems = repository.findAllByProduct_Id(productId);
         if (cartItems != null && !cartItems.isEmpty()) {
             cartItems.forEach(cartItem -> {
-                repository.delete(cartItem);
+                delete(cartItem.getId());
             });
         }
     }
 
-/*    @Transactional
-    public void deleteCartItem(UUID id) {
+    public CartItem getCartItemById(UUID id) {
+        CartItem entity = repository.findById(id).orElse(null);
+        return entity;
+    }
+
+    public void delete(UUID id) {
         CartItem cartItem = getCartItemById(id);
 
-        Cart cart = cartItem.getCart();
-        if (cart.getCartItems().size() == 1) {
-            repository.delete(cart);
-            return;
+        if(cartItem != null) {
+            Cart cart = cartItem.getCart();
+            long activeCartItemCount = cart.getCartItems().stream()
+                    .filter(c -> !c.isDeleted())
+                    .count();
+            if (activeCartItemCount == 1) {
+                cartRepository.delete(cart);
+            }
         }
+        repository.delete(cartItem);
+    }
 
-        cartItemRepository.delete(cartItem);
-    }*/
 }
