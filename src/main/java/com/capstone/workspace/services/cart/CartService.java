@@ -139,9 +139,12 @@ public class CartService {
     }
 
     public CartDetailsModel getCartDetails(UUID id) {
-        Cart entity = getCartById(id);
-
-        List<CartItemModel> cartItems = entity.getCartItems().stream().map(item -> {
+        Cart entity = repository.findCartWithDeletedProducts(id);
+        List<CartItem> cartItemList = cartItemRepository.findAllByCart_IdAndProduct_Deleted(id);
+        if (cartItemList.size() > 0){
+            throw new BadRequestException("Hu");
+        }
+        List<CartItemModel> cartItems = entity.getCartItems().stream().filter(item -> item.getProduct().isDeleted() == true).map(item -> {
             List<ProductAddon> addons = productAddonService.getBulk(item.getAddons());
             return getCartItemModel(item, addons);
         }).toList();
@@ -150,6 +153,7 @@ public class CartService {
         StoreModel storeModel = mapper.map(store, StoreModel.class);
 
         CartDetailsModel model = mapper.map(entity, CartDetailsModel.class);
+
         model.setCartItems(cartItems);
         model.setStore(storeModel);
 
@@ -224,6 +228,7 @@ public class CartService {
         model.setTempPrice(tempPrice);
         model.setFinalPrice(tempPrice);
 
+
         return model;
     }
 
@@ -250,7 +255,7 @@ public class CartService {
         UserIdentity userIdentity = identityService.getUserIdentity();
         String username = userIdentity.getUsername();
 
-        Cart entity = repository.findById(id).orElse(null);
+        Cart entity = repository.findCartWithDeletedProducts(id);
 
         if (entity == null || !username.equals(entity.getCreatedBy())) {
             throw new NotFoundException("Cart not found");
