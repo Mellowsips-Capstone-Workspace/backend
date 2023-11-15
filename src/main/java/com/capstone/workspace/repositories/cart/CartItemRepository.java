@@ -1,5 +1,6 @@
 package com.capstone.workspace.repositories.cart;
 
+import com.capstone.workspace.entities.cart.Cart;
 import com.capstone.workspace.entities.cart.CartItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -27,4 +28,13 @@ public interface CartItemRepository extends JpaRepository<CartItem, UUID> {
         @Param("note") String note
     );
     List<CartItem> findAllByProduct_Id(@Param("productId") UUID productId);
+
+    @Query(
+            value = "SELECT ci.* FROM cart_item ci " +
+                    "INNER JOIN product p ON ci.product_id = p.id " +
+                    "WHERE ci.id = :id " +
+                    "AND p.is_deleted = TRUE",
+            nativeQuery = true
+    )
+    List<CartItem> findCartItemWithDeletedProducts(@Param("id") UUID id);
 }

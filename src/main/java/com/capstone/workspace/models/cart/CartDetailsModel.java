@@ -15,4 +15,6 @@ public class CartDetailsModel extends BaseModel {
     private long tempPrice;
 
     private long finalPrice;
+
+    private boolean isChange = false;
 }

@@ -15,14 +15,4 @@ public interface CartRepository extends JpaRepository<Cart, UUID> {
 
     List<Cart> findAllByCreatedBy(String createdBy);
 
-    @Query(
-            value = "SELECT c.*, ci.* FROM cart c " +
-                    "INNER JOIN cart_item ci ON c.id = ci.cart_id " +
-                    "INNER JOIN product p ON ci.product_id = p.id " +
-                    "WHERE c.id = :id " +
-                    "AND p. = TRUE",
-            nativeQuery = true
-    )
-    Cart findCartWithDeletedProducts(@Param("id") UUID id);
-
 }

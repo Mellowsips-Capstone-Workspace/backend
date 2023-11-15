@@ -4,9 +4,9 @@ import com.capstone.workspace.entities.partner.IPartnerEntity;
 import com.capstone.workspace.entities.shared.BaseEntity;
 import com.capstone.workspace.entities.store.IStoreEntity;
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 import lombok.Data;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.*;
 
 import java.util.List;
 
@@ -14,7 +14,8 @@ import java.util.List;
 @Entity
 @Table(name = "product", schema = "public")
 @SQLDelete(sql = "UPDATE product SET is_deleted = true WHERE id = ?")
-@Where(clause = "is_deleted=false")
+@FilterDef(name = "deletedProductFilter", parameters = @ParamDef(name = "isDeleted", type = boolean.class))
+@Filter(name = "deletedProductFilter", condition = "is_deleted = :isDeleted")
 public class Product extends BaseEntity implements IPartnerEntity, IStoreEntity {
     @Column(nullable = false)
     private String name;

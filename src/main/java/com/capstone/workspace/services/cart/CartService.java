@@ -31,10 +31,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -139,30 +136,36 @@ public class CartService {
     }
 
     public CartDetailsModel getCartDetails(UUID id) {
-        Cart entity = repository.findCartWithDeletedProducts(id);
-        List<CartItem> cartItemList = cartItemRepository.findAllByCart_IdAndProduct_Deleted(id);
-        if (cartItemList.size() > 0){
-            throw new BadRequestException("Hu");
-        }
-        List<CartItemModel> cartItems = entity.getCartItems().stream().filter(item -> item.getProduct().isDeleted() == true).map(item -> {
-            List<ProductAddon> addons = productAddonService.getBulk(item.getAddons());
-            return getCartItemModel(item, addons);
-        }).toList();
-
+        Cart entity = getCartById(id);
         Store store = storeService.getStoreById(UUID.fromString(entity.getStoreId()));
         StoreModel storeModel = mapper.map(store, StoreModel.class);
 
         CartDetailsModel model = mapper.map(entity, CartDetailsModel.class);
 
-        model.setCartItems(cartItems);
+        List<CartItemModel> cartItemModels = entity.getCartItems().stream()
+                .filter(cartItem -> {
+                    if (cartItem.getProduct().isDeleted() && !cartItem.isDeleted()) {
+                        model.setChange(true);
+                        cartItemRepository.delete(cartItem);
+                        return false; // Filter out deleted items
+                    }
+                    return true;
+                })
+                .map(cartItem -> getCartItemModel(cartItem, productAddonService.getBulk(cartItem.getAddons())))
+                .toList();
+
+        model.setCartItems(cartItemModels);
         model.setStore(storeModel);
 
-        long tempPrice = cartItems.stream().reduce(0L, (res, item) -> res + item.getFinalPrice(), Long::sum);
+        long tempPrice = cartItemModels.stream().mapToLong(CartItemModel::getFinalPrice).sum();
         model.setTempPrice(tempPrice);
         model.setFinalPrice(tempPrice);
 
         return model;
     }
+
+
+
 
     public CartItemModel updateCartItem(UUID id, UpdateCartItemDto dto) {
         CartItem cartItem = getCartItemById(id);
@@ -255,7 +258,7 @@ public class CartService {
         UserIdentity userIdentity = identityService.getUserIdentity();
         String username = userIdentity.getUsername();
 
-        Cart entity = repository.findCartWithDeletedProducts(id);
+        Cart entity = repository.findById(id).orElse(null);
 
         if (entity == null || !username.equals(entity.getCreatedBy())) {
             throw new NotFoundException("Cart not found");
