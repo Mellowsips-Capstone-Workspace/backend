@@ -3,6 +3,7 @@ package com.capstone.workspace.controllers.product;
 import com.capstone.workspace.annotations.AllowedUsers;
 import com.capstone.workspace.dtos.product.CreateProductDto;
 import com.capstone.workspace.dtos.product.SearchProductDto;
+import com.capstone.workspace.dtos.product.UpdateProductDto;
 import com.capstone.workspace.entities.product.Product;
 import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.models.product.ProductDetailsModel;
@@ -57,5 +58,13 @@ public class ProductController {
     private ResponseModel<PaginationResponseModel<ProductModel>> searchProduct(SearchProductDto dto) {
         PaginationResponseModel<ProductModel> data = productService.search(dto);
         return ResponseModel.<PaginationResponseModel<ProductModel>>builder().data(data).build();
+    }
+
+    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER, UserType.STAFF})
+    @PutMapping("/{id}")
+    public ResponseModel<ProductModel> update(@PathVariable UUID id, @Valid @RequestBody UpdateProductDto dto){
+        Product product = productService.updateProduct(id, dto);
+        ProductModel model = mapper.map(product, ProductModel.class);
+        return ResponseModel.<ProductModel>builder().data(model).build();
     }
 }

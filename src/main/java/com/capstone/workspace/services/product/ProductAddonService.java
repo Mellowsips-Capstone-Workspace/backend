@@ -1,6 +1,7 @@
 package com.capstone.workspace.services.product;
 
 import com.capstone.workspace.dtos.product.CreateProductAddonDto;
+import com.capstone.workspace.dtos.product.UpdateProductAddonDto;
 import com.capstone.workspace.entities.product.ProductAddon;
 import com.capstone.workspace.entities.product.ProductOptionSection;
 import com.capstone.workspace.exceptions.BadRequestException;
@@ -52,6 +53,22 @@ public class ProductAddonService {
     public ProductAddon create(ProductOptionSection optionSection, CreateProductAddonDto dto){
         ProductAddon entity = mapper.map(dto, ProductAddon.class);
         entity.setProductOptionSection(optionSection);
+        return repository.save(entity);
+    }
+
+    public ProductAddon getById(UUID id) {
+        ProductAddon entity = repository.findById(id).orElse(null);
+        return entity;
+    }
+    public ProductAddon update(ProductOptionSection optionSection, UpdateProductAddonDto dto){
+        if (dto.getId() == null || getById(dto.getId()) == null){
+            ProductAddon entity = mapper.map(dto, ProductAddon.class);
+            entity.setProductOptionSection(optionSection);
+            return repository.save(entity);
+        }
+        ProductAddon entity = getById(dto.getId());
+        BeanUtils.copyProperties(dto, entity);
+
         return repository.save(entity);
     }
 }
