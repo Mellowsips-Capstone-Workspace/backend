@@ -15,7 +15,6 @@ import com.capstone.workspace.models.shared.PaginationResponseModel;
 import com.capstone.workspace.repositories.product.ProductRepository;
 import com.capstone.workspace.services.auth.IdentityService;
 import com.capstone.workspace.services.cart.CartItemService;
-import com.capstone.workspace.services.cart.CartService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -51,7 +50,7 @@ public class ProductService {
     private final CartItemService cartItemService;
 
     public Product getProductById(UUID id) {
-        Product entity = repository.findById(id).orElse(null);
+        Product entity = repository.findByIdAndIsDeletedIsFalse(id);
 
         if (entity == null) {
             throw new NotFoundException("Product not found");
