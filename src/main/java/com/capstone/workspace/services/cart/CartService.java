@@ -72,6 +72,10 @@ public class CartService {
         }
 
         Product product = productService.getProductById(dto.getProductId());
+        if (product.getStoreId() == null) {
+            throw new BadRequestException("This product cannot be added to the cart");
+        }
+
         List<ProductAddon> productAddons = getAddonList(product, dto.getAddons());
 
         CartItem cartItem = cartItemRepository.findByCreatedByAndProduct_IdAndAddonsAndNote(
