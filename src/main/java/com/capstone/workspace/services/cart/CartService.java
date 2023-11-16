@@ -1,6 +1,7 @@
 package com.capstone.workspace.services.cart;
 
 import com.capstone.workspace.dtos.cart.AddProductToCartDto;
+import com.capstone.workspace.dtos.cart.CalculateCartDto;
 import com.capstone.workspace.dtos.cart.UpdateCartItemDto;
 import com.capstone.workspace.entities.cart.Cart;
 import com.capstone.workspace.entities.cart.CartItem;
@@ -17,6 +18,7 @@ import com.capstone.workspace.models.cart.CartItemModel;
 import com.capstone.workspace.models.cart.CartModel;
 import com.capstone.workspace.models.product.ProductAddonModel;
 import com.capstone.workspace.models.store.StoreModel;
+import com.capstone.workspace.models.voucher.VoucherCartModel;
 import com.capstone.workspace.repositories.cart.CartItemRepository;
 import com.capstone.workspace.repositories.cart.CartRepository;
 import com.capstone.workspace.services.auth.IdentityService;
@@ -28,11 +30,13 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -267,5 +271,37 @@ public class CartService {
     public Map getVouchers(UUID cartId) {
         CartDetailsModel cartDetailsModel = getCartDetails(cartId);
         return voucherService.customerGetCartVoucher(cartDetailsModel);
+    }
+
+    public CartDetailsModel calculatePrice(UUID cartId, CalculateCartDto dto) {
+        CartDetailsModel cartDetailsModel = getCartDetails(cartId);
+        Map availableVouchers = voucherService.customerGetCartVoucher(cartDetailsModel);
+
+        List<VoucherCartModel> availableSystemVouchers = (List<VoucherCartModel>) availableVouchers.get("SYSTEM");
+        List<VoucherCartModel> availableBusinessVouchers = (List<VoucherCartModel>) availableVouchers.get("BUSINESS");
+
+        Set<String> dtoVouchers = dto.getVouchers();
+        List<VoucherCartModel> systemVouchers = availableSystemVouchers == null
+                ? Collections.emptyList()
+                : availableSystemVouchers.stream()
+                .filter(item -> (dtoVouchers.contains(String.valueOf(item.getId())) || dtoVouchers.contains(item.getCode()) && item.getPartnerId() == null))
+                .toList();
+        List<VoucherCartModel> businessVouchers = availableBusinessVouchers == null
+                ? Collections.emptyList()
+                : availableBusinessVouchers.stream()
+                .filter(item -> (dtoVouchers.contains(String.valueOf(item.getId())) || dtoVouchers.contains(item.getCode()) && item.getPartnerId() != null))
+                .toList();
+
+        if (systemVouchers.size() > 1 || businessVouchers.size() > 1) {
+            throw new BadRequestException("Exceed max allowed system or business vouchers");
+        }
+
+        List<VoucherCartModel> vouchers = Stream.concat(systemVouchers.stream(), businessVouchers.stream()).toList();
+        cartDetailsModel.setVouchers(vouchers);
+
+        Long totalDiscountAmount = vouchers.isEmpty() ? 0L : vouchers.stream().reduce(0L, (res, item) -> res + item.getDiscountAmount(), Long::sum);
+        cartDetailsModel.setFinalPrice(cartDetailsModel.getTempPrice() - totalDiscountAmount);
+
+        return cartDetailsModel;
     }
 }
