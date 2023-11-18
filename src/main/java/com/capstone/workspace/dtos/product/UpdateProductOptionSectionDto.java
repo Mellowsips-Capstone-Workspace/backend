@@ -16,6 +16,7 @@ import java.util.UUID;
 @Data
 public class UpdateProductOptionSectionDto {
     private UUID id;
+
     @NotNull
     @NotBlank
     private String name;

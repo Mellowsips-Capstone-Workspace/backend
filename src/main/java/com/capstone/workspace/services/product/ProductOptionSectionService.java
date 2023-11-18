@@ -30,17 +30,24 @@ public class ProductOptionSectionService {
         return repository.save(entity);
     }
 
-    public ProductOptionSection getById(UUID id) {
+    public ProductOptionSection getOneById(UUID id) {
         ProductOptionSection entity = repository.findById(id).orElse(null);
+
+        if (entity == null) {
+            throw new NotFoundException("Product section not found");
+        }
+
         return entity;
     }
+
     public ProductOptionSection update(Product product, UpdateProductOptionSectionDto dto){
-        if (dto.getId() == null || getById(dto.getId()) == null){
+        if (dto.getId() == null){
             ProductOptionSection entity = mapper.map(dto, ProductOptionSection.class);
             entity.setProduct(product);
             return repository.save(entity);
         }
-        ProductOptionSection entity = getById(dto.getId());
+
+        ProductOptionSection entity = getOneById(dto.getId());
         BeanUtils.copyProperties(dto, entity);
 
         return repository.save(entity);

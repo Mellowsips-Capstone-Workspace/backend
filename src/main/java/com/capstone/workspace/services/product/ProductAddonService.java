@@ -6,7 +6,6 @@ import com.capstone.workspace.entities.product.ProductAddon;
 import com.capstone.workspace.entities.product.ProductOptionSection;
 import com.capstone.workspace.exceptions.BadRequestException;
 import com.capstone.workspace.exceptions.NotFoundException;
-import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.repositories.product.ProductAddonRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -56,17 +55,14 @@ public class ProductAddonService {
         return repository.save(entity);
     }
 
-    public ProductAddon getById(UUID id) {
-        ProductAddon entity = repository.findById(id).orElse(null);
-        return entity;
-    }
     public ProductAddon update(ProductOptionSection optionSection, UpdateProductAddonDto dto){
-        if (dto.getId() == null || getById(dto.getId()) == null){
+        if (dto.getId() == null) {
             ProductAddon entity = mapper.map(dto, ProductAddon.class);
             entity.setProductOptionSection(optionSection);
             return repository.save(entity);
         }
-        ProductAddon entity = getById(dto.getId());
+
+        ProductAddon entity = getOneById(dto.getId());
         BeanUtils.copyProperties(dto, entity);
 
         return repository.save(entity);

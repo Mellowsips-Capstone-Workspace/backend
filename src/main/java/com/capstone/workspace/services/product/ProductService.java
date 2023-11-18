@@ -113,10 +113,10 @@ public class ProductService {
 
         return result;
     }
+
     @Transactional
     public Product updateProduct(UUID id, UpdateProductDto dto) {
         Product entity = getProductById(id);
-
 
         List<UpdateProductOptionSectionDto> productOptionSections = dto.getProductOptionSections();
         if (productOptionSections != null && productOptionSections.size() >= 2) {
@@ -126,14 +126,11 @@ public class ProductService {
         if (dto.getProductOptionSections() != null && !dto.getProductOptionSections().isEmpty()) {
             dto.getProductOptionSections().forEach(sectionDto -> {
                 ProductOptionSection optionSection = productOptionSectionService.update(entity, sectionDto);
-
-                sectionDto.getProductAddons().forEach(addonDto -> {
-                    productAddonService.update(optionSection, addonDto);
-                });
+                sectionDto.getProductAddons().forEach(addonDto -> productAddonService.update(optionSection, addonDto));
             });
         }
+
         BeanUtils.copyProperties(dto, entity, AppHelper.commonProperties);
-        repository.save(entity);
-        return entity;
+        return repository.save(entity);
     }
 }
