@@ -29,7 +29,7 @@ public class ProductController {
     @NonNull
     private final ModelMapper mapper;
 
-    @GetMapping("/{id}")
+    @GetMapping("/details/{id}")
     public ResponseModel<ProductDetailsModel> getProductById(@PathVariable UUID id) {
         Product entity = productService.getProductById(id);
         ProductDetailsModel model = mapper.map(entity, ProductDetailsModel.class);
