@@ -34,7 +34,7 @@ public class MenuSectionService {
         List<Product> products = dto.getProductIds().stream()
             .map(productId -> {
                 Product product = productService.getProductById(UUID.fromString(productId));
-                if (!menu.getStoreId().equals(product.getStoreId())){
+                if (!menu.getStoreId().equals(product.getStoreId())) {
                     throw new BadRequestException("Product with id " + productId + " does not belong to the store");
                 }
                 return product;

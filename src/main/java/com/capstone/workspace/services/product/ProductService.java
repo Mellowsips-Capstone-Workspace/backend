@@ -1,9 +1,6 @@
 package com.capstone.workspace.services.product;
 
-import com.capstone.workspace.dtos.product.CreateProductDto;
-import com.capstone.workspace.dtos.product.CreateProductOptionSectionDto;
-import com.capstone.workspace.dtos.product.SearchProductCriteriaDto;
-import com.capstone.workspace.dtos.product.SearchProductDto;
+import com.capstone.workspace.dtos.product.*;
 import com.capstone.workspace.entities.product.Product;
 import com.capstone.workspace.entities.product.ProductOptionSection;
 import com.capstone.workspace.enums.user.UserType;
@@ -18,6 +15,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -114,5 +112,25 @@ public class ProductService {
         result.setResults(productModels);
 
         return result;
+    }
+
+    @Transactional
+    public Product updateProduct(UUID id, UpdateProductDto dto) {
+        Product entity = getProductById(id);
+
+        List<UpdateProductOptionSectionDto> productOptionSections = dto.getProductOptionSections();
+        if (productOptionSections != null && productOptionSections.size() >= 2) {
+            productOptionSections.sort(Comparator.comparingInt(UpdateProductOptionSectionDto::getPriority));
+        }
+
+        if (dto.getProductOptionSections() != null && !dto.getProductOptionSections().isEmpty()) {
+            dto.getProductOptionSections().forEach(sectionDto -> {
+                ProductOptionSection optionSection = productOptionSectionService.update(entity, sectionDto);
+                sectionDto.getProductAddons().forEach(addonDto -> productAddonService.update(optionSection, addonDto));
+            });
+        }
+
+        BeanUtils.copyProperties(dto, entity, AppHelper.commonProperties);
+        return repository.save(entity);
     }
 }
