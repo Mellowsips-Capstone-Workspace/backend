@@ -26,7 +26,6 @@ public class UpdateVoucherDto {
     @Min(1)
     private int maxUsesPerUser;
 
-    @Min(1000)
     private Long maxDiscountAmount;
 
     @Min(0)
