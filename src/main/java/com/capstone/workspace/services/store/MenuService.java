@@ -127,4 +127,35 @@ public class MenuService {
 
         return result;
     }
+
+    @Transactional
+    public Menu update(UUID id, CreateMenuDto dto) {
+        Menu entity = getMenuById(id);
+        //Menu entity = mapper.map(dto, Menu.class);
+
+        UserIdentity userIdentity = identityService.getUserIdentity();
+        if (userIdentity.getUserType() == UserType.OWNER && (dto.getStoreId() == null || dto.getStoreId().isBlank())) {
+            throw new BadRequestException("Missing store id");
+        }
+
+        String storeId = userIdentity.getUserType() == UserType.OWNER ? dto.getStoreId() : userIdentity.getStoreId();
+        entity.setStoreId(storeId);
+
+        if (Boolean.TRUE.equals(dto.getIsActive())) {
+            Menu activeMenu = repository.findByStoreIdAndIsActiveTrue(storeId);
+            if (activeMenu != null) {
+                activeMenu.setIsActive(false);
+                repository.save(activeMenu);
+            }
+        }
+
+        List<CreateMenuSectionDto> menuSections = dto.getMenuSections();
+        if (menuSections.size() >= 2) {
+            menuSections.sort(Comparator.comparingInt(CreateMenuSectionDto::getPriority));
+        }
+
+        repository.save(entity);
+        dto.getMenuSections().forEach(section -> menuSectionService.create(entity, section));
+        return entity;
+    }
 }
