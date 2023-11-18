@@ -2,13 +2,10 @@ package com.capstone.workspace.dtos.voucher;
 
 import com.capstone.workspace.enums.voucher.VoucherDiscountType;
 import jakarta.validation.constraints.Min;
-import lombok.AccessLevel;
 import lombok.Data;
-import lombok.Setter;
 
 import java.time.Instant;
 
-@Setter(AccessLevel.NONE)
 @Data
 public class UpdateVoucherDto {
     @Min(1)
