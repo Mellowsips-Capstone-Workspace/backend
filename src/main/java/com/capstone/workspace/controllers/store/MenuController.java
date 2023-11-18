@@ -1,12 +1,9 @@
 package com.capstone.workspace.controllers.store;
 
 import com.capstone.workspace.annotations.AllowedUsers;
-import com.capstone.workspace.dtos.product.UpdateProductDto;
 import com.capstone.workspace.dtos.store.*;
-import com.capstone.workspace.entities.product.Product;
 import com.capstone.workspace.entities.store.Menu;
 import com.capstone.workspace.enums.user.UserType;
-import com.capstone.workspace.models.product.ProductModel;
 import com.capstone.workspace.models.shared.PaginationResponseModel;
 import com.capstone.workspace.models.shared.ResponseModel;
 import com.capstone.workspace.models.store.MenuDetailsModel;
@@ -51,13 +48,5 @@ public class MenuController {
     public ResponseModel<PaginationResponseModel<MenuModel>> search(@Valid @RequestBody SearchMenuDto dto) {
         PaginationResponseModel<MenuModel> data = menuService.search(dto);
         return ResponseModel.<PaginationResponseModel<MenuModel>>builder().data(data).build();
-    }
-
-    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER})
-    @PutMapping("/{id}")
-    public ResponseModel<MenuModel> update(@PathVariable UUID id, @Valid @RequestBody UpdateMenuDto dto) {
-        Menu menu = menuService.update(id, dto);
-        MenuModel model = mapper.map(menu, MenuModel.class);
-        return ResponseModel.<MenuModel>builder().data(model).build();
     }
 }

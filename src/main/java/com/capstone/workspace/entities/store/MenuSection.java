@@ -4,7 +4,6 @@ import com.capstone.workspace.entities.product.Product;
 import com.capstone.workspace.entities.shared.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.SQLDeleteAll;
 import org.hibernate.annotations.Where;
 
 import java.util.List;
@@ -12,7 +11,6 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "menu_section", schema = "public")
-@SQLDeleteAll(sql = "UPDATE menu_section SET is_deleted = true WHERE id IN ?")
 @Where(clause = "is_deleted=false")
 public class MenuSection extends BaseEntity {
     @Column(nullable = false)
@@ -25,7 +23,7 @@ public class MenuSection extends BaseEntity {
     @JoinColumn(name = "menu_id")
     private Menu menu;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "menu_section_product",
             joinColumns = @JoinColumn(name = "menu_section_id"),

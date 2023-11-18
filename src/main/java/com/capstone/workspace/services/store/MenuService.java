@@ -1,8 +1,10 @@
 package com.capstone.workspace.services.store;
 
-import com.capstone.workspace.dtos.store.*;
+import com.capstone.workspace.dtos.store.CreateMenuDto;
+import com.capstone.workspace.dtos.store.CreateMenuSectionDto;
+import com.capstone.workspace.dtos.store.SearchMenuCriteriaDto;
+import com.capstone.workspace.dtos.store.SearchMenuDto;
 import com.capstone.workspace.entities.store.Menu;
-import com.capstone.workspace.entities.store.MenuSection;
 import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.exceptions.BadRequestException;
 import com.capstone.workspace.exceptions.NotFoundException;
@@ -16,7 +18,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -125,41 +126,5 @@ public class MenuService {
         result.setResults(menuModels);
 
         return result;
-    }
-
-    @Transactional
-    public Menu update(UUID id, UpdateMenuDto dto) {
-        Menu entity = getMenuById(id);
-
-        List<UUID> currentMenuSectionIds = dto.getMenuSections().stream().map(UpdateMenuSectionDto::getId).toList();
-        List<MenuSection> removedSections = entity.getMenuSections().stream()
-                .filter(item -> !currentMenuSectionIds.contains(item.getId()))
-                .toList();
-        menuSectionService.deleteBulk(removedSections);
-
-        UserIdentity userIdentity = identityService.getUserIdentity();
-        if (userIdentity.getUserType() == UserType.OWNER && (dto.getStoreId() == null || dto.getStoreId().isBlank())) {
-            throw new BadRequestException("Missing store id");
-        }
-
-        String storeId = userIdentity.getUserType() == UserType.OWNER ? dto.getStoreId() : userIdentity.getStoreId();
-        entity.setStoreId(storeId);
-
-        if (Boolean.TRUE.equals(dto.getIsActive())) {
-            Menu activeMenu = repository.findByStoreIdAndIsActiveTrue(storeId);
-            if (activeMenu != null) {
-                activeMenu.setIsActive(false);
-                repository.save(activeMenu);
-            }
-        }
-
-        List<UpdateMenuSectionDto> menuSections = dto.getMenuSections();
-        if (menuSections.size() >= 2) {
-            menuSections.sort(Comparator.comparingInt(UpdateMenuSectionDto::getPriority));
-        }
-
-        dto.getMenuSections().forEach(section -> menuSectionService.update(entity, section));
-        BeanUtils.copyProperties(dto, entity, AppHelper.commonProperties);
-        return repository.save(entity);
     }
 }
