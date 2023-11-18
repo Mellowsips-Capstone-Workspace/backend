@@ -62,7 +62,7 @@ public class ProductAddonService {
         }
 
         ProductAddon entity = getOneById(dto.getId());
-        BeanUtils.copyProperties(dto, entity);
+        BeanUtils.copyProperties(dto, entity, "id");
 
         return repository.save(entity);
     }

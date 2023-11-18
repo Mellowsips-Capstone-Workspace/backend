@@ -65,7 +65,7 @@ public class ProductOptionSectionService {
                 .toList();
         productAddonService.deleteBulk(removedAddons);
 
-        BeanUtils.copyProperties(dto, entity);
+        BeanUtils.copyProperties(dto, entity, "id");
         ProductOptionSection saved = repository.save(entity);
         dto.getProductAddons().forEach(addonDto -> productAddonService.update(saved, addonDto));
 

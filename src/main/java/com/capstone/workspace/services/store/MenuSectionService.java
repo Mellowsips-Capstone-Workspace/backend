@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -66,7 +67,7 @@ public class MenuSectionService {
         }
 
         MenuSection entity = getOneById(dto.getId());
-        BeanUtils.copyProperties(dto, entity);
+        BeanUtils.copyProperties(dto, entity, "id", "productIds");
 
         List<Product> products = dto.getProductIds().stream()
             .map(productId -> {
@@ -76,7 +77,7 @@ public class MenuSectionService {
                 }
                 return product;
             })
-            .toList();
+            .collect(Collectors.toList());
         entity.setProducts(products);
 
         return repository.save(entity);
