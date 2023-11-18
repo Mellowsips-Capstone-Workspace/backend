@@ -4,13 +4,10 @@ import com.capstone.workspace.enums.voucher.VoucherDiscountType;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AccessLevel;
 import lombok.Data;
-import lombok.Setter;
 
 import java.time.Instant;
 
-@Setter(AccessLevel.NONE)
 @Data
 public class CreateVoucherDto {
     @NotNull
