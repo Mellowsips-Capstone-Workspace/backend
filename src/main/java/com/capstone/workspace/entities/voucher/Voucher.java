@@ -6,6 +6,7 @@ import com.capstone.workspace.entities.store.IStoreEntity;
 import com.capstone.workspace.enums.voucher.VoucherDiscountType;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import java.time.Instant;
@@ -13,6 +14,7 @@ import java.time.Instant;
 @Data
 @Entity
 @Table(name = "voucher", schema = "public")
+@SQLDelete(sql = "UPDATE voucher SET is_deleted = true WHERE id = ?")
 @Where(clause = "is_deleted=false")
 public class Voucher extends BaseEntity implements IPartnerEntity, IStoreEntity {
     @Column(nullable = false)
