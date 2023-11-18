@@ -83,7 +83,7 @@ public class JwtService {
             JsonNode header = objectMapper.readTree(Base64.getDecoder().decode(token.substring(0, token.indexOf("."))));
 
             String keyId = header.get("kid").asText();
-            if (keyId == null){
+            if (keyId == null) {
                 return null;
             }
 

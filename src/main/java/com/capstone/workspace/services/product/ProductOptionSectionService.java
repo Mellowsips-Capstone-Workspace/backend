@@ -24,7 +24,7 @@ public class ProductOptionSectionService {
     @NonNull
     private final ModelMapper mapper;
 
-    public ProductOptionSection create(Product product, CreateProductOptionSectionDto dto){
+    public ProductOptionSection create(Product product, CreateProductOptionSectionDto dto) {
         ProductOptionSection entity = mapper.map(dto, ProductOptionSection.class);
         entity.setProduct(product);
         return repository.save(entity);
@@ -40,8 +40,8 @@ public class ProductOptionSectionService {
         return entity;
     }
 
-    public ProductOptionSection update(Product product, UpdateProductOptionSectionDto dto){
-        if (dto.getId() == null){
+    public ProductOptionSection update(Product product, UpdateProductOptionSectionDto dto) {
+        if (dto.getId() == null) {
             ProductOptionSection entity = mapper.map(dto, ProductOptionSection.class);
             entity.setProduct(product);
             return repository.save(entity);

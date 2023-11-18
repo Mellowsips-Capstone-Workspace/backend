@@ -38,7 +38,7 @@ public class ProductController {
 
     @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER, UserType.STAFF})
     @PostMapping
-    public ResponseModel<ProductModel> create(@Valid @RequestBody CreateProductDto dto){
+    public ResponseModel<ProductModel> create(@Valid @RequestBody CreateProductDto dto) {
         Product product = productService.createProduct(dto);
         ProductModel model = mapper.map(product, ProductModel.class);
         return ResponseModel.<ProductModel>builder().data(model).build();
@@ -62,7 +62,7 @@ public class ProductController {
 
     @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER, UserType.STAFF})
     @PutMapping("/{id}")
-    public ResponseModel<ProductModel> update(@PathVariable UUID id, @Valid @RequestBody UpdateProductDto dto){
+    public ResponseModel<ProductModel> update(@PathVariable UUID id, @Valid @RequestBody UpdateProductDto dto) {
         Product product = productService.updateProduct(id, dto);
         ProductModel model = mapper.map(product, ProductModel.class);
         return ResponseModel.<ProductModel>builder().data(model).build();
