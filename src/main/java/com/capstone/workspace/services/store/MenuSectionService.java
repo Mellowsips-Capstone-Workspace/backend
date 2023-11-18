@@ -1,6 +1,5 @@
 package com.capstone.workspace.services.store;
 
-import com.capstone.workspace.dtos.product.CreateProductOptionSectionDto;
 import com.capstone.workspace.dtos.store.CreateMenuSectionDto;
 import com.capstone.workspace.dtos.store.UpdateMenuSectionDto;
 import com.capstone.workspace.entities.product.Product;
@@ -14,7 +13,9 @@ import com.capstone.workspace.services.product.ProductService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -59,16 +60,13 @@ public class MenuSectionService {
         return entity;
     }
 
+    @Transactional
     public MenuSection update(Menu menu, UpdateMenuSectionDto dto) {
         if (dto.getId() == null) {
             return create(menu, mapper.map(dto, CreateMenuSectionDto.class));
         }
-
         MenuSection entity = getOneById(dto.getId());
-
-        //MenuSection entity = mapper.map(dto, MenuSection.class);
-        entity.setMenu(menu);
-
+        BeanUtils.copyProperties(dto, entity);
         List<Product> products = dto.getProductIds().stream()
                 .map(productId -> {
                     Product product = productService.getProductById(UUID.fromString(productId));
@@ -78,8 +76,13 @@ public class MenuSectionService {
                     return product;
                 })
                 .toList();
+        entity.setMenu(menu);
         entity.setProducts(products);
-
         return repository.save(entity);
+    }
+
+    @Transactional
+    public void deleteBulk(List<MenuSection> menuSections) {
+        repository.deleteAll(menuSections);
     }
 }

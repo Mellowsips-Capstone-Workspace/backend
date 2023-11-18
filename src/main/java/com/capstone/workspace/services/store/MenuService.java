@@ -1,10 +1,8 @@
 package com.capstone.workspace.services.store;
 
-import com.capstone.workspace.dtos.store.CreateMenuDto;
-import com.capstone.workspace.dtos.store.CreateMenuSectionDto;
-import com.capstone.workspace.dtos.store.SearchMenuCriteriaDto;
-import com.capstone.workspace.dtos.store.SearchMenuDto;
+import com.capstone.workspace.dtos.store.*;
 import com.capstone.workspace.entities.store.Menu;
+import com.capstone.workspace.entities.store.MenuSection;
 import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.exceptions.BadRequestException;
 import com.capstone.workspace.exceptions.NotFoundException;
@@ -18,6 +16,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -129,9 +128,14 @@ public class MenuService {
     }
 
     @Transactional
-    public Menu update(UUID id, CreateMenuDto dto) {
+    public Menu update(UUID id, UpdateMenuDto dto) {
         Menu entity = getMenuById(id);
-        //Menu entity = mapper.map(dto, Menu.class);
+
+        List<UUID> currentMenuSectionIds = dto.getMenuSections().stream().map(UpdateMenuSectionDto::getId).toList();
+        List<MenuSection> removedSections = entity.getMenuSections().stream()
+                .filter(item -> !currentMenuSectionIds.contains(item.getId()))
+                .toList();
+        menuSectionService.deleteBulk(removedSections);
 
         UserIdentity userIdentity = identityService.getUserIdentity();
         if (userIdentity.getUserType() == UserType.OWNER && (dto.getStoreId() == null || dto.getStoreId().isBlank())) {
@@ -149,13 +153,13 @@ public class MenuService {
             }
         }
 
-        List<CreateMenuSectionDto> menuSections = dto.getMenuSections();
+        List<UpdateMenuSectionDto> menuSections = dto.getMenuSections();
         if (menuSections.size() >= 2) {
-            menuSections.sort(Comparator.comparingInt(CreateMenuSectionDto::getPriority));
+            menuSections.sort(Comparator.comparingInt(UpdateMenuSectionDto::getPriority));
         }
 
-        repository.save(entity);
-        dto.getMenuSections().forEach(section -> menuSectionService.create(entity, section));
-        return entity;
+        dto.getMenuSections().forEach(section -> menuSectionService.update(entity, section));
+        BeanUtils.copyProperties(dto, entity, AppHelper.commonProperties);
+        return repository.save(entity);
     }
 }
