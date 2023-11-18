@@ -58,6 +58,10 @@ public class VoucherService {
 
         if (dto.getDiscountType() == VoucherDiscountType.CASH) {
             entity.setMaxDiscountAmount(null);
+        } else {
+            if (dto.getMaxDiscountAmount() == null || dto.getMaxDiscountAmount() < 1000L) {
+                throw new BadRequestException("Max discount amount must be equals or greater than 1000 VND");
+            }
         }
 
         UserIdentity userIdentity = identityService.getUserIdentity();
@@ -121,6 +125,13 @@ public class VoucherService {
             }
             BeanUtils.copyProperties(dto, entity, "discountType", "startDate", "minOrderAmount", "maxDiscountAmount", "isHidden", "value");
         } else {
+            if (dto.getDiscountType() == VoucherDiscountType.CASH) {
+                dto.setMaxDiscountAmount(null);
+            } else {
+                if (dto.getMaxDiscountAmount() == null || dto.getMaxDiscountAmount() < 1000L) {
+                    throw new BadRequestException("Max discount amount must be equals or greater than 1000 VND");
+                }
+            }
             validate(mapper.map(dto, CreateVoucherDto.class));
             BeanUtils.copyProperties(dto, entity, AppHelper.commonProperties);
         }
