@@ -1,9 +1,6 @@
 package com.capstone.workspace.services.product;
 
-import com.capstone.workspace.dtos.product.CreateProductDto;
-import com.capstone.workspace.dtos.product.CreateProductOptionSectionDto;
-import com.capstone.workspace.dtos.product.SearchProductCriteriaDto;
-import com.capstone.workspace.dtos.product.SearchProductDto;
+import com.capstone.workspace.dtos.product.*;
 import com.capstone.workspace.entities.product.Product;
 import com.capstone.workspace.entities.product.ProductOptionSection;
 import com.capstone.workspace.enums.user.UserType;
@@ -19,6 +16,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,9 +34,6 @@ public class ProductService {
 
     @NonNull
     private final ProductOptionSectionService productOptionSectionService;
-
-    @NonNull
-    private final ProductAddonService productAddonService;
 
     @NonNull
     private final ModelMapper mapper;
@@ -75,13 +70,7 @@ public class ProductService {
         repository.save(entity);
 
         if (dto.getProductOptionSections() != null && !dto.getProductOptionSections().isEmpty()) {
-            dto.getProductOptionSections().forEach(sectionDto -> {
-                ProductOptionSection optionSection = productOptionSectionService.create(entity, sectionDto);
-
-                sectionDto.getProductAddons().forEach(addonDto -> {
-                    productAddonService.create(optionSection, addonDto);
-                });
-            });
+            dto.getProductOptionSections().forEach(sectionDto -> productOptionSectionService.create(entity, sectionDto));
         }
 
         return entity;
@@ -118,6 +107,29 @@ public class ProductService {
         result.setResults(productModels);
 
         return result;
+    }
+
+    @Transactional
+    public Product updateProduct(UUID id, UpdateProductDto dto) {
+        Product entity = getProductById(id);
+
+        List<UUID> currentAddonIds = dto.getProductOptionSections().stream().map(UpdateProductOptionSectionDto::getId).toList();
+        List<ProductOptionSection> removedSections = entity.getProductOptionSections().stream()
+                .filter(item -> !currentAddonIds.contains(item.getId()))
+                .toList();
+        productOptionSectionService.deleteBulk(removedSections);
+
+        List<UpdateProductOptionSectionDto> productOptionSections = dto.getProductOptionSections();
+        if (productOptionSections != null && productOptionSections.size() >= 2) {
+            productOptionSections.sort(Comparator.comparingInt(UpdateProductOptionSectionDto::getPriority));
+        }
+
+        if (dto.getProductOptionSections() != null && !dto.getProductOptionSections().isEmpty()) {
+            dto.getProductOptionSections().forEach(sectionDto -> productOptionSectionService.update(entity, sectionDto));
+        }
+
+        BeanUtils.copyProperties(dto, entity, AppHelper.commonProperties);
+        return repository.save(entity);
     }
 
     @Transactional

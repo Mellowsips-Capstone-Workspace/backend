@@ -2,6 +2,7 @@ package com.capstone.workspace.controllers.cart;
 
 import com.capstone.workspace.annotations.AllowedUsers;
 import com.capstone.workspace.dtos.cart.AddProductToCartDto;
+import com.capstone.workspace.dtos.cart.CalculateCartDto;
 import com.capstone.workspace.dtos.cart.UpdateCartItemDto;
 import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.models.cart.CartDetailsModel;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -64,5 +66,19 @@ public class CartController {
     public ResponseModel deleteCart(@PathVariable UUID id) {
         cartService.deleteCart(id);
         return ResponseModel.builder().message("Delete successfully").build();
+    }
+
+    @AllowedUsers(userTypes = {UserType.CUSTOMER})
+    @GetMapping("/{id}/vouchers")
+    public ResponseModel<Map> getVouchers(@PathVariable UUID id) {
+        Map data = cartService.getVouchers(id);
+        return ResponseModel.<Map>builder().data(data).build();
+    }
+
+    @AllowedUsers(userTypes = {UserType.CUSTOMER})
+    @PostMapping("/{id}/calculate")
+    public ResponseModel<CartDetailsModel> calculatePrice(@PathVariable UUID id, @Valid @RequestBody CalculateCartDto dto) {
+        CartDetailsModel data = cartService.calculatePrice(id, dto);
+        return ResponseModel.<CartDetailsModel>builder().data(data).build();
     }
 }

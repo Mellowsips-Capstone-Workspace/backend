@@ -237,7 +237,7 @@ abstract class Partner {
     public boolean isValidIdentityIssueDate() {
         try {
             return !identityIssueDate.isAfter((LocalDate) BeanHelper.getBean(LocalDateHelper.class).getLocalTimeAtZoneRequest("date"));
-        }catch (NullPointerException nullPointerException){
+        } catch (NullPointerException nullPointerException) {
             return false;
         }
     }
@@ -284,7 +284,7 @@ class HouseholdPartner extends Partner {
     public boolean isValidBusinessIdentityIssueDate() {
         try {
             return !businessIdentityIssueDate.isAfter((LocalDate) BeanHelper.getBean(LocalDateHelper.class).getLocalTimeAtZoneRequest("date"));
-        }catch (NullPointerException nullPointerException){
+        } catch (NullPointerException nullPointerException) {
             return false;
         }
     }

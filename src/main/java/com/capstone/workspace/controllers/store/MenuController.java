@@ -29,7 +29,7 @@ public class MenuController {
 
     @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER, UserType.STAFF})
     @PostMapping
-    public ResponseModel<MenuModel> create(@Valid @RequestBody CreateMenuDto dto){
+    public ResponseModel<MenuModel> create(@Valid @RequestBody CreateMenuDto dto) {
         Menu entity = menuService.create(dto);
         MenuModel model = mapper.map(entity, MenuModel.class);
         return ResponseModel.<MenuModel>builder().data(model).build();
@@ -37,7 +37,7 @@ public class MenuController {
 
     @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER, UserType.STAFF})
     @GetMapping("/{id}")
-    public ResponseModel<MenuDetailsModel> getMenuById(@PathVariable UUID id){
+    public ResponseModel<MenuDetailsModel> getMenuById(@PathVariable UUID id) {
         Menu entity = menuService.getMenuById(id);
         MenuDetailsModel model = mapper.map(entity, MenuDetailsModel.class);
         return ResponseModel.<MenuDetailsModel>builder().data(model).build();
@@ -45,7 +45,7 @@ public class MenuController {
 
     @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER, UserType.STAFF})
     @PostMapping("/search")
-    public ResponseModel<PaginationResponseModel<MenuModel>> search(@Valid @RequestBody SearchMenuDto dto){
+    public ResponseModel<PaginationResponseModel<MenuModel>> search(@Valid @RequestBody SearchMenuDto dto) {
         PaginationResponseModel<MenuModel> data = menuService.search(dto);
         return ResponseModel.<PaginationResponseModel<MenuModel>>builder().data(data).build();
     }

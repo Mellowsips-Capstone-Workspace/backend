@@ -36,7 +36,9 @@ public class AppHelper {
                     logger.warn("Class does not support method " + method.getName());
                 }
 
-                result.put(lowercaseKey, value);
+                if (value != null) {
+                    result.put(lowercaseKey, value);
+                }
             }
         }
 
