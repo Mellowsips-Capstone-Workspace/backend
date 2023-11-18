@@ -65,19 +65,21 @@ public class MenuSectionService {
         if (dto.getId() == null) {
             return create(menu, mapper.map(dto, CreateMenuSectionDto.class));
         }
+
         MenuSection entity = getOneById(dto.getId());
         BeanUtils.copyProperties(dto, entity);
+
         List<Product> products = dto.getProductIds().stream()
-                .map(productId -> {
-                    Product product = productService.getProductById(UUID.fromString(productId));
-                    if (!menu.getStoreId().equals(product.getStoreId())) {
-                        throw new BadRequestException("Product with id " + productId + " does not belong to the store");
-                    }
-                    return product;
-                })
-                .toList();
-        entity.setMenu(menu);
+            .map(productId -> {
+                Product product = productService.getProductById(UUID.fromString(productId));
+                if (!menu.getStoreId().equals(product.getStoreId())) {
+                    throw new BadRequestException("Product with id " + productId + " does not belong to the store");
+                }
+                return product;
+            })
+            .toList();
         entity.setProducts(products);
+
         return repository.save(entity);
     }
 

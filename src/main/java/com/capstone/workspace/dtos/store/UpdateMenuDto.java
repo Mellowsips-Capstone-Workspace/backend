@@ -20,6 +20,4 @@ public class UpdateMenuDto {
     @NotNull
     @NotEmpty
     private List<UpdateMenuSectionDto> menuSections;
-
-    private String storeId;
 }

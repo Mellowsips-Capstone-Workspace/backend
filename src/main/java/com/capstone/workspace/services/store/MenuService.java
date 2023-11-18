@@ -137,16 +137,8 @@ public class MenuService {
                 .toList();
         menuSectionService.deleteBulk(removedSections);
 
-        UserIdentity userIdentity = identityService.getUserIdentity();
-        if (userIdentity.getUserType() == UserType.OWNER && (dto.getStoreId() == null || dto.getStoreId().isBlank())) {
-            throw new BadRequestException("Missing store id");
-        }
-
-        String storeId = userIdentity.getUserType() == UserType.OWNER ? dto.getStoreId() : userIdentity.getStoreId();
-        entity.setStoreId(storeId);
-
         if (Boolean.TRUE.equals(dto.getIsActive())) {
-            Menu activeMenu = repository.findByStoreIdAndIsActiveTrue(storeId);
+            Menu activeMenu = repository.findByStoreIdAndIsActiveTrue(entity.getStoreId());
             if (activeMenu != null) {
                 activeMenu.setIsActive(false);
                 repository.save(activeMenu);
@@ -160,6 +152,7 @@ public class MenuService {
 
         dto.getMenuSections().forEach(section -> menuSectionService.update(entity, section));
         BeanUtils.copyProperties(dto, entity, AppHelper.commonProperties);
+
         return repository.save(entity);
     }
 }

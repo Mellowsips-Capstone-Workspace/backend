@@ -1,12 +1,9 @@
 package com.capstone.workspace.controllers.store;
 
 import com.capstone.workspace.annotations.AllowedUsers;
-import com.capstone.workspace.dtos.product.UpdateProductDto;
 import com.capstone.workspace.dtos.store.*;
-import com.capstone.workspace.entities.product.Product;
 import com.capstone.workspace.entities.store.Menu;
 import com.capstone.workspace.enums.user.UserType;
-import com.capstone.workspace.models.product.ProductModel;
 import com.capstone.workspace.models.shared.PaginationResponseModel;
 import com.capstone.workspace.models.shared.ResponseModel;
 import com.capstone.workspace.models.store.MenuDetailsModel;
