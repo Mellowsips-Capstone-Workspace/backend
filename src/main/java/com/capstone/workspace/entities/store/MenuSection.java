@@ -25,7 +25,7 @@ public class MenuSection extends BaseEntity {
     @JoinColumn(name = "menu_id")
     private Menu menu;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "menu_section_product",
             joinColumns = @JoinColumn(name = "menu_section_id"),
