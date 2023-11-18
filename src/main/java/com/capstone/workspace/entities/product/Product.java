@@ -33,7 +33,7 @@ public class Product extends BaseEntity implements IPartnerEntity, IStoreEntity 
     @Column(columnDefinition = "BOOLEAN DEFAULT false")
     private Boolean isSoldOut = false;
 
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<ProductOptionSection> productOptionSections;
 
     @Column

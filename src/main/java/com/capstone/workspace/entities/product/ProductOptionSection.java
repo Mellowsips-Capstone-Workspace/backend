@@ -24,7 +24,7 @@ public class ProductOptionSection extends BaseEntity {
     @Column
     private Integer maxAllowedChoices;
 
-    @OneToMany(mappedBy = "productOptionSection", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "productOptionSection", fetch = FetchType.EAGER, orphanRemoval = true)
     private List<ProductAddon> productAddons;
 
     @ManyToOne(fetch = FetchType.LAZY)

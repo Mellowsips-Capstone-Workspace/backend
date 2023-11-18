@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -57,14 +58,17 @@ public class ProductAddonService {
 
     public ProductAddon update(ProductOptionSection optionSection, UpdateProductAddonDto dto) {
         if (dto.getId() == null) {
-            ProductAddon entity = mapper.map(dto, ProductAddon.class);
-            entity.setProductOptionSection(optionSection);
-            return repository.save(entity);
+            return create(optionSection, mapper.map(dto, CreateProductAddonDto.class));
         }
 
         ProductAddon entity = getOneById(dto.getId());
         BeanUtils.copyProperties(dto, entity);
 
         return repository.save(entity);
+    }
+
+    @Transactional
+    public void deleteBulk(List<ProductAddon> addons) {
+        repository.deleteAll(addons);
     }
 }
