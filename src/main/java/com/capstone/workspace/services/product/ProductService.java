@@ -35,9 +35,6 @@ public class ProductService {
     private final ProductOptionSectionService productOptionSectionService;
 
     @NonNull
-    private final ProductAddonService productAddonService;
-
-    @NonNull
     private final ModelMapper mapper;
 
     @NonNull
@@ -69,13 +66,7 @@ public class ProductService {
         repository.save(entity);
 
         if (dto.getProductOptionSections() != null && !dto.getProductOptionSections().isEmpty()) {
-            dto.getProductOptionSections().forEach(sectionDto -> {
-                ProductOptionSection optionSection = productOptionSectionService.create(entity, sectionDto);
-
-                sectionDto.getProductAddons().forEach(addonDto -> {
-                    productAddonService.create(optionSection, addonDto);
-                });
-            });
+            dto.getProductOptionSections().forEach(sectionDto -> productOptionSectionService.create(entity, sectionDto));
         }
 
         return entity;
@@ -118,16 +109,19 @@ public class ProductService {
     public Product updateProduct(UUID id, UpdateProductDto dto) {
         Product entity = getProductById(id);
 
+        List<UUID> currentAddonIds = dto.getProductOptionSections().stream().map(UpdateProductOptionSectionDto::getId).toList();
+        List<ProductOptionSection> removedSections = entity.getProductOptionSections().stream()
+                .filter(item -> !currentAddonIds.contains(item.getId()))
+                .toList();
+        productOptionSectionService.deleteBulk(removedSections);
+
         List<UpdateProductOptionSectionDto> productOptionSections = dto.getProductOptionSections();
         if (productOptionSections != null && productOptionSections.size() >= 2) {
             productOptionSections.sort(Comparator.comparingInt(UpdateProductOptionSectionDto::getPriority));
         }
 
         if (dto.getProductOptionSections() != null && !dto.getProductOptionSections().isEmpty()) {
-            dto.getProductOptionSections().forEach(sectionDto -> {
-                ProductOptionSection optionSection = productOptionSectionService.update(entity, sectionDto);
-                sectionDto.getProductAddons().forEach(addonDto -> productAddonService.update(optionSection, addonDto));
-            });
+            dto.getProductOptionSections().forEach(sectionDto -> productOptionSectionService.update(entity, sectionDto));
         }
 
         BeanUtils.copyProperties(dto, entity, AppHelper.commonProperties);
