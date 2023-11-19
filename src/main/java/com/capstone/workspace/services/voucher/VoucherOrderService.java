@@ -28,7 +28,7 @@ public class VoucherOrderService {
         VoucherOrder entity = mapper.map(dto, VoucherOrder.class);
         entity.setOrder(order);
 
-        Voucher voucher = voucherService.getOneById(dto.getVoucherId());
+        Voucher voucher = voucherService.useVoucher(dto.getVoucherId());
         entity.setVoucher(voucher);
 
         return repository.save(entity);
