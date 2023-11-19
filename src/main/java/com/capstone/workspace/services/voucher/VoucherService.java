@@ -245,4 +245,16 @@ public class VoucherService {
 
         return result;
     }
+
+    public synchronized Voucher useVoucher(UUID id) {
+        Voucher entity = getOneById(id);
+
+        int newQuantity = entity.getQuantity() - 1;
+        if (newQuantity < 0) {
+            throw new BadRequestException("Out of voucher " + entity.getCode());
+        }
+        entity.setQuantity(newQuantity);
+
+        return repository.save(entity);
+    }
 }
