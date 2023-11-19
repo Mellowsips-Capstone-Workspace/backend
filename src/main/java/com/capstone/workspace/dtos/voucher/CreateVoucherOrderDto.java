@@ -1,14 +1,19 @@
-package com.capstone.workspace.models.voucher;
+package com.capstone.workspace.dtos.voucher;
 
 import com.capstone.workspace.enums.voucher.VoucherOrderSource;
-import com.capstone.workspace.models.shared.BaseModel;
+import lombok.Builder;
 import lombok.Data;
 
+import java.util.UUID;
+
+@Builder
 @Data
-public class VoucherOrderModel extends BaseModel {
+public class CreateVoucherOrderDto {
     private String description;
 
     private long discountAmount;
 
     private VoucherOrderSource source;
+
+    private UUID voucherId;
 }

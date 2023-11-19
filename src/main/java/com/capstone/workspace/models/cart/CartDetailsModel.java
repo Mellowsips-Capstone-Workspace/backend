@@ -18,4 +18,6 @@ public class CartDetailsModel extends BaseModel {
     private long finalPrice;
 
     private List<VoucherCartModel> vouchers;
+
+    private Boolean isChange = false;
 }
