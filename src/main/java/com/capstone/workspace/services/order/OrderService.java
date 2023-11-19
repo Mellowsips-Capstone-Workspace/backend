@@ -1,9 +1,11 @@
 package com.capstone.workspace.services.order;
 
+import com.capstone.workspace.dtos.cart.CalculateCartDto;
 import com.capstone.workspace.dtos.notification.PushNotificationDto;
 import com.capstone.workspace.dtos.order.CreateOrderDto;
 import com.capstone.workspace.dtos.order.SearchOrderCriteriaDto;
 import com.capstone.workspace.dtos.order.SearchOrderDto;
+import com.capstone.workspace.dtos.voucher.CreateVoucherOrderDto;
 import com.capstone.workspace.entities.order.Order;
 import com.capstone.workspace.entities.order.Transaction;
 import com.capstone.workspace.entities.store.QrCode;
@@ -13,6 +15,8 @@ import com.capstone.workspace.enums.order.OrderStatus;
 import com.capstone.workspace.enums.order.TransactionMethod;
 import com.capstone.workspace.enums.order.TransactionStatus;
 import com.capstone.workspace.enums.user.UserType;
+import com.capstone.workspace.enums.voucher.VoucherDiscountType;
+import com.capstone.workspace.enums.voucher.VoucherOrderSource;
 import com.capstone.workspace.exceptions.*;
 import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.helpers.shared.BeanHelper;
@@ -25,6 +29,8 @@ import com.capstone.workspace.models.order.TransactionModel;
 import com.capstone.workspace.models.shared.PaginationResponseModel;
 import com.capstone.workspace.models.store.QrCodeModel;
 import com.capstone.workspace.models.store.StoreModel;
+import com.capstone.workspace.models.voucher.VoucherCartModel;
+import com.capstone.workspace.models.voucher.VoucherOrderModel;
 import com.capstone.workspace.repositories.order.OrderRepository;
 import com.capstone.workspace.repositories.order.TransactionRepository;
 import com.capstone.workspace.services.auth.IdentityService;
@@ -32,6 +38,7 @@ import com.capstone.workspace.services.cart.CartService;
 import com.capstone.workspace.services.notification.NotificationService;
 import com.capstone.workspace.services.shared.JobService;
 import com.capstone.workspace.services.store.QrCodeService;
+import com.capstone.workspace.services.voucher.VoucherOrderService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -86,12 +93,18 @@ public class OrderService {
     @NonNull
     private final NotificationService notificationService;
 
+    @NonNull
+    private final VoucherOrderService voucherOrderService;
+
     @Transactional
     public OrderModel create(CreateOrderDto dto) {
         validateActiveOrderOfUser();
 
         UUID cartId = dto.getCartId();
-        CartDetailsModel cartDetails = cartService.getCartDetails(cartId);
+        CartDetailsModel cartDetails = cartService.calculatePrice(cartId, mapper.map(dto, CalculateCartDto.class));
+        if (Boolean.TRUE.equals(cartDetails.getIsChange())) {
+            throw new ConflictException("Your cart has some changes");
+        }
 
         UUID qrId = dto.getQrId();
         String code = dto.getQrCode();
@@ -134,6 +147,20 @@ public class OrderService {
 
         Order saved = repository.save(entity);
         OrderModel orderModel = mapper.map(saved, OrderModel.class);
+
+        List<VoucherCartModel> voucherCartModels = cartDetails.getVouchers();
+        if (voucherCartModels != null && !voucherCartModels.isEmpty()) {
+            voucherCartModels.forEach(item -> {
+                VoucherOrderSource source = item.getPartnerId() == null ? VoucherOrderSource.SYSTEM : VoucherOrderSource.BUSINESS;
+                CreateVoucherOrderDto voucherOrderDto = CreateVoucherOrderDto.builder()
+                        .voucherId(item.getId())
+                        .discountAmount(item.getDiscountAmount())
+                        .description("Voucher " + item.getValue() + (item.getDiscountType() == VoucherDiscountType.PERCENT ? "%" : " VNĐ") + " từ " + (source == VoucherOrderSource.SYSTEM ? "MellowSips" : "cửa hàng"))
+                        .source(source)
+                        .build();
+                voucherOrderService.create(saved, voucherOrderDto);
+            });
+        }
 
         Transaction transaction = transactionService.createInitialTransaction(saved);
         TransactionModel transactionModel = mapper.map(transaction, TransactionModel.class);

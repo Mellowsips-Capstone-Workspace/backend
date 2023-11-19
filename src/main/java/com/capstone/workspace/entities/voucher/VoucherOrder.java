@@ -3,7 +3,6 @@ package com.capstone.workspace.entities.voucher;
 import com.capstone.workspace.entities.order.Order;
 import com.capstone.workspace.entities.shared.BaseEntity;
 import com.capstone.workspace.enums.voucher.VoucherOrderSource;
-import com.capstone.workspace.enums.voucher.VoucherOrderStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.Where;
@@ -18,10 +17,6 @@ public class VoucherOrder extends BaseEntity {
 
     @Column(nullable = false)
     private long discountAmount;
-
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private VoucherOrderStatus status;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
