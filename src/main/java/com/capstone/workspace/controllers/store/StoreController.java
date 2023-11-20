@@ -70,7 +70,7 @@ public class StoreController {
         return ResponseModel.<QrCodeModel>builder().data(model).build();
     }
 
-    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER})
+    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER, UserType.STAFF})
     @GetMapping("/{id}/qrcodes")
     public ResponseModel<List<QrCodeModel>> getStoreQrCodes(@PathVariable(name = "id") String storeId) {
         List<QrCodeModel> data = qrCodeService.getStoreQrCodes(storeId);
