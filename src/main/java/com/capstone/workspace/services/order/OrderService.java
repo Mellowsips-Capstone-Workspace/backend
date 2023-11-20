@@ -9,6 +9,7 @@ import com.capstone.workspace.dtos.voucher.CreateVoucherOrderDto;
 import com.capstone.workspace.entities.order.Order;
 import com.capstone.workspace.entities.order.Transaction;
 import com.capstone.workspace.entities.store.QrCode;
+import com.capstone.workspace.entities.voucher.VoucherOrder;
 import com.capstone.workspace.enums.notification.NotificationKey;
 import com.capstone.workspace.enums.order.OrderEvent;
 import com.capstone.workspace.enums.order.OrderStatus;
@@ -149,6 +150,8 @@ public class OrderService {
         OrderModel orderModel = mapper.map(saved, OrderModel.class);
 
         List<VoucherCartModel> voucherCartModels = cartDetails.getVouchers();
+        List<VoucherOrderModel> voucherOrders = new ArrayList<>();
+
         if (voucherCartModels != null && !voucherCartModels.isEmpty()) {
             voucherCartModels.forEach(item -> {
                 VoucherOrderSource source = item.getPartnerId() == null ? VoucherOrderSource.SYSTEM : VoucherOrderSource.BUSINESS;
@@ -158,8 +161,11 @@ public class OrderService {
                         .description("Voucher " + item.getValue() + (item.getDiscountType() == VoucherDiscountType.PERCENT ? "%" : " VNĐ") + " từ " + (source == VoucherOrderSource.SYSTEM ? "MellowSips" : "cửa hàng"))
                         .source(source)
                         .build();
-                voucherOrderService.create(saved, voucherOrderDto);
+
+                VoucherOrder voucherOrder = voucherOrderService.create(saved, voucherOrderDto);
+                voucherOrders.add(mapper.map(voucherOrder, VoucherOrderModel.class));
             });
+            orderModel.setVoucherOrders(voucherOrders);
         }
 
         Transaction transaction = transactionService.createInitialTransaction(saved);

@@ -171,7 +171,7 @@ public class VoucherService {
         return repository.save(entity);
     }
 
-    public Map customerGetCartVoucher(CartDetailsModel cartDetailsModel) {
+    public Map customerGetCartVoucher(CartDetailsModel cartDetailsModel, Boolean isHidden) {
         Map<String, List<VoucherCartModel>> result = new HashMap<>();
 
         List<Voucher> entities = repository.customerCartGetVouchers(
@@ -179,6 +179,10 @@ public class VoucherService {
             cartDetailsModel.getStore().getPartnerId(),
             String.valueOf(cartDetailsModel.getStore().getId())
         );
+
+        if (Boolean.TRUE.equals(isHidden)) {
+            entities = entities.stream().filter(item -> Boolean.TRUE.equals(item.getIsHidden())).toList();
+        }
 
         List<VoucherCartModel> models = mapper.map(
                 entities,

@@ -270,12 +270,12 @@ public class CartService {
 
     public Map getVouchers(UUID cartId) {
         CartDetailsModel cartDetailsModel = getCartDetails(cartId);
-        return voucherService.customerGetCartVoucher(cartDetailsModel);
+        return voucherService.customerGetCartVoucher(cartDetailsModel, true);
     }
 
     public CartDetailsModel calculatePrice(UUID cartId, CalculateCartDto dto) {
         CartDetailsModel cartDetailsModel = getCartDetails(cartId);
-        Map availableVouchers = voucherService.customerGetCartVoucher(cartDetailsModel);
+        Map availableVouchers = voucherService.customerGetCartVoucher(cartDetailsModel, null);
 
         List<VoucherCartModel> availableSystemVouchers = (List<VoucherCartModel>) availableVouchers.get("SYSTEM");
         List<VoucherCartModel> availableBusinessVouchers = (List<VoucherCartModel>) availableVouchers.get("BUSINESS");
@@ -284,12 +284,12 @@ public class CartService {
         List<VoucherCartModel> systemVouchers = availableSystemVouchers == null
                 ? Collections.emptyList()
                 : availableSystemVouchers.stream()
-                .filter(item -> (dtoVouchers.contains(String.valueOf(item.getId())) || dtoVouchers.contains(item.getCode()) && item.getPartnerId() == null))
+                .filter(item -> (dtoVouchers.contains(String.valueOf(item.getId())) || dtoVouchers.contains(item.getCode()) && item.getPartnerId() == null) && item.getCanUse())
                 .toList();
         List<VoucherCartModel> businessVouchers = availableBusinessVouchers == null
                 ? Collections.emptyList()
                 : availableBusinessVouchers.stream()
-                .filter(item -> (dtoVouchers.contains(String.valueOf(item.getId())) || dtoVouchers.contains(item.getCode()) && item.getPartnerId() != null))
+                .filter(item -> (dtoVouchers.contains(String.valueOf(item.getId())) || dtoVouchers.contains(item.getCode()) && item.getPartnerId() != null) && item.getCanUse())
                 .toList();
 
         if (systemVouchers.size() > 1 || businessVouchers.size() > 1) {
@@ -303,6 +303,8 @@ public class CartService {
         cartDetailsModel.setFinalPrice(cartDetailsModel.getTempPrice() - totalDiscountAmount);
 
         if (vouchers.size() != dto.getVouchers().size()) {
+            System.out.println(businessVouchers);
+            System.out.println(dto.getVouchers());
             cartDetailsModel.setIsChange(true);
         }
 
