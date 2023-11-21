@@ -5,4 +5,6 @@ import lombok.Data;
 
 @Data
 public class ReviewModel extends BaseModel {
+    private int point;
+    private String comment;
 }

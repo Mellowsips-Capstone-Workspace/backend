@@ -11,9 +11,11 @@ import com.capstone.workspace.models.shared.PaginationResponseModel;
 import com.capstone.workspace.models.shared.ResponseModel;
 import com.capstone.workspace.models.store.MenuDetailsModel;
 import com.capstone.workspace.models.store.QrCodeModel;
+import com.capstone.workspace.models.store.ReviewModel;
 import com.capstone.workspace.models.store.StoreModel;
 import com.capstone.workspace.services.store.MenuService;
 import com.capstone.workspace.services.store.QrCodeService;
+import com.capstone.workspace.services.store.ReviewService;
 import com.capstone.workspace.services.store.StoreService;
 import jakarta.validation.Valid;
 import lombok.NonNull;
@@ -43,6 +45,9 @@ public class StoreController {
 
     @NonNull
     private final StoreHelper storeHelper;
+
+    @NonNull
+    private final ReviewService reviewService;
 
     @PostMapping("/customer/search")
     public ResponseModel<PaginationResponseModel<StoreModel>> customerSearch(@Valid @RequestBody SearchStoreDto dto) {
@@ -122,5 +127,11 @@ public class StoreController {
         StoreModel model = mapper.map(store, StoreModel.class);
         model.setIsOpen(storeHelper.isStoreOpening(model.getOperationalHours()));
         return ResponseModel.<StoreModel>builder().data(model).build();
+    }
+
+    @PostMapping("/{id}/reviews/search")
+    public ResponseModel<PaginationResponseModel<ReviewModel>> getStoreReviews(@PathVariable String id, @Valid @RequestBody SearchReviewDto dto) {
+        PaginationResponseModel<ReviewModel> data = reviewService.getStoreReviews(id, dto);
+        return ResponseModel.<PaginationResponseModel<ReviewModel>>builder().data(data).build();
     }
 }
