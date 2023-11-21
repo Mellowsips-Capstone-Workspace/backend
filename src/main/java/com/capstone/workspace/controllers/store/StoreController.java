@@ -9,10 +9,7 @@ import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.helpers.store.StoreHelper;
 import com.capstone.workspace.models.shared.PaginationResponseModel;
 import com.capstone.workspace.models.shared.ResponseModel;
-import com.capstone.workspace.models.store.MenuDetailsModel;
-import com.capstone.workspace.models.store.QrCodeModel;
-import com.capstone.workspace.models.store.ReviewModel;
-import com.capstone.workspace.models.store.StoreModel;
+import com.capstone.workspace.models.store.*;
 import com.capstone.workspace.services.store.MenuService;
 import com.capstone.workspace.services.store.QrCodeService;
 import com.capstone.workspace.services.store.ReviewService;
@@ -86,7 +83,12 @@ public class StoreController {
     public ResponseModel<StoreModel> getStoreById(@PathVariable(name = "id") UUID storeId) {
         Store entity = storeService.getStoreById(storeId);
         StoreModel model = mapper.map(entity, StoreModel.class);
+
         model.setIsOpen(storeHelper.isStoreOpening(model.getOperationalHours()));
+
+        StoreReviewStatisticsModel reviewStatistics = reviewService.getStoreReviewStatistics(String.valueOf(storeId));
+        model.setReviewStatistic(reviewStatistics);
+
         return ResponseModel.<StoreModel>builder().data(model).build();
     }
 

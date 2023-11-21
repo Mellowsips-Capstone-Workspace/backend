@@ -11,6 +11,7 @@ import com.capstone.workspace.exceptions.ConflictException;
 import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.models.shared.PaginationResponseModel;
 import com.capstone.workspace.models.store.ReviewModel;
+import com.capstone.workspace.models.store.StoreReviewStatisticsModel;
 import com.capstone.workspace.repositories.store.ReviewRepository;
 import com.capstone.workspace.services.order.OrderService;
 import lombok.NonNull;
@@ -84,5 +85,9 @@ public class ReviewService {
         result.setResults(reviewModels);
 
         return result;
+    }
+
+    public StoreReviewStatisticsModel getStoreReviewStatistics(String storeId) {
+        return repository.getStoreReviewStatistics(storeId);
     }
 }

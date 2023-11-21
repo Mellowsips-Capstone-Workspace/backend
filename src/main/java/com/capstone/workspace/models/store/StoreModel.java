@@ -32,4 +32,6 @@ public class StoreModel extends BaseModel {
     private Map<DayOfWeek, List<Period>> operationalHours;
 
     private String partnerId;
+
+    private StoreReviewStatisticsModel reviewStatistic;
 }
