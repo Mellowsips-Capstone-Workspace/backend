@@ -144,7 +144,7 @@ public class OrderService {
             entity.setStatus(OrderStatus.PENDING);
         }
 
-        cartService.deleteCart(cartId);
+        cartService.deleteCart(cartId, true);
 
         Order saved = repository.save(entity);
         OrderModel orderModel = mapper.map(saved, OrderModel.class);

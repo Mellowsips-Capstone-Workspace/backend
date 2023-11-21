@@ -23,7 +23,7 @@ import java.util.Map;
 
 @Transactional
 public class BaseRepositoryImplement<T extends BaseEntity, ID extends Serializable> extends SimpleJpaRepository<T, ID> implements BaseRepository<T, ID> {
-    private final EntityManager entityManager;
+    protected final EntityManager entityManager;
 
     public BaseRepositoryImplement(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager) {
         super(entityInformation, entityManager);

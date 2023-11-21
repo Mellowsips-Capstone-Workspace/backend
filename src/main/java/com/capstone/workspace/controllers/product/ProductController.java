@@ -2,12 +2,14 @@ package com.capstone.workspace.controllers.product;
 
 import com.capstone.workspace.annotations.AllowedUsers;
 import com.capstone.workspace.dtos.product.CreateProductDto;
+import com.capstone.workspace.dtos.product.SearchProductPurchasesDto;
 import com.capstone.workspace.dtos.product.SearchProductDto;
 import com.capstone.workspace.dtos.product.UpdateProductDto;
 import com.capstone.workspace.entities.product.Product;
 import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.models.product.ProductDetailsModel;
 import com.capstone.workspace.models.product.ProductModel;
+import com.capstone.workspace.models.product.ProductPurchaseModel;
 import com.capstone.workspace.models.shared.PaginationResponseModel;
 import com.capstone.workspace.models.shared.ResponseModel;
 import com.capstone.workspace.services.product.ProductService;
@@ -66,5 +68,12 @@ public class ProductController {
         Product product = productService.updateProduct(id, dto);
         ProductModel model = mapper.map(product, ProductModel.class);
         return ResponseModel.<ProductModel>builder().data(model).build();
+    }
+
+    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER, UserType.STAFF})
+    @PostMapping("/purchases")
+    public ResponseModel<PaginationResponseModel<ProductPurchaseModel>> bestSellingProducts(@Valid @RequestBody SearchProductPurchasesDto dto) {
+        PaginationResponseModel<ProductPurchaseModel> data = productService.getBestSellingProducts(dto);
+        return ResponseModel.<PaginationResponseModel<ProductPurchaseModel>>builder().data(data).build();
     }
 }

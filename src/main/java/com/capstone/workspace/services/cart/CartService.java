@@ -250,8 +250,18 @@ public class CartService {
     }
 
     @Transactional
-    public void deleteCart(UUID id) {
+    public void deleteCart(UUID id, boolean isBought) {
         Cart entity = getCartById(id);
+
+        List<CartItem> cartItems = entity.getCartItems();
+        for (CartItem item: cartItems) {
+            if (isBought) {
+                item.setIsBought(true);
+            }
+            item.setDeleted(true);
+        }
+        cartItemRepository.saveAll(cartItems);
+
         repository.delete(entity);
     }
 

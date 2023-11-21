@@ -64,7 +64,7 @@ public class CartController {
     @AllowedUsers(userTypes = {UserType.CUSTOMER})
     @DeleteMapping("/{id}")
     public ResponseModel deleteCart(@PathVariable UUID id) {
-        cartService.deleteCart(id);
+        cartService.deleteCart(id, false);
         return ResponseModel.builder().message("Delete successfully").build();
     }
 

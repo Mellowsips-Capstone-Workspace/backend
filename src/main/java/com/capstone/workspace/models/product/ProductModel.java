@@ -7,19 +7,19 @@ import java.util.List;
 
 @Data
 public class ProductModel extends BaseModel {
-    private String name;
+    protected String name;
 
-    private long price;
+    protected long price;
 
-    private String coverImage;
+    protected String coverImage;
 
-    private String description;
+    protected String description;
 
-    private List<String> categories;
+    protected List<String> categories;
 
-    private Boolean isSoldOut;
+    protected Boolean isSoldOut;
 
-    private String partnerId;
+    protected String partnerId;
 
-    private String storeId;
+    protected String storeId;
 }

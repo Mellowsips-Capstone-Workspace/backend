@@ -8,6 +8,7 @@ import com.capstone.workspace.exceptions.NotFoundException;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.models.product.ProductModel;
+import com.capstone.workspace.models.product.ProductPurchaseModel;
 import com.capstone.workspace.models.shared.PaginationResponseModel;
 import com.capstone.workspace.repositories.product.ProductRepository;
 import com.capstone.workspace.services.auth.IdentityService;
@@ -16,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +31,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class ProductService {
-    @NonNull
+    @Autowired
+    @Qualifier("productRepositoryImplement")
     private final ProductRepository repository;
 
     @NonNull
@@ -127,5 +131,16 @@ public class ProductService {
 
         BeanUtils.copyProperties(dto, entity, AppHelper.commonProperties);
         return repository.save(entity);
+    }
+
+    public PaginationResponseModel<ProductPurchaseModel> getBestSellingProducts(SearchProductPurchasesDto dto) {
+        SearchProductPurchasesCriteriaDto criteriaDto = dto.getCriteria() == null ? new SearchProductPurchasesCriteriaDto() : dto.getCriteria();
+        SearchProductPurchasesFilterDto filterDto = criteriaDto.getFilter() == null ? new SearchProductPurchasesFilterDto() : criteriaDto.getFilter();
+
+        return repository.searchProductPurchases(
+                filterDto,
+                criteriaDto.getOrder(),
+                dto.getPagination()
+        );
     }
 }

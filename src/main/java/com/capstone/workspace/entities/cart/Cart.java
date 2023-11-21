@@ -15,7 +15,7 @@ import java.util.List;
 @SQLDelete(sql = "UPDATE cart SET is_deleted = true WHERE id = ?")
 @Where(clause = "is_deleted=false")
 public class Cart extends BaseEntity implements IStoreEntity {
-    @OneToMany(mappedBy = "cart", fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(mappedBy = "cart", fetch = FetchType.LAZY)
     private List<CartItem> cartItems;
 
     @Column

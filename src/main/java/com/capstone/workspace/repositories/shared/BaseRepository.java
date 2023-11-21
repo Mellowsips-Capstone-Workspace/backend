@@ -1,7 +1,6 @@
 package com.capstone.workspace.repositories.shared;
 
 import com.capstone.workspace.dtos.shared.PaginationDto;
-import com.capstone.workspace.entities.shared.BaseEntity;
 import com.capstone.workspace.models.shared.PaginationResponseModel;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
