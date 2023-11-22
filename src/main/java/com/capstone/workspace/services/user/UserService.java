@@ -3,6 +3,7 @@ package com.capstone.workspace.services.user;
 import com.capstone.workspace.dtos.auth.VerifyUserDto;
 import com.capstone.workspace.dtos.auth.RegisterUserDto;
 import com.capstone.workspace.dtos.user.AddEmployeeDto;
+import com.capstone.workspace.dtos.user.UpdateUserProfileDto;
 import com.capstone.workspace.entities.user.User;
 import com.capstone.workspace.enums.auth.AuthProviderType;
 import com.capstone.workspace.enums.user.UserType;
@@ -144,10 +145,6 @@ public class UserService {
 
     public User getMyOwnProfile() {
         UserIdentity userIdentity = identityService.getUserIdentity();
-        if (userIdentity == null || userIdentity.getUsername() == null) {
-            throw new UnauthorizedException("Unauthorized");
-        }
-
         return getUserByUsername(userIdentity.getUsername());
     }
 
@@ -159,5 +156,20 @@ public class UserService {
 
         user.setPartnerId(groupName);
         repository.save(user);
+    }
+
+    public User updateProfile(UpdateUserProfileDto dto) {
+        User entity = getMyOwnProfile();
+
+        if (dto.getEmail() != null && entity.getProvider() == AuthProviderType.USERNAME && !dto.getEmail().equalsIgnoreCase(entity.getEmail())) {
+            throw new ConflictException("Not allow to update email");
+        }
+
+        if (dto.getPhone() != null && entity.getProvider() == AuthProviderType.PHONE && !dto.getPhone().equals(entity.getPhone())) {
+            throw new ConflictException("Not allow to update phone");
+        }
+
+        BeanUtils.copyProperties(dto, entity, AppHelper.commonProperties);
+        return repository.save(entity);
     }
 }
