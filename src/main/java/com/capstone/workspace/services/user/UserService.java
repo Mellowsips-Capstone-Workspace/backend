@@ -3,6 +3,8 @@ package com.capstone.workspace.services.user;
 import com.capstone.workspace.dtos.auth.VerifyUserDto;
 import com.capstone.workspace.dtos.auth.RegisterUserDto;
 import com.capstone.workspace.dtos.user.AddEmployeeDto;
+import com.capstone.workspace.dtos.user.SearchUserCriteriaDto;
+import com.capstone.workspace.dtos.user.SearchUserDto;
 import com.capstone.workspace.dtos.user.UpdateUserProfileDto;
 import com.capstone.workspace.entities.user.User;
 import com.capstone.workspace.enums.auth.AuthProviderType;
@@ -10,18 +12,20 @@ import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.exceptions.*;
 import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
+import com.capstone.workspace.models.shared.PaginationResponseModel;
+import com.capstone.workspace.models.user.UserModel;
 import com.capstone.workspace.repositories.user.UserRepository;
 import com.capstone.workspace.services.auth.IdentityService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -161,15 +165,58 @@ public class UserService {
     public User updateProfile(UpdateUserProfileDto dto) {
         User entity = getMyOwnProfile();
 
-        if (dto.getEmail() != null && entity.getProvider() == AuthProviderType.USERNAME && !dto.getEmail().equalsIgnoreCase(entity.getEmail())) {
-            throw new ConflictException("Not allow to update email");
+        if (entity.getProvider() == AuthProviderType.USERNAME) {
+            if (dto.getEmail() == null) {
+                throw new BadRequestException("Email must not be null");
+            }
+            if (!dto.getEmail().equalsIgnoreCase(entity.getEmail())) {
+                throw new ConflictException("Not allow to update email");
+            }
         }
 
-        if (dto.getPhone() != null && entity.getProvider() == AuthProviderType.PHONE && !dto.getPhone().equals(entity.getPhone())) {
-            throw new ConflictException("Not allow to update phone");
+        if (entity.getProvider() == AuthProviderType.PHONE) {
+            if (dto.getPhone() == null) {
+                throw new BadRequestException("Phone must not be null");
+            }
+            if (!dto.getPhone().equals(entity.getPhone())) {
+                throw new ConflictException("Not allow to update phone");
+            }
         }
 
         BeanUtils.copyProperties(dto, entity, AppHelper.commonProperties);
         return repository.save(entity);
+    }
+
+    public PaginationResponseModel<UserModel> search(SearchUserDto dto) {
+        String[] searchableFields = new String[]{"username", "displayName", "email"};
+        Map<String, Object> filterParams = Collections.emptyMap();
+
+        SearchUserCriteriaDto criteria = dto.getCriteria();
+        String keyword = null;
+        Map orderCriteria = null;
+
+        if (criteria != null) {
+            if (criteria.getFilter() != null) {
+                filterParams = AppHelper.copyPropertiesToMap(criteria.getFilter());
+            }
+            keyword = criteria.getKeyword();
+            orderCriteria = criteria.getOrder();
+        }
+
+        PaginationResponseModel result = repository.searchBy(
+                keyword,
+                searchableFields,
+                filterParams,
+                orderCriteria,
+                dto.getPagination()
+        );
+
+        List<UserModel> userModels = mapper.map(
+                result.getResults(),
+                new TypeToken<List<UserModel>>() {}.getType()
+        );
+        result.setResults(userModels);
+
+        return result;
     }
 }
