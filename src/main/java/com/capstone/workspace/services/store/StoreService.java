@@ -189,7 +189,7 @@ public class StoreService {
         return false;
     }
 
-    public Store activeStore(UUID id) {
+    public Store activateStore(UUID id) {
         Store entity = getStoreById(id);
 
         if (Boolean.TRUE.equals(entity.getIsActive())) {
@@ -207,6 +207,17 @@ public class StoreService {
         menuService.getStoreMenu(String.valueOf(id));
 
         entity.setIsActive(true);
+        return repository.save(entity);
+    }
+
+    public Store deactivateStore(UUID id) {
+        Store entity = getStoreById(id);
+
+        if (Boolean.FALSE.equals(entity.getIsActive())) {
+            throw new ConflictException("Store has been deactivated");
+        }
+
+        entity.setIsActive(false);
         return repository.save(entity);
     }
 }
