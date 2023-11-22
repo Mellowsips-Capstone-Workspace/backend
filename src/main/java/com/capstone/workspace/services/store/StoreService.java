@@ -4,6 +4,7 @@ import com.capstone.workspace.dtos.store.SearchStoreCriteriaDto;
 import com.capstone.workspace.dtos.store.SearchStoreDto;
 import com.capstone.workspace.dtos.store.UpdateStoreDto;
 import com.capstone.workspace.entities.partner.Partner;
+import com.capstone.workspace.entities.store.Menu;
 import com.capstone.workspace.entities.store.Store;
 import com.capstone.workspace.enums.partner.BusinessType;
 import com.capstone.workspace.exceptions.*;
@@ -47,6 +48,9 @@ public class StoreService {
 
     @NonNull
     private final DocumentService documentService;
+
+    @NonNull
+    private final MenuService menuService;
 
     public List<Store> createBulk(List<StoreModel> data) {
         if (data == null || data.isEmpty()) {
@@ -183,5 +187,37 @@ public class StoreService {
             return true;
         }
         return false;
+    }
+
+    public Store activateStore(UUID id) {
+        Store entity = getStoreById(id);
+
+        if (Boolean.TRUE.equals(entity.getIsActive())) {
+            throw new ConflictException("Store has been activated");
+        }
+
+        if (entity.getOperationalHours() == null) {
+            throw new NotFoundException("Missing operational hours");
+        }
+
+        if (entity.getCoverImage() == null || entity.getProfileImage() == null) {
+            throw new NotFoundException("Missing cover or profile image");
+        }
+
+        menuService.getStoreMenu(String.valueOf(id));
+
+        entity.setIsActive(true);
+        return repository.save(entity);
+    }
+
+    public Store deactivateStore(UUID id) {
+        Store entity = getStoreById(id);
+
+        if (Boolean.FALSE.equals(entity.getIsActive())) {
+            throw new ConflictException("Store has been deactivated");
+        }
+
+        entity.setIsActive(false);
+        return repository.save(entity);
     }
 }

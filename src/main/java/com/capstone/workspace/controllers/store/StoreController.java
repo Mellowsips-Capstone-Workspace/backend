@@ -139,4 +139,20 @@ public class StoreController {
         PaginationResponseModel<ReviewModel> data = reviewService.getStoreReviews(id, dto);
         return ResponseModel.<PaginationResponseModel<ReviewModel>>builder().data(data).build();
     }
+
+    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER})
+    @PutMapping("/{id}/activate")
+    public ResponseModel<StoreModel> activateStore(@PathVariable UUID id) {
+        Store entity = storeService.activateStore(id);
+        StoreModel model = mapper.map(entity, StoreModel.class);
+        return ResponseModel.<StoreModel>builder().data(model).build();
+    }
+
+    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER})
+    @PutMapping("/{id}/deactivate")
+    public ResponseModel<StoreModel> deactivateStore(@PathVariable UUID id) {
+        Store entity = storeService.deactivateStore(id);
+        StoreModel model = mapper.map(entity, StoreModel.class);
+        return ResponseModel.<StoreModel>builder().data(model).build();
+    }
 }
