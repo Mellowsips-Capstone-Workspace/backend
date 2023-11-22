@@ -14,6 +14,6 @@ import java.util.UUID;
 public interface ReviewRepository extends BaseRepository<Review, UUID> {
     Review findByOrder(Order order);
 
-    @Query(value = "SELECT new com.capstone.workspace.models.store.StoreReviewStatisticsModel(AVG(r.point), COUNT(r.id)) FROM Review r WHERE r.order.storeId = :storeId")
+    @Query(value = "SELECT new com.capstone.workspace.models.store.StoreReviewStatisticsModel(AVG(r.point), COUNT(r.id)) FROM Review r WHERE r.order.storeId = :storeId GROUP BY r.order.id")
     StoreReviewStatisticsModel getStoreReviewStatistics(@Param("storeId") String storeId);
 }

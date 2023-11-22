@@ -98,6 +98,9 @@ public class StoreController {
         if (data.getResults() != null) {
             data.getResults().forEach(item -> {
                 item.setIsOpen(storeHelper.isStoreOpening(item.getOperationalHours()));
+
+                StoreReviewStatisticsModel reviewStatistics = reviewService.getStoreReviewStatistics(String.valueOf(item.getId()));
+                item.setReviewStatistic(reviewStatistics);
             });
         }
 
