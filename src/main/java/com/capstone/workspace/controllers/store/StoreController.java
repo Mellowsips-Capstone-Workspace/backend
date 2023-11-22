@@ -139,4 +139,12 @@ public class StoreController {
         PaginationResponseModel<ReviewModel> data = reviewService.getStoreReviews(id, dto);
         return ResponseModel.<PaginationResponseModel<ReviewModel>>builder().data(data).build();
     }
+
+    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER})
+    @PutMapping("/{id}/active")
+    public ResponseModel<StoreModel> activeStore(@PathVariable UUID id) {
+        Store entity = storeService.activeStore(id);
+        StoreModel model = mapper.map(entity, StoreModel.class);
+        return ResponseModel.<StoreModel>builder().data(model).build();
+    }
 }

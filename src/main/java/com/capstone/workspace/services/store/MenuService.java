@@ -29,9 +29,6 @@ public class MenuService {
     private final MenuRepository repository;
 
     @NonNull
-    private final StoreService storeService;
-
-    @NonNull
     private final MenuSectionService menuSectionService;
 
     @NonNull
@@ -41,7 +38,6 @@ public class MenuService {
     private final IdentityService identityService;
 
     public Menu getStoreMenu(String storeId) {
-        storeService.getStoreById(UUID.fromString(storeId));
         Menu entity = repository.findByStoreIdAndIsActiveTrue(storeId);
 
         if (entity == null) {
