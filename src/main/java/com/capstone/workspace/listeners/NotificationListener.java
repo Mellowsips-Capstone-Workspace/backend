@@ -29,7 +29,7 @@ public class NotificationListener {
     }
 
     private void verifyUser(UserIdentity userIdentity, Notification entity) {
-        if (userIdentity.getUserType() != UserType.CUSTOMER || !entity.getReceiver().equals(userIdentity.getUsername())) {
+        if (!entity.getReceiver().equals(userIdentity.getUsername())) {
             throw new ForbiddenException("Not allow to modify this data");
         }
     }

@@ -6,6 +6,7 @@ import com.capstone.workspace.dtos.store.SearchStoreCriteriaDto;
 import com.capstone.workspace.entities.notification.Notification;
 import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.exceptions.BadRequestException;
+import com.capstone.workspace.exceptions.ConflictException;
 import com.capstone.workspace.exceptions.ForbiddenException;
 import com.capstone.workspace.exceptions.NotFoundException;
 import com.capstone.workspace.helpers.shared.AppHelper;
@@ -25,6 +26,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.*;
 
 @Service
@@ -77,13 +79,8 @@ public class NotificationService {
     public Notification getOneById(UUID id) {
         UserIdentity userIdentity = identityService.getUserIdentity();
         String username = userIdentity.getUsername();
-        UserType userType = userIdentity.getUserType();
 
         Notification entity = repository.findById(id).orElse(null);
-
-        if (userType != UserType.CUSTOMER) {
-            throw new ForbiddenException("Your user type is not allowed to perform this action");
-        }
 
         if (entity == null || !entity.getReceiver().equals(username)) {
             throw new NotFoundException("Notification not found");
@@ -120,5 +117,22 @@ public class NotificationService {
         result.setResults(notificationModels);
 
         return result;
+    }
+
+    public Notification markAsRead(UUID id) {
+        Notification entity = getOneById(id);
+
+        if (Boolean.TRUE.equals(entity.getIsSeen())) {
+            throw new ConflictException("Notification has already been read");
+        }
+        entity.setIsSeen(true);
+        entity.setSeenAt(Instant.now());
+
+        return repository.save(entity);
+    }
+
+    public void markAllAsRead() {
+        UserIdentity userIdentity = identityService.getUserIdentity();
+        repository.markAllAsReadByUsername(userIdentity.getUsername());
     }
 }
