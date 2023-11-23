@@ -24,7 +24,7 @@ public class ExternalExceptionHandler {
 
     @ExceptionHandler(BaseException.class)
     public ResponseEntity<ErrorResponse> handleRuntimeExceptions(BaseException ex, HttpServletRequest request) {
-        logger.error(ex.getClass().getName() + ": [" + request.getRequestURI() + "] " + ex.getMessage());
+        logger.error(ex.getClass().getName() + ": [" + request.getMethod() + " " + request.getRequestURI() + "] " + ex.getMessage());
         logger.error(Arrays.toString(ex.getStackTrace()));
 
         HttpStatus httpStatus = ex.getHttpStatus() != null ? ex.getHttpStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
@@ -40,7 +40,7 @@ public class ExternalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleRuntimeExceptions(HttpMessageNotReadableException ex, HttpServletRequest request) {
-        logger.error(ex.getClass().getName() + ": [" + request.getRequestURI() + "] " + ex.getMessage());
+        logger.error(ex.getClass().getName() + ": [" + request.getMethod() + " " + request.getRequestURI() + "] " + ex.getMessage());
         logger.error(Arrays.toString(ex.getStackTrace()));
 
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
@@ -59,7 +59,7 @@ public class ExternalExceptionHandler {
         String message = ex.getMessage() != null ? ex.getMessage() : ex.getErrorCode().getMessage();
         HttpStatus httpStatus = ex.getHttpStatus() != null ? ex.getHttpStatus() : ex.getErrorCode().getHttpStatus();
 
-        logger.error(ex.getClass().getName() + ": [" + request.getRequestURI() + "] " + message);
+        logger.error(ex.getClass().getName() + ": [" + request.getMethod() + " " + request.getRequestURI() + "] " + message);
         logger.error(Arrays.toString(ex.getStackTrace()));
 
         ErrorResponse errorResponse = new ErrorResponse(
@@ -83,7 +83,7 @@ public class ExternalExceptionHandler {
             }
         }
 
-        logger.error(ex.getClass().getName() + ": [" + request.getRequestURI() + "] " + ex.getMessage());
+        logger.error(ex.getClass().getName() + ": [" + request.getMethod() + " " + request.getRequestURI() + "] " + ex.getMessage());
         logger.error(Arrays.toString(ex.getStackTrace()));
 
         ErrorResponse errorResponse = new ErrorResponse(
@@ -103,7 +103,7 @@ public class ExternalExceptionHandler {
             errorMessage = errorMessage.replace(":", "");
         }
 
-        logger.error(ex.getClass().getName() + ": [" + request.getRequestURI() + "] " + ex.getMessage());
+        logger.error(ex.getClass().getName() + ": [" + request.getMethod() + " " + request.getRequestURI() + "] " + ex.getMessage());
         logger.error(Arrays.toString(ex.getStackTrace()));
 
         ErrorResponse errorResponse = new ErrorResponse(
@@ -119,7 +119,7 @@ public class ExternalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleTransactionSystemException(TransactionSystemException ex, HttpServletRequest request) {
         Throwable exception = ex.getCause().getCause() == null ? ex : ex.getCause().getCause();
 
-        logger.error(exception.getClass().getName() + ": [" + request.getRequestURI() + "] " + exception.getMessage());
+        logger.error(exception.getClass().getName() + ": [" + request.getMethod() + " " + request.getRequestURI() + "] " + exception.getMessage());
         logger.error(Arrays.toString(exception.getStackTrace()));
 
         HttpStatus httpStatus = exception instanceof BaseException ? ((BaseException) exception).getHttpStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
@@ -135,7 +135,7 @@ public class ExternalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleOtherExceptions(Exception ex, HttpServletRequest request) {
-        logger.error(ex.getClass().getName() + ": [" + request.getRequestURI() + "] " + ex.getMessage());
+        logger.error(ex.getClass().getName() + ": [" + request.getMethod() + " " + request.getRequestURI() + "] " + ex.getMessage());
         logger.error(Arrays.toString(ex.getStackTrace()));
 
         ErrorResponse errorResponse = new ErrorResponse(

@@ -54,7 +54,7 @@ public class UserController {
         return ResponseModel.<UserModel>builder().data(model).build();
     }
 
-    @AllowedUsers(userTypes = {UserType.ADMIN})
+    @AllowedUsers(userTypes = {UserType.ADMIN, UserType.OWNER, UserType.STORE_MANAGER})
     @PutMapping("/{id}/deactivate")
     public ResponseModel<UserModel> deactivateUser(@PathVariable UUID id) {
         User entity = userService.deactivate(id);

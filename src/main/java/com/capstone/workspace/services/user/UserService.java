@@ -248,6 +248,11 @@ public class UserService {
     public User deactivate(UUID id) {
         User entity = getUserById(id);
 
+        UserIdentity userIdentity = identityService.getUserIdentity();
+        if (userIdentity.getUsername().equals(entity.getUsername())) {
+            throw new BadRequestException("Not allow to deactivate yourself");
+        }
+
         if (Boolean.FALSE.equals(entity.getIsActive())) {
             throw new ConflictException("User has been deactivated");
         }

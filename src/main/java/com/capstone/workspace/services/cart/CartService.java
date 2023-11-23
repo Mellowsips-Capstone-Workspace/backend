@@ -313,8 +313,6 @@ public class CartService {
         cartDetailsModel.setFinalPrice(cartDetailsModel.getTempPrice() - totalDiscountAmount);
 
         if (vouchers.size() != dto.getVouchers().size()) {
-            System.out.println(businessVouchers);
-            System.out.println(dto.getVouchers());
             cartDetailsModel.setIsChange(true);
         }
 
