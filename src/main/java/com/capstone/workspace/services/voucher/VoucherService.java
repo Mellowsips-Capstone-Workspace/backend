@@ -253,16 +253,16 @@ public class VoucherService {
 
     public Voucher useVoucher(UUID id) {
         int count = 0;
+        Voucher entity = getOneById(id);
+
         while (true) {
+            count++;
+            int newQuantity = entity.getQuantity() - 1;
+            if (newQuantity < 0) {
+                throw new BadRequestException("Out of voucher " + entity.getCode());
+            }
+
             try {
-                count++;
-                Voucher entity = getOneById(id);
-
-                int newQuantity = entity.getQuantity() - 1;
-                if (newQuantity < 0) {
-                    throw new BadRequestException("Out of voucher " + entity.getCode());
-                }
-
                 return repository.useVoucher(id);
             } catch (OptimisticLockException e) {
                 if (count == 3) {
@@ -274,10 +274,11 @@ public class VoucherService {
 
     public Voucher revokeVoucher(UUID id) {
         int count = 0;
+        getOneById(id);
+
         while (true) {
+            count++;
             try {
-                count++;
-                getOneById(id);
                 return repository.revokeVoucher(id);
             } catch (OptimisticLockException e) {
                 if (count == 3) {
