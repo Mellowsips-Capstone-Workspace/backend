@@ -16,6 +16,7 @@ import com.capstone.workspace.models.shared.PaginationResponseModel;
 import com.capstone.workspace.models.voucher.VoucherModel;
 import com.capstone.workspace.repositories.voucher.VoucherRepository;
 import com.capstone.workspace.services.auth.IdentityService;
+import jakarta.persistence.OptimisticLockException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -250,15 +251,24 @@ public class VoucherService {
         return result;
     }
 
-    public synchronized Voucher useVoucher(UUID id) {
-        Voucher entity = getOneById(id);
+    public Voucher useVoucher(UUID id) {
+        int count = 0;
+        while (true) {
+            try {
+                count++;
+                Voucher entity = getOneById(id);
 
-        int newQuantity = entity.getQuantity() - 1;
-        if (newQuantity < 0) {
-            throw new BadRequestException("Out of voucher " + entity.getCode());
+                int newQuantity = entity.getQuantity() - 1;
+                if (newQuantity < 0) {
+                    throw new BadRequestException("Out of voucher " + entity.getCode());
+                }
+
+                return repository.useVoucher(id);
+            } catch (OptimisticLockException e) {
+                if (count == 3) {
+                    throw new ServiceUnavailableException("Service is unavailable now. Please try again");
+                }
+            }
         }
-        entity.setQuantity(newQuantity);
-
-        return repository.save(entity);
     }
 }

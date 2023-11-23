@@ -53,4 +53,8 @@ public class Voucher extends BaseEntity implements IPartnerEntity, IStoreEntity 
 
     @Column
     private String storeId;
+
+    @Column
+    @Version
+    private Integer version;
 }
