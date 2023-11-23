@@ -117,7 +117,7 @@ public class VoucherService {
 
         Instant now = Instant.now();
         if (entity.getStartDate().isBefore(now)) {
-            if (entity.getEndDate().isBefore(now)) {
+            if (entity.getEndDate() != null && entity.getEndDate().isBefore(now)) {
                 throw new GoneException("Voucher has expired");
             }
 
