@@ -225,8 +225,7 @@ public class OrderService {
         entity.setStatus(newStatus);
 
         switch (newStatus) {
-            case COMPLETED:
-            case PROCESSING:
+            case COMPLETED, PROCESSING:
                 jobService.publishPushNotificationOrderChangesJob(mapper.map(entity, OrderModel.class));
                 break;
             case DECLINED:
