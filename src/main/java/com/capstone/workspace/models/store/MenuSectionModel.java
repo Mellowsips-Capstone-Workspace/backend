@@ -10,7 +10,7 @@ import java.util.List;
 public class MenuSectionModel extends BaseModel {
     private String name;
 
-    private int order;
+    private int priority;
 
     private List<ProductModel> products;
 }
