@@ -14,10 +14,9 @@ import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping( "/api/users")
@@ -45,5 +44,13 @@ public class UserController {
     public ResponseModel<PaginationResponseModel<UserModel>> search(@Valid @RequestBody SearchUserDto dto) {
         PaginationResponseModel<UserModel> data = userService.search(dto);
         return ResponseModel.<PaginationResponseModel<UserModel>>builder().data(data).build();
+    }
+
+    @AllowedUsers(userTypes = {UserType.ADMIN})
+    @PutMapping("/{id}/activate")
+    public ResponseModel<UserModel> activateUser(@PathVariable UUID id) {
+        User entity = userService.activate(id);
+        UserModel model = mapper.map(entity, UserModel.class);
+        return ResponseModel.<UserModel>builder().data(model).build();
     }
 }

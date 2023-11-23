@@ -219,4 +219,15 @@ public class UserService {
 
         return result;
     }
+
+    public User activate(UUID id) {
+        User entity = getUserById(id);
+
+        if (Boolean.TRUE.equals(entity.getIsActive())) {
+            throw new ConflictException("User has been activated");
+        }
+
+        entity.setIsActive(true);
+        return repository.save(entity);
+    }
 }
