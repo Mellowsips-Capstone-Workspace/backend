@@ -32,6 +32,9 @@ public class User extends BaseEntity implements IPartnerEntity {
     private Boolean isActive = true;
 
     @Column
+    private int numberOfFlakes = 0;
+
+    @Column
     private String avatar;
 
     @Column(nullable = false)

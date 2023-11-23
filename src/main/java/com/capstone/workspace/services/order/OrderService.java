@@ -39,6 +39,7 @@ import com.capstone.workspace.services.cart.CartService;
 import com.capstone.workspace.services.notification.NotificationService;
 import com.capstone.workspace.services.shared.JobService;
 import com.capstone.workspace.services.store.QrCodeService;
+import com.capstone.workspace.services.user.UserService;
 import com.capstone.workspace.services.voucher.VoucherOrderService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.NonNull;
@@ -96,6 +97,9 @@ public class OrderService {
 
     @NonNull
     private final VoucherOrderService voucherOrderService;
+
+    @NonNull
+    private final UserService userService;
 
     @Transactional
     public OrderModel create(CreateOrderDto dto) {
@@ -229,7 +233,7 @@ public class OrderService {
                 jobService.publishPushNotificationOrderChangesJob(mapper.map(entity, OrderModel.class));
                 break;
             case DECLINED:
-                // TODO: Xử lí bom hàng
+                userService.handleCustomerFlake(entity.getCreatedBy());
                 break;
             case REJECTED, CANCELED:
                 // TODO: Xử lí Cashback, change transaction status khi hủy lúc PENDING

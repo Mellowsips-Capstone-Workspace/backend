@@ -230,4 +230,18 @@ public class UserService {
         entity.setIsActive(true);
         return repository.save(entity);
     }
+
+    public void handleCustomerFlake(String username) {
+        User user = getUserByUsername(username);
+
+        int flakeCount = user.getNumberOfFlakes();
+        flakeCount++;
+        if (flakeCount >= 3) {
+            user.setIsActive(false);
+            user.setNumberOfFlakes(0);
+        }
+
+        repository.save(user);
+        // TODO: Notify for customer
+    }
 }
