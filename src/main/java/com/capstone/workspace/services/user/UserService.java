@@ -244,4 +244,15 @@ public class UserService {
         repository.save(user);
         // TODO: Notify for customer
     }
+
+    public User deactivate(UUID id) {
+        User entity = getUserById(id);
+
+        if (Boolean.FALSE.equals(entity.getIsActive())) {
+            throw new ConflictException("User has been deactivated");
+        }
+
+        entity.setIsActive(false);
+        return repository.save(entity);
+    }
 }
