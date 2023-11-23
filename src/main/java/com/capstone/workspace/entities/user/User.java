@@ -29,7 +29,7 @@ public class User extends BaseEntity implements IPartnerEntity {
     private Boolean isVerified;
 
     @Column(columnDefinition = "BOOLEAN DEFAULT true")
-    private Boolean isActive;
+    private Boolean isActive = true;
 
     @Column
     private String avatar;
