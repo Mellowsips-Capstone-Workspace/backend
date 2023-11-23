@@ -271,4 +271,19 @@ public class VoucherService {
             }
         }
     }
+
+    public Voucher revokeVoucher(UUID id) {
+        int count = 0;
+        while (true) {
+            try {
+                count++;
+                getOneById(id);
+                return repository.revokeVoucher(id);
+            } catch (OptimisticLockException e) {
+                if (count == 3) {
+                    throw new ServiceUnavailableException("Service is unavailable now. Please try again");
+                }
+            }
+        }
+    }
 }

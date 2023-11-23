@@ -237,6 +237,7 @@ public class OrderService {
                 if (currentStatus != OrderStatus.PENDING) {
                     jobService.publishPushNotificationOrderChangesJob(mapper.map(entity, OrderModel.class));
                 }
+                voucherOrderService.revoke(entity);
                 break;
             case RECEIVED:
                 Transaction transaction = transactionRepository.findByOrder_IdOrderByCreatedAtDesc(id);

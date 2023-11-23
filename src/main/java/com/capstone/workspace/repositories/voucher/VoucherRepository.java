@@ -34,4 +34,9 @@ public interface VoucherRepository extends BaseRepository<Voucher, UUID> {
     @Modifying
     @Query(value = "UPDATE Voucher v SET v.quantity = v.quantity - 1 WHERE v.id = :id")
     Voucher useVoucher(@Param("id") UUID id);
+
+    @Lock(LockModeType.OPTIMISTIC_FORCE_INCREMENT)
+    @Modifying
+    @Query(value = "UPDATE Voucher v SET v.quantity = v.quantity + 1 WHERE v.id = :id")
+    Voucher revokeVoucher(@Param("id") UUID id);
 }
