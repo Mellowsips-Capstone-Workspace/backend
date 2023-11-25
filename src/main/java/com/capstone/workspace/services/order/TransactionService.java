@@ -207,6 +207,8 @@ public class TransactionService {
                         refundTransaction.setStatus(TransactionStatus.FAILED);
                     }
                     break;
+                default:
+                    break;
             }
         } else if (transaction.getMethod() == TransactionMethod.CASH) {
             refundTransaction.setStatus(TransactionStatus.SUCCESS);
