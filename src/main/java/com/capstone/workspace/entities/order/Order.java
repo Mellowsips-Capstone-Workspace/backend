@@ -51,6 +51,9 @@ public class Order extends BaseEntity implements IPartnerEntity, IStoreEntity {
     private TransactionMethod initialTransactionMethod;
 
     @Column
+    private String rejectReason;
+
+    @Column
     private String partnerId;
 
     @Column

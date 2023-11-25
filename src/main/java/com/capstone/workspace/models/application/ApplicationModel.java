@@ -20,5 +20,7 @@ public class ApplicationModel extends BaseModel {
 
     private ApplicationType type;
 
+    private String rejectReason;
+
     private String partnerId;
 }

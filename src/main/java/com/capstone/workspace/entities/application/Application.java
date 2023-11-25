@@ -37,5 +37,8 @@ public class Application extends BaseEntity implements IPartnerEntity {
     private ApplicationType type;
 
     @Column
+    private String rejectReason;
+
+    @Column
     private String partnerId;
 }

@@ -1,15 +1,16 @@
 package com.capstone.workspace.services.application;
 
-import com.capstone.workspace.dtos.application.CreateApplicationDto;
-import com.capstone.workspace.dtos.application.SearchApplicationCriteriaDto;
-import com.capstone.workspace.dtos.application.SearchApplicationDto;
-import com.capstone.workspace.dtos.application.UpdateApplicationDto;
+import com.capstone.workspace.dtos.application.*;
 import com.capstone.workspace.dtos.document.UpdateDocumentDto;
+import com.capstone.workspace.dtos.notification.PushNotificationDto;
 import com.capstone.workspace.entities.application.Application;
+import com.capstone.workspace.entities.user.User;
 import com.capstone.workspace.enums.application.ApplicationErrorCode;
 import com.capstone.workspace.enums.application.ApplicationEvent;
 import com.capstone.workspace.enums.application.ApplicationStatus;
 import com.capstone.workspace.enums.application.ApplicationType;
+import com.capstone.workspace.enums.notification.NotificationKey;
+import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.exceptions.*;
 import com.capstone.workspace.helpers.application.ApplicationHelper;
 import com.capstone.workspace.helpers.shared.AppHelper;
@@ -17,9 +18,11 @@ import com.capstone.workspace.models.application.ApplicationModel;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.models.shared.PaginationResponseModel;
 import com.capstone.workspace.repositories.application.ApplicationRepository;
+import com.capstone.workspace.repositories.user.UserRepository;
 import com.capstone.workspace.services.application.application_machine.ApplicationStateMachine;
 import com.capstone.workspace.services.auth.IdentityService;
 import com.capstone.workspace.services.document.DocumentService;
+import com.capstone.workspace.services.shared.JobService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -59,7 +62,11 @@ public class ApplicationService {
     @NonNull
     private final DocumentService documentService;
 
-    private static Logger logger = LoggerFactory.getLogger(ApplicationService.class);
+    @NonNull
+    private final JobService jobService;
+
+    @NonNull
+    private final UserRepository userRepository;
 
     @Transactional
     public Application create(CreateApplicationDto dto) {
@@ -118,7 +125,7 @@ public class ApplicationService {
         return entity;
     }
 
-    public synchronized Application transition(UUID id, String event) {
+    public synchronized Application transition(UUID id, String event, RejectApplicationDto dto) {
         Application entity = getApplicationById(id);
         ApplicationEvent applicationEvent = ApplicationEvent.valueOf(event.toUpperCase());
 
@@ -131,6 +138,56 @@ public class ApplicationService {
         ApplicationStatus newStatus = applicationStateMachine.transition(entity.getStatus(), applicationEvent);
         if (newStatus != ApplicationStatus.APPROVED) {
             entity.setStatus(newStatus);
+
+            PushNotificationDto pushNotificationDto = null;
+
+            switch (newStatus) {
+                case REJECTED:
+                    entity.setRejectReason(dto.getReason());
+
+                    pushNotificationDto = PushNotificationDto.builder()
+                        .key(String.valueOf(NotificationKey.APPLICATION_REJECTED))
+                        .subject("Yêu cầu của bạn đã bị từ chối")
+                        .content("Lí do: " + dto.getReason())
+                        .receivers(List.of(entity.getCreatedBy()))
+                        .metadata(new HashMap<>(){{
+                            put("applicationId", entity.getId());
+                        }})
+                        .build();
+
+                    break;
+                case PROCESSING:
+                    pushNotificationDto = PushNotificationDto.builder()
+                        .key(String.valueOf(NotificationKey.APPLICATION_PROCESSING))
+                        .subject("Yêu cầu của bạn đang được xử lí")
+                        .content("Hệ thống đang bắt đầu xử lí yêu cầu tạo/thay đổi doanh nghiệp của bạn")
+                        .receivers(List.of(entity.getCreatedBy()))
+                        .metadata(new HashMap<>(){{
+                            put("applicationId", entity.getId());
+                        }})
+                        .build();
+                    break;
+                case WAITING_FOR_APPROVAL:
+                    List<User> admins = userRepository.findByType(UserType.ADMIN);
+                    List<String> adminUsernames = admins.stream().map(User::getUsername).toList();
+
+                    pushNotificationDto = PushNotificationDto.builder()
+                        .key(String.valueOf(NotificationKey.APPLICATION_PROCESSING))
+                        .subject("Hệ thống có đơn yêu cầu mới")
+                        .content("Bạn có đơn yêu cầu mới cần xử lí")
+                        .receivers(adminUsernames)
+                        .metadata(new HashMap<>(){{
+                            put("applicationId", entity.getId());
+                        }})
+                        .build();
+                    break;
+                default:
+                    break;
+            }
+
+            if (pushNotificationDto != null) {
+                jobService.publishPushNotificationJob(pushNotificationDto);
+            }
         }
 
         return repository.save(entity);

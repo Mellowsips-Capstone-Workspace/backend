@@ -87,7 +87,7 @@ public class PushNotificationOrderChangesJobRequestHandler implements JobRequest
                     .key(String.valueOf(NotificationKey.ORDER_REJECTED))
                     .receivers(List.of(order.getCreatedBy()))
                     .subject("Đơn hàng của bạn đã bị từ chối")
-                    .content("Xin lỗi bạn vì sự bất tiện này. Vì một số lí do nên chúng tôi không thể xử lí đơn hàng này. Bạn vui lòng gọi món tại quầy.")
+                    .content("Lí do: " + order.getRejectReason())
                     .metadata(new HashMap<>(){{
                         put("orderId", order.getId());
                     }})

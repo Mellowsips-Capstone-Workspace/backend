@@ -15,4 +15,6 @@ public interface UserRepository extends BaseRepository<User, UUID> {
     List<User> findByPartnerIdAndType(String partnerId, UserType type);
 
     List<User> findByStoreId(String storeId);
+
+    List<User> findByType(UserType type);
 }
