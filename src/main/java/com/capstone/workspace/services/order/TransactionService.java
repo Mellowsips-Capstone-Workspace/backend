@@ -6,12 +6,17 @@ import com.capstone.workspace.enums.order.OrderStatus;
 import com.capstone.workspace.enums.order.TransactionMethod;
 import com.capstone.workspace.enums.order.TransactionStatus;
 import com.capstone.workspace.enums.order.TransactionType;
+import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.exceptions.BadRequestException;
+import com.capstone.workspace.exceptions.ConflictException;
+import com.capstone.workspace.exceptions.NotFoundException;
+import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.models.order.OrderModel;
 import com.capstone.workspace.models.order.ZaloPayCallbackData;
 import com.capstone.workspace.models.order.ZaloPayCallbackResult;
 import com.capstone.workspace.repositories.order.OrderRepository;
 import com.capstone.workspace.repositories.order.TransactionRepository;
+import com.capstone.workspace.services.auth.IdentityService;
 import com.capstone.workspace.services.shared.JobService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -49,6 +55,9 @@ public class TransactionService {
 
     @NonNull
     private final ModelMapper mapper;
+
+    @NonNull
+    private final IdentityService identityService;
 
     @Transactional
     public Transaction createInitialTransaction(Order order) {
@@ -123,5 +132,36 @@ public class TransactionService {
             throw new BadRequestException("Do not support cash transaction");
         }
         return zaloPayService.checkTransactionStatusCode(transaction);
+    }
+
+    public Transaction pay(UUID id) {
+        Transaction entity = getOneById(id);
+
+        if (entity.getMethod() != TransactionMethod.CASH) {
+            throw new ConflictException("Support for cash transaction only");
+        }
+
+        if (entity.getStatus() != TransactionStatus.PENDING) {
+            throw new ConflictException("Transaction has end");
+        }
+
+        entity.setStatus(TransactionStatus.SUCCESS);
+        return repository.save(entity);
+    }
+
+    public Transaction getOneById(UUID id) {
+        UserIdentity userIdentity = identityService.getUserIdentity();
+        UserType userType = userIdentity.getUserType();
+
+        Transaction entity = repository.findById(id).orElse(null);
+
+        if (entity == null
+                || (userType == UserType.CUSTOMER && !userIdentity.getUsername().equals(entity.getCreatedBy()))
+                || (List.of(UserType.OWNER, UserType.STORE_MANAGER, UserType.STAFF).contains(userType) && (!entity.getPartnerId().equals(userIdentity.getPartnerId()) || (userIdentity.getStoreId() != null && !userIdentity.getStoreId().equals(entity.getStoreId()))))
+        ) {
+            throw new NotFoundException("Transaction not found");
+        }
+
+        return entity;
     }
 }

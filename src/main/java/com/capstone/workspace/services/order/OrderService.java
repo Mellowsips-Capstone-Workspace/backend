@@ -290,11 +290,17 @@ public class OrderService {
 
     public Transaction requestTransaction(UUID id) {
         Order order = getOneById(id);
-        if (order.getStatus() != OrderStatus.PENDING || order.getInitialTransactionMethod() == TransactionMethod.CASH) {
+        Transaction latestTransaction = transactionRepository.findByOrder_IdOrderByCreatedAtDesc(id);
+
+        if (order.getInitialTransactionMethod() == TransactionMethod.CASH) {
+            if (latestTransaction.getStatus() != TransactionStatus.PENDING) {
+                throw new ConflictException("Transaction has end");
+            }
+            return latestTransaction;
+        } else if (order.getStatus() != OrderStatus.PENDING) {
             throw new BadRequestException("This order does not support requesting transaction now");
         }
 
-        Transaction latestTransaction = transactionRepository.findByOrder_IdOrderByCreatedAtDesc(id);
         int transactionStatusCode = transactionService.checkTransactionStatusCode(latestTransaction);
 
         switch (transactionStatusCode) {
