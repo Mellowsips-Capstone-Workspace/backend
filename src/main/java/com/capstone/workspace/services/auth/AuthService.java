@@ -31,7 +31,7 @@ public class AuthService {
     private final CognitoService cognitoService;
 
     @NonNull
-    private final AuthContextService authContextService;
+    private final IdentityService identityService;
 
     @Transactional
     public User register(RegisterUserDto dto) {
@@ -67,7 +67,7 @@ public class AuthService {
     }
 
     public void logout() {
-        UserIdentity userIdentity = authContextService.getUserIdentity();
+        UserIdentity userIdentity = identityService.getUserIdentity();
         String username = userIdentity.getUsername();
         userService.getUserByUsername(username);
         cognitoService.logout(username);

@@ -32,6 +32,8 @@ public class VoucherModel extends BaseModel {
 
     private String storeId;
 
+    private int version;
+
     public void setStartDate(Instant startDate) {
         this.startDate = startDate == null ? null : startDate.atZone(ZoneId.of("Asia/Saigon"));
     }

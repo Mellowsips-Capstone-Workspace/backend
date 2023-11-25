@@ -5,11 +5,13 @@ import com.capstone.workspace.entities.shared.BaseEntity;
 import com.capstone.workspace.enums.voucher.VoucherOrderSource;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 @Data
 @Entity
 @Table(name = "voucher_order", schema = "public")
+@SQLDelete(sql = "UPDATE voucher_order SET is_deleted = true WHERE id = ?")
 @Where(clause = "is_deleted=false")
 public class VoucherOrder extends BaseEntity {
     @Column(nullable = false)

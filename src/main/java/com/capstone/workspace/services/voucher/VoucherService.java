@@ -16,6 +16,7 @@ import com.capstone.workspace.models.shared.PaginationResponseModel;
 import com.capstone.workspace.models.voucher.VoucherModel;
 import com.capstone.workspace.repositories.voucher.VoucherRepository;
 import com.capstone.workspace.services.auth.IdentityService;
+import jakarta.persistence.OptimisticLockException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -24,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -116,7 +118,7 @@ public class VoucherService {
 
         Instant now = Instant.now();
         if (entity.getStartDate().isBefore(now)) {
-            if (entity.getEndDate().isBefore(now)) {
+            if (entity.getEndDate() != null && entity.getEndDate().isBefore(now)) {
                 throw new GoneException("Voucher has expired");
             }
 
@@ -250,15 +252,46 @@ public class VoucherService {
         return result;
     }
 
-    public synchronized Voucher useVoucher(UUID id) {
-        Voucher entity = getOneById(id);
+    @Transactional
+    public Voucher useVoucher(UUID id) {
+        int count = 0;
 
-        int newQuantity = entity.getQuantity() - 1;
-        if (newQuantity < 0) {
-            throw new BadRequestException("Out of voucher " + entity.getCode());
+        while (true) {
+            try {
+                count++;
+                Voucher entity = repository.getById(id);
+
+                int newQuantity = entity.getQuantity() - 1;
+                if (newQuantity < 0) {
+                    throw new BadRequestException("Out of voucher " + entity.getCode());
+                }
+
+                entity.setQuantity(newQuantity);
+                return repository.save(entity);
+            } catch (OptimisticLockException e) {
+                if (count == 3) {
+                    throw new ServiceUnavailableException("Service is unavailable now. Please try again");
+                }
+            }
         }
-        entity.setQuantity(newQuantity);
+    }
 
-        return repository.save(entity);
+    @Transactional
+    public Voucher revokeVoucher(UUID id) {
+        int count = 0;
+
+        while (true) {
+            count++;
+            try {
+                Voucher entity = getOneById(id);
+                int newQuantity = entity.getQuantity() + 1;
+                entity.setQuantity(newQuantity);
+                return repository.save(entity);
+            } catch (OptimisticLockException e) {
+                if (count == 3) {
+                    throw new ServiceUnavailableException("Service is unavailable now. Please try again");
+                }
+            }
+        }
     }
 }

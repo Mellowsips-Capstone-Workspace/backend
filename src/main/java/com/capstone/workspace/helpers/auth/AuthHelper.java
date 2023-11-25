@@ -3,6 +3,7 @@ package com.capstone.workspace.helpers.auth;
 import com.capstone.workspace.entities.user.User;
 import com.capstone.workspace.enums.auth.AuthErrorCode;
 import com.capstone.workspace.exceptions.AppDefinedException;
+import com.capstone.workspace.exceptions.ForbiddenException;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.services.auth.JwtService;
 import com.capstone.workspace.services.user.UserService;
@@ -42,6 +43,9 @@ public class AuthHelper {
 
         String username = tokenPayload.get("username", String.class);
         User user = userService.getUserByUsername(username);
+        if (!Boolean.TRUE.equals(user.getIsActive())) {
+            throw new ForbiddenException("Your account has been blocked");
+        }
 
         userIdentity.setUsername(username);
         userIdentity.setUserType(user.getType());
@@ -49,11 +53,6 @@ public class AuthHelper {
         userIdentity.setPartnerId(user.getPartnerId());
 
         return userIdentity;
-    }
-
-    public Claims decodeUserToken(String authorization) {
-        String token = this.extractTokenFromAuthorization(authorization);
-        return this.jwtService.decode(token);
     }
 
     public String extractTokenFromAuthorization(String authorization) {

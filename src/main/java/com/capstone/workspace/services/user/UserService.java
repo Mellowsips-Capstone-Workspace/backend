@@ -219,4 +219,45 @@ public class UserService {
 
         return result;
     }
+
+    public User activate(UUID id) {
+        User entity = getUserById(id);
+
+        if (Boolean.TRUE.equals(entity.getIsActive())) {
+            throw new ConflictException("User has been activated");
+        }
+
+        entity.setIsActive(true);
+        return repository.save(entity);
+    }
+
+    public void handleCustomerFlake(String username) {
+        User user = getUserByUsername(username);
+
+        int flakeCount = user.getNumberOfFlakes();
+        flakeCount++;
+        if (flakeCount >= 3) {
+            user.setIsActive(false);
+            user.setNumberOfFlakes(0);
+        }
+
+        repository.save(user);
+        // TODO: Notify for customer
+    }
+
+    public User deactivate(UUID id) {
+        User entity = getUserById(id);
+
+        UserIdentity userIdentity = identityService.getUserIdentity();
+        if (userIdentity.getUsername().equals(entity.getUsername())) {
+            throw new BadRequestException("Not allow to deactivate yourself");
+        }
+
+        if (Boolean.FALSE.equals(entity.getIsActive())) {
+            throw new ConflictException("User has been deactivated");
+        }
+
+        entity.setIsActive(false);
+        return repository.save(entity);
+    }
 }

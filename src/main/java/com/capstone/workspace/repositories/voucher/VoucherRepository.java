@@ -2,7 +2,8 @@ package com.capstone.workspace.repositories.voucher;
 
 import com.capstone.workspace.entities.voucher.Voucher;
 import com.capstone.workspace.repositories.shared.BaseRepository;
-import org.springframework.data.jpa.repository.JpaRepository;
+import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -26,4 +27,7 @@ public interface VoucherRepository extends BaseRepository<Voucher, UUID> {
             @Param("partnerId") String partnerId,
             @Param("storeId") String storeId
     );
+
+    @Lock(LockModeType.READ)
+    Voucher getById(@Param("id") UUID id);
 }
