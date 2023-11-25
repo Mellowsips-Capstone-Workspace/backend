@@ -13,6 +13,7 @@ import com.capstone.workspace.exceptions.BadRequestException;
 import com.capstone.workspace.exceptions.ConflictException;
 import com.capstone.workspace.exceptions.InternalServerErrorException;
 import com.capstone.workspace.exceptions.NotFoundException;
+import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.models.order.OrderModel;
 import com.capstone.workspace.models.order.ZaloPayCallbackData;
@@ -29,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -175,40 +177,64 @@ public class TransactionService {
     @Transactional
     public Transaction handleCashback(UUID orderId) throws InterruptedException {
         Transaction transaction = repository.findByOrder_IdOrderByCreatedAtDesc(orderId);
+        Transaction refundTransaction = createRefundTransaction(transaction);
 
         if (transaction.getMethod() == TransactionMethod.ZALO_PAY && transaction.getStatus() == TransactionStatus.SUCCESS) {
-            Map<String, Object> response = zaloPayService.refund(transaction);
+            Map<String, Object> response = zaloPayService.refund(refundTransaction);
+            Map<String, Object> externalPaymentInfo = refundTransaction.getExternalPaymentInfo();
 
             switch ((int) response.get("return_code")) {
                 case 1:
-                    Map<String, Object> externalPaymentInfo = transaction.getExternalPaymentInfo();
                     externalPaymentInfo.put("refundId", response.get("refund_id"));
-                    transaction.setExternalPaymentInfo(externalPaymentInfo);
-                    transaction.setStatus(TransactionStatus.EXPIRED);
-
-                    PushNotificationDto dto = PushNotificationDto.builder()
-                            .key(String.valueOf(NotificationKey.REFUND_SUCCESS))
-                            .subject("Hoàn tiền thành công")
-                            .content("Đã hoàn thành công " + transaction.getAmount() + " VNĐ vào ví điện tử ZaloPay")
-                            .receivers(List.of(transaction.getCreatedBy()))
-                            .build();
-                    notificationService.createPrivateNotification(dto);
+                    externalPaymentInfo.put("mRefundId", response.get("m_refund_id"));
+                    refundTransaction.setExternalPaymentInfo(externalPaymentInfo);
+                    refundTransaction.setStatus(TransactionStatus.SUCCESS);
+                    pushRefundSuccessNotification(transaction);
                     break;
                 case 2:
                     logger.error(String.valueOf(response.get("return_message")) + " " + String.valueOf(response.get("sub_return_message")));
-                    throw new InternalServerErrorException("ZaloPay refund transaction failed");
+                    refundTransaction.setStatus(TransactionStatus.FAILED);
+                    break;
                 case 3:
                     logger.warn("Refund is processing");
                     Thread.sleep(5000);
                     if (zaloPayService.checkRefundTransactionStatusCode((String) response.get("m_refund_id")) == 1) {
-                        transaction.setStatus(TransactionStatus.EXPIRED);
+                        externalPaymentInfo.put("mRefundId", response.get("m_refund_id"));
+                        refundTransaction.setExternalPaymentInfo(externalPaymentInfo);
+                        refundTransaction.setStatus(TransactionStatus.SUCCESS);
+                        pushRefundSuccessNotification(transaction);
+                    } else {
+                        refundTransaction.setStatus(TransactionStatus.FAILED);
                     }
+                    break;
+                default:
                     break;
             }
         } else if (transaction.getMethod() == TransactionMethod.CASH) {
-            transaction.setStatus(TransactionStatus.EXPIRED);
+            refundTransaction.setStatus(TransactionStatus.SUCCESS);
         }
 
-        return repository.save(transaction);
+        return repository.save(refundTransaction);
+    }
+
+    private Transaction createRefundTransaction(Transaction oldTransaction) {
+        Transaction refund = new Transaction();
+        BeanUtils.copyProperties(oldTransaction, refund, AppHelper.commonProperties);
+
+        refund.setType(TransactionType.REFUND);
+        refund.setAmount(-1 * oldTransaction.getAmount());
+        refund.setOrder(oldTransaction.getOrder());
+
+        return refund;
+    }
+
+    private void pushRefundSuccessNotification(Transaction transaction) {
+        PushNotificationDto dto = PushNotificationDto.builder()
+                .key(String.valueOf(NotificationKey.REFUND_SUCCESS))
+                .subject("Hoàn tiền thành công")
+                .content("Đã hoàn thành công " + transaction.getAmount() + " VNĐ vào ví điện tử ZaloPay")
+                .receivers(List.of(transaction.getCreatedBy()))
+                .build();
+        notificationService.createPrivateNotification(dto);
     }
 }

@@ -150,15 +150,15 @@ public class ZaloPayService {
     public Map<String, Object> refund(Transaction transaction) {
         long currentTimeMillis = System.currentTimeMillis();
         String mRefundId = AppHelper.getCurrentVietnamTimeString("yyMMdd") + "_" + appId + "_" + currentTimeMillis;
-        String zpTransId = (String) transaction.getExternalPaymentInfo().get("zpTransToken");
+        Long zpTransId = (Long) transaction.getExternalPaymentInfo().get("zpTransId");
 
         Map<String, Object> refundRequest = new HashMap<String, Object>(){{
             put("app_id", appId);
-            put("zp_trans_id", zpTransId);
+            put("zp_trans_id", String.valueOf(zpTransId));
             put("m_refund_id", mRefundId);
             put("timestamp", currentTimeMillis);
-            put("amount", transaction.getAmount());
-            put("description", "MellowSips - Thanh toán cho đơn hàng #" + transaction.getOrder().getId());
+            put("amount", Math.abs(transaction.getAmount()));
+            put("description", "MellowSips - Hoàn tiền cho đơn hàng #" + transaction.getOrder().getId());
         }};
 
         String data = refundRequest.get("app_id") +"|"+ refundRequest.get("zp_trans_id") +"|"+ refundRequest.get("amount")
@@ -169,6 +169,7 @@ public class ZaloPayService {
         ResponseEntity<HashMap> responseEntity = restTemplate.exchange(endpoint + "/refund", HttpMethod.POST, request, HashMap.class);
 
         Map<String, Object> response = responseEntity.getBody();
+
         response.put("m_refund_id", mRefundId);
         return response;
     }
@@ -192,7 +193,6 @@ public class ZaloPayService {
         int statusCode = (int) response.get("return_code");
         if (statusCode != 1) {
             logger.error(statusCode + " " + String.valueOf(response.get("return_message")) + " " + String.valueOf(response.get("sub_return_message")));
-            throw new InternalServerErrorException("ZaloPay refund transaction failed");
         }
 
         return statusCode;

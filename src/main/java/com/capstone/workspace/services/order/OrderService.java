@@ -332,6 +332,8 @@ public class OrderService {
         }
 
         if (order.getStatus() == OrderStatus.PENDING) {
+            voucherOrderService.revoke(order);
+
             order.setStatus(OrderStatus.EXPIRED);
             repository.save(order);
 
