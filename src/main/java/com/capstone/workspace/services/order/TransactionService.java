@@ -1,7 +1,9 @@
 package com.capstone.workspace.services.order;
 
+import com.capstone.workspace.dtos.notification.PushNotificationDto;
 import com.capstone.workspace.entities.order.Order;
 import com.capstone.workspace.entities.order.Transaction;
+import com.capstone.workspace.enums.notification.NotificationKey;
 import com.capstone.workspace.enums.order.OrderStatus;
 import com.capstone.workspace.enums.order.TransactionMethod;
 import com.capstone.workspace.enums.order.TransactionStatus;
@@ -9,6 +11,7 @@ import com.capstone.workspace.enums.order.TransactionType;
 import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.exceptions.BadRequestException;
 import com.capstone.workspace.exceptions.ConflictException;
+import com.capstone.workspace.exceptions.InternalServerErrorException;
 import com.capstone.workspace.exceptions.NotFoundException;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.models.order.OrderModel;
@@ -17,6 +20,7 @@ import com.capstone.workspace.models.order.ZaloPayCallbackResult;
 import com.capstone.workspace.repositories.order.OrderRepository;
 import com.capstone.workspace.repositories.order.TransactionRepository;
 import com.capstone.workspace.services.auth.IdentityService;
+import com.capstone.workspace.services.notification.NotificationService;
 import com.capstone.workspace.services.shared.JobService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -58,6 +62,9 @@ public class TransactionService {
 
     @NonNull
     private final IdentityService identityService;
+
+    @NonNull
+    private final NotificationService notificationService;
 
     @Transactional
     public Transaction createInitialTransaction(Order order) {
@@ -163,5 +170,45 @@ public class TransactionService {
         }
 
         return entity;
+    }
+
+    @Transactional
+    public Transaction handleCashback(UUID orderId) throws InterruptedException {
+        Transaction transaction = repository.findByOrder_IdOrderByCreatedAtDesc(orderId);
+
+        if (transaction.getMethod() == TransactionMethod.ZALO_PAY && transaction.getStatus() == TransactionStatus.SUCCESS) {
+            Map<String, Object> response = zaloPayService.refund(transaction);
+
+            switch ((int) response.get("return_code")) {
+                case 1:
+                    Map<String, Object> externalPaymentInfo = transaction.getExternalPaymentInfo();
+                    externalPaymentInfo.put("refundId", response.get("refund_id"));
+                    transaction.setExternalPaymentInfo(externalPaymentInfo);
+                    transaction.setStatus(TransactionStatus.EXPIRED);
+
+                    PushNotificationDto dto = PushNotificationDto.builder()
+                            .key(String.valueOf(NotificationKey.REFUND_SUCCESS))
+                            .subject("Hoàn tiền thành công")
+                            .content("Đã hoàn thành công " + transaction.getAmount() + " VNĐ vào ví điện tử ZaloPay")
+                            .receivers(List.of(transaction.getCreatedBy()))
+                            .build();
+                    notificationService.createPrivateNotification(dto);
+                    break;
+                case 2:
+                    logger.error(String.valueOf(response.get("return_message")) + " " + String.valueOf(response.get("sub_return_message")));
+                    throw new InternalServerErrorException("ZaloPay refund transaction failed");
+                case 3:
+                    logger.warn("Refund is processing");
+                    Thread.sleep(5000);
+                    if (zaloPayService.checkRefundTransactionStatusCode((String) response.get("m_refund_id")) == 1) {
+                        transaction.setStatus(TransactionStatus.EXPIRED);
+                    }
+                    break;
+            }
+        } else if (transaction.getMethod() == TransactionMethod.CASH) {
+            transaction.setStatus(TransactionStatus.EXPIRED);
+        }
+
+        return repository.save(transaction);
     }
 }
