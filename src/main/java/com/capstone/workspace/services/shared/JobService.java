@@ -2,10 +2,8 @@ package com.capstone.workspace.services.shared;
 
 import com.capstone.workspace.dtos.notification.PushNotificationDto;
 import com.capstone.workspace.entities.order.Order;
-import com.capstone.workspace.jobs.requests.ApproveApplicationJobRequest;
-import com.capstone.workspace.jobs.requests.ExpiringOrderJobRequest;
-import com.capstone.workspace.jobs.requests.PushNotificationJobRequest;
-import com.capstone.workspace.jobs.requests.PushNotificationOrderChangesJobRequest;
+import com.capstone.workspace.jobs.requests.*;
+import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.models.order.OrderModel;
 import com.capstone.workspace.services.auth.IdentityService;
 import lombok.NonNull;
@@ -45,5 +43,11 @@ public class JobService {
 
     public void expiringOrder(UUID id) {
         BackgroundJobRequest.schedule(Instant.now().plusSeconds(900L), new ExpiringOrderJobRequest(id));
+    }
+
+    public void refundTransaction(UUID orderId) {
+        BackgroundJobRequest.enqueue(
+            new RefundTransactionJobRequest(orderId, identityService.getUserIdentity())
+        );
     }
 }

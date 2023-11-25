@@ -68,7 +68,7 @@ public class ZaloPayService {
                 put("app_time", currentTimeMillis);
                 put("app_user", userIdentity.getUsername());
                 put("amount", orderEntity.getFinalPrice());
-                put("description", "Mellow Sips - Payment for the order #" + orderEntity.getId());
+                put("description", "MellowSips - Thanh toán cho đơn hàng #" + orderEntity.getId());
                 put("bank_code", "zalopayapp");
                 put("callback_url", callbackUrl);
                 put("item", objectMapper.writeValueAsString(Collections.emptyList()));
@@ -86,7 +86,7 @@ public class ZaloPayService {
             Map<String, Object> response = responseEntity.getBody();
             if ((int) response.get("return_code") != 1) {
                 logger.error(String.valueOf(response.get("return_message")) + " " + String.valueOf(response.get("sub_return_message")));
-                throw new InternalServerErrorException("Zalo transaction failed");
+                throw new InternalServerErrorException("ZaloPay transaction failed");
             }
 
             response.put("app_id", appId);
@@ -142,6 +142,57 @@ public class ZaloPayService {
         int statusCode = (int) response.get("return_code");
         if (statusCode == 3) {
             return ((String) response.get("return_message")).equals("Giao dịch chưa được thực hiện") ? 3 : 4;
+        }
+
+        return statusCode;
+    }
+
+    public Map<String, Object> refund(Transaction transaction) {
+        long currentTimeMillis = System.currentTimeMillis();
+        String mRefundId = AppHelper.getCurrentVietnamTimeString("yyMMdd") + "_" + appId + "_" + currentTimeMillis;
+        String zpTransId = (String) transaction.getExternalPaymentInfo().get("zpTransToken");
+
+        Map<String, Object> refundRequest = new HashMap<String, Object>(){{
+            put("app_id", appId);
+            put("zp_trans_id", zpTransId);
+            put("m_refund_id", mRefundId);
+            put("timestamp", currentTimeMillis);
+            put("amount", transaction.getAmount());
+            put("description", "MellowSips - Thanh toán cho đơn hàng #" + transaction.getOrder().getId());
+        }};
+
+        String data = refundRequest.get("app_id") +"|"+ refundRequest.get("zp_trans_id") +"|"+ refundRequest.get("amount")
+                +"|"+ refundRequest.get("description") +"|"+ refundRequest.get("timestamp");
+        refundRequest.put("mac", HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, key1, data));
+
+        HttpEntity request = new HttpEntity(refundRequest);
+        ResponseEntity<HashMap> responseEntity = restTemplate.exchange(endpoint + "/refund", HttpMethod.POST, request, HashMap.class);
+
+        Map<String, Object> response = responseEntity.getBody();
+        response.put("m_refund_id", mRefundId);
+        return response;
+    }
+
+    public int checkRefundTransactionStatusCode(String mRefundId) {
+        long currentTimeMillis = System.currentTimeMillis();
+        String data = appId +"|"+ mRefundId  +"|"+ currentTimeMillis;
+        String mac = HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, key1, data);
+
+        Map<String, Object> params = new HashMap<>() {{
+            put("app_id", appId);
+            put("m_refund_id", mRefundId);
+            put("timestamp", currentTimeMillis);
+            put("mac", mac);
+        }};
+
+        HttpEntity request = new HttpEntity(params);
+        ResponseEntity<HashMap> responseEntity = restTemplate.exchange(endpoint + "/query_refund", HttpMethod.POST, request, HashMap.class);
+
+        Map<String, Object> response = responseEntity.getBody();
+        int statusCode = (int) response.get("return_code");
+        if (statusCode != 1) {
+            logger.error(statusCode + " " + String.valueOf(response.get("return_message")) + " " + String.valueOf(response.get("sub_return_message")));
+            throw new InternalServerErrorException("ZaloPay refund transaction failed");
         }
 
         return statusCode;

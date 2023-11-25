@@ -48,6 +48,7 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -236,11 +237,12 @@ public class OrderService {
                 userService.handleCustomerFlake(entity.getCreatedBy());
                 break;
             case REJECTED, CANCELED:
-                // TODO: Xử lí Cashback, change transaction status khi hủy lúc PENDING
                 voucherOrderService.revoke(entity);
                 if (currentStatus != OrderStatus.PENDING) {
                     jobService.publishPushNotificationOrderChangesJob(mapper.map(entity, OrderModel.class));
                 }
+
+                jobService.refundTransaction(id);
                 break;
             case RECEIVED:
                 Transaction transaction = transactionRepository.findByOrder_IdOrderByCreatedAtDesc(id);
