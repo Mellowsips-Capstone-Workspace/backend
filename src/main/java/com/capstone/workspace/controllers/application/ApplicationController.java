@@ -2,6 +2,7 @@ package com.capstone.workspace.controllers.application;
 
 import com.capstone.workspace.annotations.AllowedUsers;
 import com.capstone.workspace.dtos.application.CreateApplicationDto;
+import com.capstone.workspace.dtos.application.RejectApplicationDto;
 import com.capstone.workspace.dtos.application.SearchApplicationDto;
 import com.capstone.workspace.dtos.application.UpdateApplicationDto;
 import com.capstone.workspace.entities.application.Application;
@@ -36,10 +37,18 @@ public class ApplicationController {
         return ResponseModel.<ApplicationModel>builder().data(model).build();
     }
 
+    @AllowedUsers(userTypes = {UserType.ADMIN})
+    @PutMapping("/{id}/events/reject")
+    public ResponseModel<ApplicationModel> reject(@PathVariable UUID id, @Valid @RequestBody RejectApplicationDto dto) {
+        Application entity = applicationService.transition(id, "event", dto);
+        ApplicationModel model = mapper.map(entity, ApplicationModel.class);
+        return ResponseModel.<ApplicationModel>builder().data(model).build();
+    }
+
     @AllowedUsers(userTypes = {UserType.OWNER, UserType.ADMIN})
     @PutMapping("/{id}/events/{event}")
     public ResponseModel<ApplicationModel> transition(@PathVariable UUID id, @PathVariable String event) {
-        Application entity = applicationService.transition(id, event);
+        Application entity = applicationService.transition(id, event, null);
         ApplicationModel model = mapper.map(entity, ApplicationModel.class);
         return ResponseModel.<ApplicationModel>builder().data(model).build();
     }

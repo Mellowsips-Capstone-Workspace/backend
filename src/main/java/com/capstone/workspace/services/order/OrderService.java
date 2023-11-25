@@ -3,6 +3,7 @@ package com.capstone.workspace.services.order;
 import com.capstone.workspace.dtos.cart.CalculateCartDto;
 import com.capstone.workspace.dtos.notification.PushNotificationDto;
 import com.capstone.workspace.dtos.order.CreateOrderDto;
+import com.capstone.workspace.dtos.order.RejectOrderDto;
 import com.capstone.workspace.dtos.order.SearchOrderCriteriaDto;
 import com.capstone.workspace.dtos.order.SearchOrderDto;
 import com.capstone.workspace.dtos.voucher.CreateVoucherOrderDto;
@@ -219,7 +220,7 @@ public class OrderService {
     }
 
     @Transactional
-    public synchronized Order transition(UUID id, String event) {
+    public synchronized Order transition(UUID id, String event, RejectOrderDto dto) {
         Order entity = getOneById(id);
         OrderEvent orderEvent = OrderEvent.valueOf(event.toUpperCase());
 
@@ -237,6 +238,10 @@ public class OrderService {
                 userService.handleCustomerFlake(entity.getCreatedBy());
                 break;
             case REJECTED, CANCELED:
+                if (newStatus == OrderStatus.REJECTED) {
+                    entity.setRejectReason(dto.getReason());
+                }
+
                 voucherOrderService.revoke(entity);
                 if (currentStatus != OrderStatus.PENDING) {
                     jobService.publishPushNotificationOrderChangesJob(mapper.map(entity, OrderModel.class));

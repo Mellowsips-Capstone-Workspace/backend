@@ -204,12 +204,9 @@ public class CartService {
         for (ProductOptionSection section : productOptionSections) {
             if (section.getIsRequired() != null && section.getIsRequired()) {
                 int addonLength = (int) productAddons.stream().filter(addon -> section.getId().equals(addon.getProductOptionSection().getId())).count();
-
-                if (addonLength != 1) {
-                    throw new BadRequestException("Missing required addon or exceeded max allowed addon items in section");
+                if (addonLength < 1) {
+                    throw new BadRequestException("Missing required addon");
                 }
-
-                continue;
             }
 
             if (!productAddons.isEmpty()) {

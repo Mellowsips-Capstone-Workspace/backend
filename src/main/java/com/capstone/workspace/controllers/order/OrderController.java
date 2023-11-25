@@ -2,6 +2,7 @@ package com.capstone.workspace.controllers.order;
 
 import com.capstone.workspace.annotations.AllowedUsers;
 import com.capstone.workspace.dtos.order.CreateOrderDto;
+import com.capstone.workspace.dtos.order.RejectOrderDto;
 import com.capstone.workspace.dtos.order.SearchOrderDto;
 import com.capstone.workspace.entities.order.Order;
 import com.capstone.workspace.entities.order.Transaction;
@@ -55,9 +56,16 @@ public class OrderController {
         return orderService.receiveZaloPayCallback(jsonStr);
     }
 
+    @PutMapping("/{id}/events/reject")
+    public ResponseModel<OrderModel> reject(@PathVariable UUID id, @Valid @RequestBody RejectOrderDto dto) {
+        Order entity = orderService.transition(id, "reject", dto);
+        OrderModel model = mapper.map(entity, OrderModel.class);
+        return ResponseModel.<OrderModel>builder().data(model).build();
+    }
+
     @PutMapping("/{id}/events/{event}")
     public ResponseModel<OrderModel> transition(@PathVariable UUID id, @PathVariable String event) {
-        Order entity = orderService.transition(id, event);
+        Order entity = orderService.transition(id, event, null);
         OrderModel model = mapper.map(entity, OrderModel.class);
         return ResponseModel.<OrderModel>builder().data(model).build();
     }

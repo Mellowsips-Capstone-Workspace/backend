@@ -28,6 +28,8 @@ public class OrderModel extends BaseModel {
 
     private List<VoucherOrderModel> voucherOrders;
 
+    private String rejectReason;
+
     private String partnerId;
 
     private String storeId;
