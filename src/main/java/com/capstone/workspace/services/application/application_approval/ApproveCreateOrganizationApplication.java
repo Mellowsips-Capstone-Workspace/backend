@@ -148,7 +148,7 @@ public class ApproveCreateOrganizationApplication extends BaseApproveApplication
                 .key(String.valueOf(NotificationKey.APPROVE_CREATE_ORGANIZATION_APPLICATION_SUCCESS))
                 .receivers(List.of(application.getCreatedBy(), approver))
                 .subject("Yêu cầu tạo doanh nghiệp đã được chấp nhận")
-                .content("<p>// TODO: Thêm content cho thng báo này</p>")
+                .content("Yêu cầu tạo doanh nghiệp của bạn đã được chấp thuận. Bây giờ bạn có thế thiết lập cho các cửa hàng.")
                 .metadata(new HashMap<>(){{
                     put("applicationId", application.getId());
                 }})
