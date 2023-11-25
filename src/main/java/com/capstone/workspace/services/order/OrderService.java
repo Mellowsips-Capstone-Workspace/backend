@@ -237,10 +237,10 @@ public class OrderService {
                 break;
             case REJECTED, CANCELED:
                 // TODO: Xử lí Cashback, change transaction status khi hủy lúc PENDING
+                voucherOrderService.revoke(entity);
                 if (currentStatus != OrderStatus.PENDING) {
                     jobService.publishPushNotificationOrderChangesJob(mapper.map(entity, OrderModel.class));
                 }
-                voucherOrderService.revoke(entity);
                 break;
             case RECEIVED:
                 Transaction transaction = transactionRepository.findByOrder_IdOrderByCreatedAtDesc(id);

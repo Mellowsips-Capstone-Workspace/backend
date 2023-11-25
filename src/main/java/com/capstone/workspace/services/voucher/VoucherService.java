@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -251,19 +252,22 @@ public class VoucherService {
         return result;
     }
 
+    @Transactional
     public Voucher useVoucher(UUID id) {
         int count = 0;
-        Voucher entity = getOneById(id);
 
         while (true) {
-            count++;
-            int newQuantity = entity.getQuantity() - 1;
-            if (newQuantity < 0) {
-                throw new BadRequestException("Out of voucher " + entity.getCode());
-            }
-
             try {
-                return repository.useVoucher(id);
+                count++;
+                Voucher entity = repository.getById(id);
+
+                int newQuantity = entity.getQuantity() - 1;
+                if (newQuantity < 0) {
+                    throw new BadRequestException("Out of voucher " + entity.getCode());
+                }
+
+                entity.setQuantity(newQuantity);
+                return repository.save(entity);
             } catch (OptimisticLockException e) {
                 if (count == 3) {
                     throw new ServiceUnavailableException("Service is unavailable now. Please try again");
@@ -272,14 +276,17 @@ public class VoucherService {
         }
     }
 
+    @Transactional
     public Voucher revokeVoucher(UUID id) {
         int count = 0;
-        getOneById(id);
 
         while (true) {
             count++;
             try {
-                return repository.revokeVoucher(id);
+                Voucher entity = getOneById(id);
+                int newQuantity = entity.getQuantity() + 1;
+                entity.setQuantity(newQuantity);
+                return repository.save(entity);
             } catch (OptimisticLockException e) {
                 if (count == 3) {
                     throw new ServiceUnavailableException("Service is unavailable now. Please try again");

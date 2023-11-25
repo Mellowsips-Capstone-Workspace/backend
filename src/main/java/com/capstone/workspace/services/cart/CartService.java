@@ -312,6 +312,8 @@ public class CartService {
         Long totalDiscountAmount = vouchers.isEmpty() ? 0L : vouchers.stream().reduce(0L, (res, item) -> res + item.getDiscountAmount(), Long::sum);
         cartDetailsModel.setFinalPrice(cartDetailsModel.getTempPrice() - totalDiscountAmount);
 
+        System.out.println(vouchers);
+        System.out.println(dto.getVouchers());
         if (vouchers.size() != dto.getVouchers().size()) {
             cartDetailsModel.setIsChange(true);
         }

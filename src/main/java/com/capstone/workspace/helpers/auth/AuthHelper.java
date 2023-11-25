@@ -55,11 +55,6 @@ public class AuthHelper {
         return userIdentity;
     }
 
-    public Claims decodeUserToken(String authorization) {
-        String token = this.extractTokenFromAuthorization(authorization);
-        return this.jwtService.decode(token);
-    }
-
     public String extractTokenFromAuthorization(String authorization) {
         if (authorization == null) {
             throw AppDefinedException.builder().errorCode(AuthErrorCode.MISSING_TOKEN).build();
