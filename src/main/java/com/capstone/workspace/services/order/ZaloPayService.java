@@ -157,7 +157,7 @@ public class ZaloPayService {
             put("zp_trans_id", zpTransId);
             put("m_refund_id", mRefundId);
             put("timestamp", currentTimeMillis);
-            put("amount", transaction.getAmount());
+            put("amount", Math.abs(transaction.getAmount()));
             put("description", "MellowSips - Thanh toán cho đơn hàng #" + transaction.getOrder().getId());
         }};
 
@@ -169,6 +169,7 @@ public class ZaloPayService {
         ResponseEntity<HashMap> responseEntity = restTemplate.exchange(endpoint + "/refund", HttpMethod.POST, request, HashMap.class);
 
         Map<String, Object> response = responseEntity.getBody();
+
         response.put("m_refund_id", mRefundId);
         return response;
     }
@@ -192,7 +193,6 @@ public class ZaloPayService {
         int statusCode = (int) response.get("return_code");
         if (statusCode != 1) {
             logger.error(statusCode + " " + String.valueOf(response.get("return_message")) + " " + String.valueOf(response.get("sub_return_message")));
-            throw new InternalServerErrorException("ZaloPay refund transaction failed");
         }
 
         return statusCode;

@@ -1,6 +1,8 @@
 package com.capstone.workspace.jobs.handlers;
 
+import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.jobs.requests.RefundTransactionJobRequest;
+import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.services.auth.IdentityService;
 import com.capstone.workspace.services.order.TransactionService;
 import lombok.NonNull;
@@ -25,10 +27,13 @@ public class RefundTransactionJobRequestHandler implements JobRequestHandler<Ref
     @Override
     @Job(name = "Refund transaction job")
     public void run(RefundTransactionJobRequest request) throws Exception {
-        identityService.setUserIdentity(request.getUserIdentity());
+        UserIdentity userIdentity = new UserIdentity();
+        userIdentity.setUsername("system");
+        userIdentity.setUserType(UserType.ADMIN);
+        identityService.setUserIdentity(userIdentity);
 
         logger.info("Start refund transaction process");
         transactionService.handleCashback(request.getOrderId());
-        logger.info("Start refund transaction process");
+        logger.info("Complete refund transaction process");
     }
 }

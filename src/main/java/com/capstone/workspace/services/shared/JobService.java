@@ -47,7 +47,7 @@ public class JobService {
 
     public void refundTransaction(UUID orderId) {
         BackgroundJobRequest.enqueue(
-            new RefundTransactionJobRequest(orderId, identityService.getUserIdentity())
+            new RefundTransactionJobRequest(orderId)
         );
     }
 }

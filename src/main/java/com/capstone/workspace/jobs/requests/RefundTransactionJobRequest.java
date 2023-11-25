@@ -17,9 +17,6 @@ public class RefundTransactionJobRequest implements JobRequest {
     @NonNull
     private UUID orderId;
 
-    @NonNull
-    private UserIdentity userIdentity;
-
     @Override
     public Class<RefundTransactionJobRequestHandler> getJobRequestHandler() {
         return RefundTransactionJobRequestHandler.class;
