@@ -68,7 +68,7 @@ public class OrderController {
         return ResponseModel.<PaginationResponseModel<OrderModel>>builder().data(data).build();
     }
 
-    @AllowedUsers(userTypes = {UserType.CUSTOMER})
+    @AllowedUsers(userTypes = {UserType.CUSTOMER, UserType.OWNER, UserType.STORE_MANAGER, UserType.STAFF})
     @PostMapping("/{id}/transactions")
     public ResponseModel<TransactionModel> requestTransaction(@PathVariable UUID id) {
         Transaction entity = orderService.requestTransaction(id);
