@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,13 +42,14 @@ public class VoucherOrderService {
     @Transactional
     public void revoke(Order order) {
         List<VoucherOrder> voucherOrders = order.getVoucherOrders();
-        if (order.getStatus() == OrderStatus.REJECTED) {
-            repository.deleteAll(voucherOrders);
-        }
 
         for (VoucherOrder item: voucherOrders) {
             UUID voucherId = item.getVoucher().getId();
             voucherService.revokeVoucher(voucherId);
+        }
+
+        if (order.getStatus() == OrderStatus.REJECTED) {
+            repository.deleteAll(voucherOrders);
         }
     }
 }

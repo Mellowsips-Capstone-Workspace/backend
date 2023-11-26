@@ -38,6 +38,7 @@ public class InterceptorAppConfiguration implements WebMvcConfigurer {
                 .addPathPatterns("/api/users/**")
                 .addPathPatterns("/api/reviews/**")
                 .addPathPatterns("/api/transactions/**")
+                .addPathPatterns("/api/dashboard/**")
                 .excludePathPatterns("/api/vouchers/details/**")
                 .excludePathPatterns("/api/orders/zalopay/callback")
                 .excludePathPatterns("/api/products/customer/**")

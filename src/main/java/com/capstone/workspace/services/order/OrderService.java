@@ -231,13 +231,15 @@ public class OrderService {
         entity.setStatus(newStatus);
 
         switch (newStatus) {
-            case COMPLETED, PROCESSING:
-                jobService.publishPushNotificationOrderChangesJob(mapper.map(entity, OrderModel.class));
-                break;
-            case DECLINED:
+            case COMPLETED, PROCESSING -> jobService.publishPushNotificationOrderChangesJob(mapper.map(entity, OrderModel.class));
+            case DECLINED -> {
+                Transaction transaction = transactionRepository.findByOrder_IdOrderByCreatedAtDesc(id);
+                if (transaction.getStatus() == TransactionStatus.SUCCESS) {
+                    throw new BadRequestException("Transaction has been completed. Should mark it as received");
+                }
                 userService.handleCustomerFlake(entity.getCreatedBy());
-                break;
-            case REJECTED, CANCELED:
+            }
+            case REJECTED, CANCELED -> {
                 if (newStatus == OrderStatus.REJECTED) {
                     entity.setRejectReason(dto.getReason());
                 }
@@ -248,15 +250,16 @@ public class OrderService {
                 }
 
                 jobService.refundTransaction(id);
-                break;
-            case RECEIVED:
+            }
+            case RECEIVED -> {
                 Transaction transaction = transactionRepository.findByOrder_IdOrderByCreatedAtDesc(id);
                 if (transaction.getStatus() != TransactionStatus.SUCCESS) {
                     throw new BadRequestException("Transaction is not completed yet");
                 }
-                break;
-            default:
-                break;
+            }
+            default -> {
+                logger.warn("No supported status");
+            }
         }
 
         return repository.save(entity);
