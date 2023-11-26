@@ -22,8 +22,15 @@ public class DashboardController {
 
     @PostMapping("/business/statistics")
     @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER})
-    public ResponseModel<Map<String, Object>> getStatistics(@Valid @RequestBody GetDashboardStatisticDto dto) throws ExecutionException, InterruptedException {
-        Map<String, Object> data = dashboardService.getStatistics(dto);
+    public ResponseModel<Map<String, Object>> getBusinessStatistics(@Valid @RequestBody GetDashboardStatisticDto dto) throws ExecutionException, InterruptedException {
+        Map<String, Object> data = dashboardService.getBusinessStatistics(dto);
+        return ResponseModel.<Map<String, Object>>builder().data(data).build();
+    }
+
+    @PostMapping("/system/statistics")
+    @AllowedUsers(userTypes = {UserType.ADMIN})
+    public ResponseModel<Map<String, Object>> getSystemStatistics(@Valid @RequestBody GetDashboardStatisticDto dto) throws ExecutionException, InterruptedException {
+        Map<String, Object> data = dashboardService.getSystemStatistics(dto);
         return ResponseModel.<Map<String, Object>>builder().data(data).build();
     }
 }

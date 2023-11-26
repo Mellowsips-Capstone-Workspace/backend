@@ -34,7 +34,7 @@ public class DashboardService {
     @NonNull
     private final VoucherOrderRepository voucherOrderRepository;
 
-    public Map<String, Object> getStatistics(GetDashboardStatisticDto dto) throws ExecutionException, InterruptedException {
+    public Map<String, Object> getBusinessStatistics(GetDashboardStatisticDto dto) throws ExecutionException, InterruptedException {
         Map<String, Object> result = new HashMap<>();
         UserIdentity userIdentity = identityService.getUserIdentity();
         String storeId = userIdentity.getUserType() == UserType.OWNER && dto.getStoreId() != null ? dto.getStoreId() : userIdentity.getStoreId();
@@ -111,7 +111,7 @@ public class DashboardService {
                 executorService.submit(() -> {
                     List<AmountStoreModel> amountStoreModels = orderRepository.sumAmountForStore(
                         userIdentity.getPartnerId(),
-                        new OrderStatus[]{OrderStatus.RECEIVED},
+                        new OrderStatus[]{OrderStatus.RECEIVED, OrderStatus.ORDERED, OrderStatus.PROCESSING, OrderStatus.COMPLETED},
                         dto.getStartDate() != null ? convertToInstant(dto.getStartDate().atStartOfDay()) : null,
                         dto.getEndDate() != null ? convertToInstant(dto.getEndDate().atStartOfDay().plusSeconds(86400L)) : null
                     );
@@ -172,5 +172,41 @@ public class DashboardService {
 
     private Instant convertToInstant(LocalDateTime localDateTime) {
         return localDateTime.toInstant(ZoneOffset.of("+07:00"));
+    }
+
+    public Map<String, Object> getSystemStatistics(GetDashboardStatisticDto dto) throws ExecutionException, InterruptedException {
+        Map<String, Object> result = new HashMap<>();
+        ExecutorService executorService = Executors.newFixedThreadPool(4);
+        List<Future<Void>> futures = new ArrayList<>();
+
+        futures.add(
+            executorService.submit(() -> {
+                AmountModel model = voucherOrderRepository.sumAmountOfSystem(
+                    new OrderStatus[]{OrderStatus.PROCESSING, OrderStatus.COMPLETED, OrderStatus.RECEIVED, OrderStatus.DECLINED},
+                    dto.getStartDate() != null ? convertToInstant(dto.getStartDate().atStartOfDay()) : null,
+                    dto.getEndDate() != null ? convertToInstant(dto.getEndDate().atStartOfDay().plusSeconds(86400L)) : null
+                );
+                result.put("usedVoucherAmount", model != null ? model.getAmount() : 0L);
+                return null;
+            })
+        );
+
+        futures.add(
+            executorService.submit(() -> {
+                AmountModel model = voucherOrderRepository.sumAmountOfSystem(
+                    new OrderStatus[]{OrderStatus.ORDERED, OrderStatus.PENDING},
+                    dto.getStartDate() != null ? convertToInstant(dto.getStartDate().atStartOfDay()) : null,
+                    dto.getEndDate() != null ? convertToInstant(dto.getEndDate().atStartOfDay().plusSeconds(86400L)) : null
+                );
+                result.put("pendingVoucherAmount", model != null ? model.getAmount() : 0L);
+                return null;
+            })
+        );
+
+        for (Future<Void> future: futures) {
+            future.get();
+        }
+
+        return result;
     }
 }

@@ -29,4 +29,18 @@ public interface VoucherOrderRepository extends JpaRepository<VoucherOrder, UUID
         @Param("startDate") Instant startDate,
         @Param("endDate") Instant endDate
     );
+
+    @Query(
+            value = "SELECT new com.capstone.workspace.models.dashboard.AmountModel(SUM(vo.discountAmount)) FROM VoucherOrder vo " +
+                    "WHERE vo.source = 'SYSTEM' " +
+                    "AND vo.order.status IN :statuses " +
+                    "AND (cast(:startDate as timestamp) IS NULL OR vo.createdAt >= :startDate) " +
+                    "AND (cast(:endDate as timestamp) IS NULL OR vo.createdAt <= :endDate) " +
+                    "GROUP BY vo.source"
+    )
+    AmountModel sumAmountOfSystem(
+            @Param("statuses") OrderStatus[] statuses,
+            @Param("startDate") Instant startDate,
+            @Param("endDate") Instant endDate
+    );
 }
