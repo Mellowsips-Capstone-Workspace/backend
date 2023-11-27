@@ -202,8 +202,8 @@ public class CartService {
 
         List<ProductOptionSection> productOptionSections = product.getProductOptionSections();
         for (ProductOptionSection section : productOptionSections) {
+            int addonLength = (int) productAddons.stream().filter(addon -> section.getId().equals(addon.getProductOptionSection().getId())).count();
             if (section.getIsRequired() != null && section.getIsRequired()) {
-                int addonLength = (int) productAddons.stream().filter(addon -> section.getId().equals(addon.getProductOptionSection().getId())).count();
                 if (addonLength < 1) {
                     throw new BadRequestException("Missing required addon");
                 }
@@ -211,8 +211,7 @@ public class CartService {
 
             if (!productAddons.isEmpty()) {
                 int maxAllowedChoices = section.getMaxAllowedChoices();
-                long numberOfChoices = productAddons.stream().filter(addon -> section.getId().equals(addon.getProductOptionSection().getId())).count();
-                if (numberOfChoices > maxAllowedChoices) {
+                if (addonLength > maxAllowedChoices) {
                     throw new BadRequestException("Exceeded max allowed addon items in section");
                 }
             }

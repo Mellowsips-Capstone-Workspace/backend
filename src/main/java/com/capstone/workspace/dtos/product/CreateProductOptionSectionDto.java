@@ -19,7 +19,7 @@ public class CreateProductOptionSectionDto {
     @Min(0)
     private int priority;
 
-    @Min(0)
+    @Min(1)
     private Integer maxAllowedChoices;
 
     private Boolean isRequired;
