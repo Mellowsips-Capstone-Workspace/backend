@@ -99,10 +99,27 @@ public class ApplicationService {
         }
 
         Application saved = repository.save(entity);
-
+        pushNotificationForAdmins(saved);
         updateApplicationDocument(saved);
 
         return saved;
+    }
+
+    private void pushNotificationForAdmins(Application entity) {
+        List<User> admins = userRepository.findByType(UserType.ADMIN);
+        List<String> adminUsernames = admins.stream().map(User::getUsername).toList();
+
+        PushNotificationDto pushNotificationDto = PushNotificationDto.builder()
+                .key(String.valueOf(NotificationKey.HAVING_NEW_APPLICATION))
+                .subject("Bạn có yêu cầu mới từ doanh nghiệp")
+                .content("Có yêu cầu tạo mới doanh nghiệp cần bạn xử lí.")
+                .receivers(adminUsernames)
+                .metadata(new HashMap<>(){{
+                    put("applicationId", entity.getId());
+                }})
+                .build();
+
+        jobService.publishPushNotificationJob(pushNotificationDto);
     }
 
     private Application upsert(UUID id, Object dto) {

@@ -1,6 +1,7 @@
 package com.capstone.workspace.enums.notification;
 
 public enum NotificationKey {
+    HAVING_NEW_APPLICATION,
     APPROVE_CREATE_ORGANIZATION_APPLICATION_SUCCESS,
     APPROVE_CREATE_ORGANIZATION_APPLICATION_FAILED,
     HAVING_NEW_ORDER,

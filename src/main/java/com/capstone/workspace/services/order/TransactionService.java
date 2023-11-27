@@ -234,6 +234,9 @@ public class TransactionService {
                 .subject("Hoàn tiền thành công")
                 .content("Đã hoàn thành công " + transaction.getAmount() + " VNĐ vào ví điện tử ZaloPay")
                 .receivers(List.of(transaction.getCreatedBy()))
+                .metadata(new HashMap<>(){{
+                    put("orderId", transaction.getOrder().getId());
+                }})
                 .build();
         notificationService.createPrivateNotification(dto);
     }
