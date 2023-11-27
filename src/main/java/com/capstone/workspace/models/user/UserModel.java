@@ -17,6 +17,8 @@ public class UserModel extends BaseModel {
 
     private Boolean isVerified;
 
+    private Boolean isActive;
+
     private String avatar;
 
     private UserType type;

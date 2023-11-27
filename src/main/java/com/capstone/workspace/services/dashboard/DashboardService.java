@@ -106,6 +106,34 @@ public class DashboardService {
             )
         );
 
+        futures.add(
+            executorService.submit(() -> {
+                AmountModel model = voucherOrderRepository.sumAmountOfSystemUsedByBusiness(
+                    userIdentity.getPartnerId(),
+                    storeId,
+                    new OrderStatus[]{OrderStatus.ORDERED, OrderStatus.PENDING},
+                    dto.getStartDate() != null ? convertToInstant(dto.getStartDate().atStartOfDay()) : null,
+                    dto.getEndDate() != null ? convertToInstant(dto.getEndDate().atStartOfDay().plusSeconds(86400L)) : null
+                );
+                result.put("pendingSystemVoucherAmount", model != null ? model.getAmount() : 0L);
+                return null;
+            })
+        );
+
+        futures.add(
+            executorService.submit(() -> {
+                AmountModel model = voucherOrderRepository.sumAmountOfSystemUsedByBusiness(
+                    userIdentity.getPartnerId(),
+                    storeId,
+                    new OrderStatus[]{OrderStatus.PROCESSING, OrderStatus.COMPLETED, OrderStatus.RECEIVED, OrderStatus.DECLINED},
+                    dto.getStartDate() != null ? convertToInstant(dto.getStartDate().atStartOfDay()) : null,
+                    dto.getEndDate() != null ? convertToInstant(dto.getEndDate().atStartOfDay().plusSeconds(86400L)) : null
+                );
+                result.put("usedSystemVoucherAmount", model != null ? model.getAmount() : 0L);
+                return null;
+            })
+        );
+
         if (storeId == null) {
             futures.add(
                 executorService.submit(() -> {
@@ -176,7 +204,7 @@ public class DashboardService {
 
     public Map<String, Object> getSystemStatistics(GetDashboardStatisticDto dto) throws ExecutionException, InterruptedException {
         Map<String, Object> result = new HashMap<>();
-        ExecutorService executorService = Executors.newFixedThreadPool(4);
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
         List<Future<Void>> futures = new ArrayList<>();
 
         futures.add(
