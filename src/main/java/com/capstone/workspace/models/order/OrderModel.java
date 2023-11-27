@@ -1,6 +1,7 @@
 package com.capstone.workspace.models.order;
 
 import com.capstone.workspace.enums.order.OrderStatus;
+import com.capstone.workspace.enums.order.TransactionMethod;
 import com.capstone.workspace.models.cart.CartDetailsModel;
 import com.capstone.workspace.models.shared.BaseModel;
 import com.capstone.workspace.models.store.QrCodeModel;
@@ -29,6 +30,8 @@ public class OrderModel extends BaseModel {
     private List<VoucherOrderModel> voucherOrders;
 
     private String rejectReason;
+
+    private TransactionMethod initialTransactionMethod;
 
     private String partnerId;
 
