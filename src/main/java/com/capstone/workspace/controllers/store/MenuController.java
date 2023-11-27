@@ -50,7 +50,7 @@ public class MenuController {
         return ResponseModel.<PaginationResponseModel<MenuModel>>builder().data(data).build();
     }
 
-    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER})
+    @AllowedUsers(userTypes = {UserType.OWNER, UserType.STORE_MANAGER, UserType.STAFF})
     @PutMapping("/{id}")
     public ResponseModel<MenuModel> update(@PathVariable UUID id, @Valid @RequestBody UpdateMenuDto dto) {
         Menu menu = menuService.update(id, dto);
