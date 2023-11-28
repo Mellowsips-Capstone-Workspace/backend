@@ -2,6 +2,7 @@ package com.capstone.workspace.entities.user;
 
 import com.capstone.workspace.entities.partner.IPartnerEntity;
 import com.capstone.workspace.entities.shared.BaseEntity;
+import com.capstone.workspace.entities.store.IStoreEntity;
 import com.capstone.workspace.enums.auth.AuthProviderType;
 import com.capstone.workspace.enums.user.UserType;
 import jakarta.persistence.*;
@@ -12,7 +13,7 @@ import org.hibernate.annotations.Where;
 @Entity
 @Table(name = "user", schema = "public")
 @Where(clause = "is_deleted=false")
-public class User extends BaseEntity implements IPartnerEntity {
+public class User extends BaseEntity implements IPartnerEntity, IStoreEntity {
     @Column(nullable = false, unique = true)
     private String username;
 
