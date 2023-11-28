@@ -28,6 +28,17 @@ public interface VoucherRepository extends BaseRepository<Voucher, UUID> {
             @Param("storeId") String storeId
     );
 
+    @Query(
+            value = "SELECT v FROM Voucher v " +
+                    "WHERE v.quantity > 0 " +
+                    "AND v.startDate < CURRENT_TIMESTAMP AND (v.endDate > CURRENT_TIMESTAMP OR v.endDate IS NULL) " +
+                    "AND v.partnerId = :partnerId AND (v.storeId IS NULL OR v.storeId = :storeId)"
+    )
+    List<Voucher> getBusinessVouchersOfStore(
+            @Param("partnerId") String partnerId,
+            @Param("storeId") String storeId
+    );
+
     @Lock(LockModeType.READ)
     Voucher getById(@Param("id") UUID id);
 }

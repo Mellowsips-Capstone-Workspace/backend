@@ -1,18 +1,32 @@
 package com.capstone.workspace.services.dashboard;
 
 import com.capstone.workspace.dtos.dashboard.GetDashboardStatisticDto;
+import com.capstone.workspace.dtos.shared.PaginationDto;
+import com.capstone.workspace.entities.voucher.Voucher;
 import com.capstone.workspace.enums.order.OrderStatus;
 import com.capstone.workspace.enums.user.UserType;
+import com.capstone.workspace.helpers.shared.BeanHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.models.dashboard.AmountModel;
 import com.capstone.workspace.models.dashboard.AmountStoreModel;
+import com.capstone.workspace.models.shared.PaginationResponseModel;
+import com.capstone.workspace.models.store.StoreModel;
+import com.capstone.workspace.models.store.StoreReviewStatisticsModel;
+import com.capstone.workspace.models.voucher.VoucherModel;
 import com.capstone.workspace.repositories.order.OrderRepository;
+import com.capstone.workspace.repositories.store.StoreRepository;
 import com.capstone.workspace.repositories.voucher.VoucherOrderRepository;
+import com.capstone.workspace.repositories.voucher.VoucherRepository;
 import com.capstone.workspace.services.auth.IdentityService;
+import com.capstone.workspace.services.store.ReviewService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.awt.print.Pageable;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -33,6 +47,18 @@ public class DashboardService {
 
     @NonNull
     private final VoucherOrderRepository voucherOrderRepository;
+
+    @NonNull
+    private final StoreRepository storeRepository;
+
+    @NonNull
+    private final VoucherRepository voucherRepository;
+
+    @NonNull
+    private final ReviewService reviewService;
+
+    @NonNull
+    private final ModelMapper mapper;
 
     public Map<String, Object> getBusinessStatistics(GetDashboardStatisticDto dto) throws ExecutionException, InterruptedException {
         Map<String, Object> result = new HashMap<>();
@@ -236,5 +262,25 @@ public class DashboardService {
         }
 
         return result;
+    }
+
+    public PaginationResponseModel<StoreModel> getHotDealStores(PaginationDto dto) {
+        PaginationResponseModel<StoreModel> data = storeRepository.getHotDealStores(dto);
+
+        if (data.getResults() != null) {
+            data.getResults().forEach(item -> {
+                List<Voucher> vouchers = voucherRepository.getBusinessVouchersOfStore(item.getPartnerId(), String.valueOf(item.getId()));
+                List<VoucherModel> voucherModels = mapper.map(
+                        vouchers,
+                        new TypeToken<List<VoucherModel>>() {}.getType()
+                );
+                item.setVouchers(voucherModels);
+
+                StoreReviewStatisticsModel reviewStatistics = reviewService.getStoreReviewStatistics(String.valueOf(item.getId()));
+                item.setReviewStatistic(reviewStatistics);
+            });
+        }
+
+        return data;
     }
 }

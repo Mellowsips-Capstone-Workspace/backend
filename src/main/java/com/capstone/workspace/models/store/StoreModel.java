@@ -2,9 +2,9 @@ package com.capstone.workspace.models.store;
 
 import com.capstone.workspace.models.shared.BaseModel;
 import com.capstone.workspace.models.shared.Period;
+import com.capstone.workspace.models.voucher.VoucherModel;
 import lombok.Data;
 
-import java.sql.Time;
 import java.time.DayOfWeek;
 import java.util.List;
 import java.util.Map;
@@ -34,4 +34,6 @@ public class StoreModel extends BaseModel {
     private String partnerId;
 
     private StoreReviewStatisticsModel reviewStatistic;
+
+    private List<VoucherModel> vouchers;
 }
