@@ -14,4 +14,6 @@ public interface StoreRepository extends BaseRepository<Store, UUID> {
     Store findByPartnerId(String partnerId);
 
     PaginationResponseModel<StoreModel> getHotDealStores(PaginationDto dto);
+
+    PaginationResponseModel<StoreModel> getQualityStores(PaginationDto dto);
 }

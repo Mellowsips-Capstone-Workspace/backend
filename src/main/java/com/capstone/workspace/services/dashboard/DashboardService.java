@@ -19,6 +19,7 @@ import com.capstone.workspace.repositories.voucher.VoucherOrderRepository;
 import com.capstone.workspace.repositories.voucher.VoucherRepository;
 import com.capstone.workspace.services.auth.IdentityService;
 import com.capstone.workspace.services.store.ReviewService;
+import com.capstone.workspace.services.voucher.VoucherService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -52,7 +53,7 @@ public class DashboardService {
     private final StoreRepository storeRepository;
 
     @NonNull
-    private final VoucherRepository voucherRepository;
+    private final VoucherService voucherService;
 
     @NonNull
     private final ReviewService reviewService;
@@ -268,17 +269,17 @@ public class DashboardService {
         PaginationResponseModel<StoreModel> data = storeRepository.getHotDealStores(dto);
 
         if (data.getResults() != null) {
-            data.getResults().forEach(item -> {
-                List<Voucher> vouchers = voucherRepository.getBusinessVouchersOfStore(item.getPartnerId(), String.valueOf(item.getId()));
-                List<VoucherModel> voucherModels = mapper.map(
-                        vouchers,
-                        new TypeToken<List<VoucherModel>>() {}.getType()
-                );
-                item.setVouchers(voucherModels);
+            data.getResults().forEach(StoreModel::loadData);
+        }
 
-                StoreReviewStatisticsModel reviewStatistics = reviewService.getStoreReviewStatistics(String.valueOf(item.getId()));
-                item.setReviewStatistic(reviewStatistics);
-            });
+        return data;
+    }
+
+    public PaginationResponseModel<StoreModel> getQualityStores(PaginationDto dto) {
+        PaginationResponseModel<StoreModel> data = storeRepository.getQualityStores(dto);
+
+        if (data.getResults() != null) {
+            data.getResults().forEach(StoreModel::loadData);
         }
 
         return data;

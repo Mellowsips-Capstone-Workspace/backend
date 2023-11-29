@@ -2,12 +2,14 @@ package com.capstone.workspace.services.user;
 
 import com.capstone.workspace.dtos.auth.VerifyUserDto;
 import com.capstone.workspace.dtos.auth.RegisterUserDto;
+import com.capstone.workspace.dtos.notification.PushNotificationDto;
 import com.capstone.workspace.dtos.user.AddEmployeeDto;
 import com.capstone.workspace.dtos.user.SearchUserCriteriaDto;
 import com.capstone.workspace.dtos.user.SearchUserDto;
 import com.capstone.workspace.dtos.user.UpdateUserProfileDto;
 import com.capstone.workspace.entities.user.User;
 import com.capstone.workspace.enums.auth.AuthProviderType;
+import com.capstone.workspace.enums.notification.NotificationKey;
 import com.capstone.workspace.enums.user.UserType;
 import com.capstone.workspace.exceptions.*;
 import com.capstone.workspace.helpers.shared.AppHelper;
@@ -16,6 +18,7 @@ import com.capstone.workspace.models.shared.PaginationResponseModel;
 import com.capstone.workspace.models.user.UserModel;
 import com.capstone.workspace.repositories.user.UserRepository;
 import com.capstone.workspace.services.auth.IdentityService;
+import com.capstone.workspace.services.shared.JobService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +44,9 @@ public class UserService {
 
     @NonNull
     private final HttpServletRequest httpServletRequest;
+
+    @NonNull
+    private final JobService jobService;
 
     public User getUserByUsername(String username) {
         User user = repository.findByUsername(username);
@@ -239,10 +245,19 @@ public class UserService {
         if (flakeCount >= 3) {
             user.setIsActive(false);
             user.setNumberOfFlakes(0);
+
+            PushNotificationDto dto = PushNotificationDto.builder()
+                    .key(String.valueOf(NotificationKey.ACCOUNT_BLOCKED))
+                    .receivers(List.of(username))
+                    .subject("Tài khoản của bạn đã bị khóa")
+                    .content("Hệ thống tạm thời khóa tài khoản của bạn trong vòng 30 ngày vì bạn đã bom hàng 3 lần.")
+                    .build();
+            jobService.publishPushNotificationJob(dto);
+        } else {
+            user.setNumberOfFlakes(flakeCount);
         }
 
         repository.save(user);
-        // TODO: Notify for customer
     }
 
     public User deactivate(UUID id) {

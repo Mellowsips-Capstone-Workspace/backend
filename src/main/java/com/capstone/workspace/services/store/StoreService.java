@@ -6,6 +6,7 @@ import com.capstone.workspace.dtos.store.UpdateStoreDto;
 import com.capstone.workspace.entities.partner.Partner;
 import com.capstone.workspace.entities.store.Menu;
 import com.capstone.workspace.entities.store.Store;
+import com.capstone.workspace.entities.voucher.Voucher;
 import com.capstone.workspace.enums.partner.BusinessType;
 import com.capstone.workspace.exceptions.*;
 import com.capstone.workspace.helpers.shared.AppHelper;
@@ -13,10 +14,13 @@ import com.capstone.workspace.models.auth.UserIdentity;
 import com.capstone.workspace.models.shared.PaginationResponseModel;
 import com.capstone.workspace.models.shared.Period;
 import com.capstone.workspace.models.store.StoreModel;
+import com.capstone.workspace.models.store.StoreReviewStatisticsModel;
+import com.capstone.workspace.models.voucher.VoucherModel;
 import com.capstone.workspace.repositories.store.StoreRepository;
 import com.capstone.workspace.services.auth.IdentityService;
 import com.capstone.workspace.services.document.DocumentService;
 import com.capstone.workspace.services.partner.PartnerService;
+import com.capstone.workspace.services.voucher.VoucherService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -106,12 +110,18 @@ public class StoreService {
             dto.getPagination()
         );
 
-        List<StoreModel> storeModels = mapper.map(
-            result.getResults(),
-            new TypeToken<List<StoreModel>>() {}.getType()
-        );
-        result.setResults(storeModels);
+        List<StoreModel> storeModels = null;
 
+        if (result.getResults() != null) {
+            storeModels = mapper.map(
+                    result.getResults(),
+                    new TypeToken<List<StoreModel>>() {}.getType()
+            );
+
+            storeModels.forEach(StoreModel::loadData);
+        }
+
+        result.setResults(storeModels);
         return result;
     }
 

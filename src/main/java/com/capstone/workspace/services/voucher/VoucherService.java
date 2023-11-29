@@ -294,4 +294,12 @@ public class VoucherService {
             }
         }
     }
+
+    public List<VoucherModel> getBusinessVouchersOfStore(String partnerId, String storeId) {
+        List<Voucher> vouchers = repository.getBusinessVouchersOfStore(partnerId, storeId);
+        return mapper.map(
+                vouchers,
+                new TypeToken<List<VoucherModel>>() {}.getType()
+        );
+    }
 }

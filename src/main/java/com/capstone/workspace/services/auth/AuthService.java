@@ -9,6 +9,7 @@ import com.capstone.workspace.dtos.user.AddEmployeeDto;
 import com.capstone.workspace.entities.user.User;
 import com.capstone.workspace.exceptions.BadRequestException;
 import com.capstone.workspace.exceptions.ConflictException;
+import com.capstone.workspace.exceptions.ForbiddenException;
 import com.capstone.workspace.exceptions.NotFoundException;
 import com.capstone.workspace.helpers.shared.AppHelper;
 import com.capstone.workspace.models.auth.UserIdentity;
@@ -56,7 +57,11 @@ public class AuthService {
     public Map loginByPassword(PasswordLoginDto dto) {
         // TODO: prevent login from devices that do not support user type
         // userService.validateUsername(dto.getUsername());
-        userService.getUserByUsername(dto.getUsername());
+        User user = userService.getUserByUsername(dto.getUsername());
+        if (!Boolean.TRUE.equals(user.getIsActive())) {
+            throw new ForbiddenException("Your account has been blocked");
+        }
+
         return cognitoService.loginUserByPassword(dto.getUsername(), dto.getPassword(), true);
     }
 

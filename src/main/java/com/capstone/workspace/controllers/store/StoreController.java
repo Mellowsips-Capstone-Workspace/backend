@@ -83,27 +83,12 @@ public class StoreController {
     public ResponseModel<StoreModel> getStoreById(@PathVariable(name = "id") UUID storeId) {
         Store entity = storeService.getStoreById(storeId);
         StoreModel model = mapper.map(entity, StoreModel.class);
-
-        model.setIsOpen(storeHelper.isStoreOpening(model.getOperationalHours()));
-
-        StoreReviewStatisticsModel reviewStatistics = reviewService.getStoreReviewStatistics(String.valueOf(storeId));
-        model.setReviewStatistic(reviewStatistics);
-
+        model.loadData();
         return ResponseModel.<StoreModel>builder().data(model).build();
     }
 
     private ResponseModel<PaginationResponseModel<StoreModel>> searchStore(SearchStoreDto dto) {
         PaginationResponseModel<StoreModel> data = storeService.search(dto);
-
-        if (data.getResults() != null) {
-            data.getResults().forEach(item -> {
-                item.setIsOpen(storeHelper.isStoreOpening(item.getOperationalHours()));
-
-                StoreReviewStatisticsModel reviewStatistics = reviewService.getStoreReviewStatistics(String.valueOf(item.getId()));
-                item.setReviewStatistic(reviewStatistics);
-            });
-        }
-
         return ResponseModel.<PaginationResponseModel<StoreModel>>builder().data(data).build();
     }
 
@@ -112,7 +97,6 @@ public class StoreController {
     public ResponseModel<StoreModel> updateStoreProfileImg(@PathVariable UUID id, @Valid @RequestBody UpdateStoreProfileImgDto dto) throws ParseException {
         Store store = storeService.updateStore(id, mapper.map(dto, UpdateStoreDto.class));
         StoreModel model = mapper.map(store, StoreModel.class);
-        model.setIsOpen(storeHelper.isStoreOpening(model.getOperationalHours()));
         return ResponseModel.<StoreModel>builder().data(model).build();
     }
 
@@ -121,7 +105,6 @@ public class StoreController {
     public ResponseModel<StoreModel> updateStoreCoverImg(@PathVariable UUID id, @Valid @RequestBody UpdateStoreCoverImgDto dto) throws ParseException {
         Store store = storeService.updateStore(id, mapper.map(dto, UpdateStoreDto.class));
         StoreModel model = mapper.map(store, StoreModel.class);
-        model.setIsOpen(storeHelper.isStoreOpening(model.getOperationalHours()));
         return ResponseModel.<StoreModel>builder().data(model).build();
     }
 
@@ -130,7 +113,6 @@ public class StoreController {
     public ResponseModel<StoreModel> updateStoreOperationalHours(@PathVariable UUID id, @Valid @RequestBody UpdateStoreOperationalHoursDto dto) throws ParseException {
         Store store = storeService.updateStore(id, mapper.map(dto, UpdateStoreDto.class));
         StoreModel model = mapper.map(store, StoreModel.class);
-        model.setIsOpen(storeHelper.isStoreOpening(model.getOperationalHours()));
         return ResponseModel.<StoreModel>builder().data(model).build();
     }
 
