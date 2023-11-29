@@ -46,7 +46,7 @@ public class UserController {
         return ResponseModel.<PaginationResponseModel<UserModel>>builder().data(data).build();
     }
 
-    @AllowedUsers(userTypes = {UserType.ADMIN})
+    @AllowedUsers(userTypes = {UserType.ADMIN, UserType.OWNER, UserType.STORE_MANAGER})
     @PutMapping("/{id}/activate")
     public ResponseModel<UserModel> activateUser(@PathVariable UUID id) {
         User entity = userService.activate(id);
