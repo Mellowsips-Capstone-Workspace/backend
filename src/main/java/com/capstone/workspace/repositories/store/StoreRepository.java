@@ -16,4 +16,6 @@ public interface StoreRepository extends BaseRepository<Store, UUID> {
     PaginationResponseModel<StoreModel> getHotDealStores(PaginationDto dto);
 
     PaginationResponseModel<StoreModel> getQualityStores(PaginationDto dto);
+
+    PaginationResponseModel<StoreModel> getMilkTeaStores(PaginationDto dto);
 }

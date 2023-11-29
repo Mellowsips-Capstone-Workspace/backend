@@ -48,4 +48,10 @@ public class DashboardController {
         PaginationResponseModel<StoreModel> data = dashboardService.getQualityStores(dto);
         return ResponseModel.<PaginationResponseModel<StoreModel>>builder().data(data).build();
     }
+
+    @PostMapping("/customer/milk-tea")
+    public ResponseModel<PaginationResponseModel<StoreModel>> getMilkTeaStores(@Valid @RequestBody PaginationDto dto) {
+        PaginationResponseModel<StoreModel> data = dashboardService.getMilkTeaStores(dto);
+        return ResponseModel.<PaginationResponseModel<StoreModel>>builder().data(data).build();
+    }
 }

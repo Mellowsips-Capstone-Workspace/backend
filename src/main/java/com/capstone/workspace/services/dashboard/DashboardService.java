@@ -284,4 +284,14 @@ public class DashboardService {
 
         return data;
     }
+
+    public PaginationResponseModel<StoreModel> getMilkTeaStores(PaginationDto dto) {
+        PaginationResponseModel<StoreModel> data = storeRepository.getMilkTeaStores(dto);
+
+        if (data.getResults() != null) {
+            data.getResults().forEach(StoreModel::loadData);
+        }
+
+        return data;
+    }
 }

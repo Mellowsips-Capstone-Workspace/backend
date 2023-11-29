@@ -45,7 +45,7 @@ public class StoreRepositoryImplement extends BaseRepositoryImplement<Store, UUI
         StringBuilder queryString = new StringBuilder(
             "SELECT s.* FROM store s INNER JOIN voucher v " +
             "ON s.partner_id = v.partner_id AND (CAST(s.id as text) = v.store_id OR v.store_id IS NULL) " +
-            "WHERE v.start_date < NOW() AND (v.end_date > NOW() OR v.end_date IS NULL) AND v.quantity > 0 " +
+            "WHERE v.start_date < NOW() AND (v.end_date > NOW() OR v.end_date IS NULL) AND v.quantity > 0 AND s.is_active = TRUE " +
             "GROUP BY s.id"
         );
 
@@ -84,8 +84,47 @@ public class StoreRepositoryImplement extends BaseRepositoryImplement<Store, UUI
             "SELECT s FROM Store s INNER JOIN Order o " +
             "ON CAST(s.id as text) = o.storeId " +
             "INNER JOIN Review r ON r.order.id = o.id " +
+            "WHERE s.isActive = TRUE " +
             "GROUP BY s.id HAVING AVG(r.point) >= 4 " +
             "ORDER BY COUNT(r.id) DESC, AVG(r.point) DESC"
+        );
+
+        int page = 1;
+        int itemsPerPage = 10;
+        if (dto != null) {
+            page = dto.getPage();
+            itemsPerPage = dto.getItemsPerPage();
+        }
+
+        TypedQuery<Store> typedQuery = this.entityManager.createQuery(queryString.toString(), getDomainClass());
+        List<Store> resultList = typedQuery.getResultList();
+
+        List<Store> data = resultList.stream()
+                .skip((long) itemsPerPage * (page - 1))
+                .limit(itemsPerPage)
+                .toList();
+
+        List<StoreModel> models = BeanHelper.getBean(ModelMapper.class).map(
+                data,
+                new TypeToken<List<StoreModel>>() {}.getType()
+        );
+
+        int totalItems = resultList.size();
+        return PaginationResponseModel.<StoreModel>builder()
+                .results(models)
+                .page(page)
+                .itemsPerPage(itemsPerPage)
+                .totalItems(totalItems)
+                .build();
+    }
+
+    @Override
+    public PaginationResponseModel<StoreModel> getMilkTeaStores(PaginationDto dto) {
+        StringBuilder queryString = new StringBuilder(
+                "SELECT s FROM Store s INNER JOIN Product p " +
+                "ON CAST(s.id as text) = p.storeId " +
+                "WHERE s.isActive = TRUE AND EXIST(('trà sữa', 'ts', 'milktea', 'milk tea') IN s.categories) " +
+                "GROUP BY s.id"
         );
 
         int page = 1;
