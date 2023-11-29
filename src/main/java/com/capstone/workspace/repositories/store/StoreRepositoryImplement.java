@@ -123,7 +123,13 @@ public class StoreRepositoryImplement extends BaseRepositoryImplement<Store, UUI
         StringBuilder queryString = new StringBuilder(
                 "SELECT s FROM Store s INNER JOIN Product p " +
                 "ON CAST(s.id as text) = p.storeId " +
-                "WHERE s.isActive = TRUE AND EXIST(('trà sữa', 'ts', 'milktea', 'milk tea') IN s.categories) " +
+                "WHERE s.isActive = TRUE " +
+                "AND (ARRAY_TO_STRING(s.categories, ',') ILIKE '%trà sữa%' OR ARRAY_TO_STRING(p.categories, ',') ILIKE '%trà sữa%' " +
+                        "OR s.name ILIKE '%trà sữa%' OR p.name ILIKE '%trà sữa%' " +
+                        "OR ARRAY_TO_STRING(s.categories, ',') ILIKE '%tra sua%' OR ARRAY_TO_STRING(p.categories, ',') ILIKE '%tra sua%' " +
+                        "OR s.name ILIKE '%tra sua%' OR p.name ILIKE '%tra sua%' " +
+                        "OR ARRAY_TO_STRING(s.categories, ',') ILIKE '%milk tea%' OR ARRAY_TO_STRING(p.categories, ',') ILIKE '%milk tea%' " +
+                        "OR s.name ILIKE '%milk tea%' OR p.name ILIKE '%milk tea%') " +
                 "GROUP BY s.id"
         );
 
