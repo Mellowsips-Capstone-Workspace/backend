@@ -1,0 +1,10 @@
+ALTER TABLE "user"
+    ALTER COLUMN partner_id TYPE VARCHAR(255),
+    ALTER COLUMN store_id TYPE VARCHAR(255);
+
+ALTER TABLE application
+    ALTER COLUMN partner_id TYPE VARCHAR(255),
+    ALTER COLUMN store_id TYPE VARCHAR(255);
+
+ALTER TABLE role
+    ALTER COLUMN partner_id TYPE VARCHAR(255);

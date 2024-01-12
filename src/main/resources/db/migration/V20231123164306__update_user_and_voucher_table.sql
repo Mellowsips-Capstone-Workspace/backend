@@ -1,0 +1,6 @@
+ALTER TABLE voucher
+    ADD COLUMN "version" INTEGER NOT NULL DEFAULT 0;
+
+ALTER TABLE "user"
+    ADD COLUMN is_active BOOLEAN DEFAULT TRUE,
+    ADD COLUMN number_of_flakes INTEGER DEFAULT 0;

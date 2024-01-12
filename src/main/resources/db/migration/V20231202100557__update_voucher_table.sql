@@ -1,0 +1,2 @@
+ALTER TABLE voucher
+    ADD COLUMN original_quantity INTEGER NOT NULL DEFAULT 0;
